@@ -11,8 +11,8 @@ import 'package:essentia/src/arguments/lex_result.dart';
 import 'package:essentia/src/arguments/parameter_spec.dart';
 import 'package:essentia/src/arguments/parameter_violation.dart';
 import 'package:essentia/src/arguments/raw_occurrence.dart';
-import 'package:essentia/src/arguments/suggestions.dart';
 import 'package:essentia/src/arguments/unknown_argument_policy.dart';
+import 'package:essentia/src/text/string_similarity.dart';
 import 'package:meta/meta.dart';
 
 /// What reading one command line has found so far.
@@ -53,7 +53,7 @@ final class LexState {
       _unknown.add(token);
       return;
     }
-    _violations.add(UnknownArgument(token, closestName(token, _knownNames)));
+    _violations.add(UnknownArgument(token, token.closestIn(_knownNames)));
   }
 
   /// Records [token], a bundle of short names of which [letter] is not

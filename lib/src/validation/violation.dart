@@ -7,6 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'package:essentia/src/validation/reported_violation.dart';
 import 'package:essentia/src/validation/severity.dart';
 import 'package:essentia/src/validation/violation_code.dart';
 import 'package:essentia/src/validation/violation_path.dart';
@@ -26,6 +27,25 @@ import 'package:essentia/src/validation/violation_path.dart';
 /// is the example, and it stays a sealed hierarchy a caller can match on
 /// exhaustively.
 abstract interface class Violation {
+  /// Creates a violation at [path] of the kind [code], saying [message],
+  /// with [severity].
+  ///
+  /// The plain shape, for a caller that has nothing to add to it.
+  ///
+  /// ```dart
+  /// final Violation missing = Violation.of(
+  ///   ViolationPath.of('sinks').index(2).name('queueSize'),
+  ///   ViolationCode.required,
+  ///   'is required but was missing',
+  /// );
+  /// ```
+  const factory Violation.of(
+    ViolationPath path,
+    ViolationCode code,
+    String message, {
+    Severity severity,
+  }) = ReportedViolation.of;
+
   /// Where the problem is, as a path through the object being validated.
   ViolationPath get path;
 

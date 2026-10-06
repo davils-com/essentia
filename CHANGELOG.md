@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 1.1.0
+
+### Added
+
+- `ValidationReport.of` and a public `ValidationException` constructor, so a library with a
+  validation pass of its own - a decoder that reads a whole document - reports in the same shape
+  and its failure is caught as a `ValidationException`.
+- `Violation.of` for a violation that has nothing to add to the shared shape.
+- `DurationParsing`: `toIsoDuration()` and `toIsoDurationOrNull()` read the ISO 8601 form that
+  `toIsoString()` renders, Kotlin's `Duration.parseIsoString`.
+- `StringWords`: `words()`, `toSnakeCase()`, `toKebabCase()`, `toScreamingSnakeCase()`,
+  `toCamelCase()` and `toPascalCase()`. Snake and kebab case follow kotlinx serialization's
+  `JsonNamingStrategy` character for character.
+- `StringSimilarity.closestIn`, the bounded "did you mean" search the program parameters use.
+- `Platform.parse` and `Platform.tryParse` read a platform from its identifier.
+
 ## 1.0.0
 
 ### Added

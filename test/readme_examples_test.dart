@@ -13,8 +13,8 @@ import 'package:test/test.dart';
 import 'support/topics.dart';
 import 'support/user_event.dart';
 
-/// Runs the version and principal examples of the README, so that they
-/// stay true.
+/// Runs the version, principal, text and time examples of the README, so
+/// that they stay true.
 void main() {
   test('the semantic version example', () {
     final version = SemanticVersion.parse('1.4.0-rc.1');
@@ -43,5 +43,13 @@ void main() {
     await bus.drain();
 
     expect(seen, <String?>['alice']);
+  });
+
+  test('the text and time examples', () {
+    expect('HTTPServer'.toSnakeCase(), 'http_server');
+    expect('lease_duration'.toCamelCase(), 'leaseDuration');
+    expect('--prot'.closestIn(<String>['--port', '--host']), '--port');
+    expect('PT1H30M'.toIsoDuration(), const Duration(hours: 1, minutes: 30));
+    expect(Platform.parse('linux-x86_64').isLinux, isTrue);
   });
 }

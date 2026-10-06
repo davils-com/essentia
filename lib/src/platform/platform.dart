@@ -101,6 +101,37 @@ final class Platform {
     return Platform._(system, architecture);
   }
 
+  /// Reads a platform from its [identifier], such as `linux-x86_64`, the
+  /// way it is written in a path or a manifest.
+  ///
+  /// ```dart
+  /// Platform.parse('macos-aarch64').isMacos; // true
+  /// ```
+  ///
+  /// Unlike [of], which resolves what a runtime reports, this accepts only
+  /// the exact spelling of [identifier]: one of [identifiers].
+  ///
+  /// Returns the platform.
+  ///
+  /// Throws a [FormatException] if [identifier] is not one of
+  /// [identifiers]. The message does not quote it.
+  static Platform parse(String identifier) =>
+      tryParse(identifier) ??
+      (throw const FormatException('not a platform identifier'));
+
+  /// Reads a platform from its [identifier], or answers `null` when it is
+  /// not one of [identifiers].
+  ///
+  /// Returns the platform, or `null`.
+  static Platform? tryParse(String identifier) {
+    for (final Platform platform in entries) {
+      if (platform.identifier == identifier) {
+        return platform;
+      }
+    }
+    return null;
+  }
+
   /// The platform this process is running on.
   ///
   /// Read once and held, because a machine does not change under a running

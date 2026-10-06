@@ -92,6 +92,10 @@ LoggingData logging(void Function(LoggingBuilder it) block) =>
 - **Warnings.** A warning is reported and stops nothing.
 - **Values from outside.** `dto.validateAs('workspace')` returns the report, and
   `dto.validateOrThrow('workspace')` throws a `ValidationException` carrying all of it.
+- **Reports from other libraries.** A library with a validation pass of its own - a decoder that
+  reads a whole document before it answers - builds its findings with `Violation.of` and
+  `ValidationReport.of`, and its failure extends `ValidationException`, so one `catch` and one
+  rendering serve both.
 
 ## Program parameters
 
@@ -209,7 +213,7 @@ its documentation which Kotlin function it mirrors, and every collection it retu
 | `Iterable` | `associate`, `associateWith`, `groupingBy`, `partitionWhere`, `sumOfInt`, `countWhere`, `indexOfFirst`, `maxBy`, `minOf`, `joinToString`, `sortedByDescending`, `toSortedSet`, `random`, `intersect`, `union`, `subtract`, `mapNotNull`, `distinctBy`, `onEach`, `zip`, `windowed`, `zipWithNext`, `runningFold`, `runningReduce`, `requireNoNulls`, `unzip`, `orEmpty`, `isNullOrEmpty` … |
 | `List`, `Set` | `lastIndex`, `indices`, `getOrElse`, `foldRight`, `reduceRight`, `removeFirstOrNull`, `takeLast`, `dropLastWhile`, `plusElement`, `minusAll` … |
 | `Map` | `getValue`, `getOrElse`, `withDefault`, `mapKeys`, `mapValues`, `minusKey`, `toSortedMap`, `any`, `none`, `countWhere` … |
-| `String` | `removePrefix`, `removeSurrounding`, `substringBefore`, `substringAfterLast`, `take`, `dropLast`, `capitalize`, `equalsIgnoreCase`, `isBlank`, `ifBlank`, `trimIndent`, `trimMargin`, `lines`, `windowed`, `chunked`, `splitWithLimit` … |
+| `String` | `removePrefix`, `removeSurrounding`, `substringBefore`, `substringAfterLast`, `take`, `dropLast`, `capitalize`, `equalsIgnoreCase`, `isBlank`, `ifBlank`, `trimIndent`, `trimMargin`, `lines`, `windowed`, `chunked`, `splitWithLimit`, `toIsoDuration`, and `words`, `toSnakeCase`, `toKebabCase`, `toCamelCase`, `toPascalCase` spelled as kotlinx serialization's naming strategies spell them, and `closestIn`, the bounded "did you mean" search … |
 | `int`, `double`, `Duration` | `5.seconds`, `1.5.hours`, `floorDiv`, `mod`, `rangeTo`, `until`, `downTo`, `toComponents`, `toIsoString`, `duration / duration` |
 | `Comparable`, `Comparator` | `coerceIn`, `coerceAtLeast`, `rangeTo`, `rangeUntil`, `thenBy`, `thenByDescending`, with `compareBy`, `naturalOrder` and `nullsLast` beside them |
 | `Future`, `Stream` | `timeoutOrNull`, and the `Flow` operators `mapLatest`, `collectLatest`, `flatMapMerge`, `zip`, `onStart`, `onCompletion`, `onEmpty`, `runningReduce`, `distinctUntilChangedBy` … |
@@ -226,7 +230,8 @@ are what `rangeTo`, `until` and `downTo` hand back.
 - **Identifiers.** `UuidV4` reveals nothing; `UuidV7` sorts by when it was minted and is minted
   monotonically.
 - **Platform detection.** `Platform`, `OperatingSystem` and `Architecture`, with
-  `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name.
+  `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
+  `Platform.parse('linux-x86_64')` for an identifier read from a path or a manifest.
 
 ## Differences to Arc
 

@@ -23,36 +23,51 @@ const _distanceRatio = 3;
 /// cost time proportional to its length for every candidate.
 const _longestWorthComparing = 64;
 
-/// Finds the candidate closest to a mistyped [token].
+/// Finds what a mistyped name was meant to be: the "did you mean" of an
+/// error message.
 ///
-/// The search is bounded: a candidate whose length alone puts it out of
-/// reach is skipped, and a comparison stops as soon as it cannot beat the
-/// best one so far.
+/// ```dart
+/// '--prot'.closestIn(<String>['--port', '--host']); // --port
+/// 'tagz'.closestIn(<String>['name', 'tags']);       // tags
+/// ```
 ///
-/// Returns the closest of [candidates], or `null` when none is close
-/// enough to be what was meant.
-@internal
-String? closestName(String token, Iterable<String> candidates) {
-  if (token.length > _longestWorthComparing) {
-    return null;
-  }
-  final int limit = min(_maximumDistance, token.length ~/ _distanceRatio);
-  if (limit < 1) {
-    return null;
-  }
-  String? best;
-  int bestDistance = limit + 1;
-  for (final candidate in candidates) {
-    if ((token.length - candidate.length).abs() >= bestDistance) {
-      continue;
+/// A name is close when few insertions, deletions and substitutions turn
+/// one into the other: at most one for every three characters, and never
+/// more than three. A name of fewer than three characters has no close
+/// candidates, and neither has one longer than 64 characters, which is not
+/// a mistyped name and would cost time to compare.
+extension StringSimilarity on String {
+  /// Finds the candidate closest to this text.
+  ///
+  /// The search is bounded: a candidate whose length alone puts it out of
+  /// reach is skipped, and a comparison stops as soon as it cannot beat
+  /// the best one so far. Of two candidates equally close, the first wins.
+  ///
+  /// Returns the closest of [candidates], or `null` when none is close
+  /// enough to be what was meant.
+  @useResult
+  String? closestIn(Iterable<String> candidates) {
+    if (length > _longestWorthComparing) {
+      return null;
     }
-    final int distance = _boundedDistance(token, candidate, bestDistance);
-    if (distance < bestDistance) {
-      bestDistance = distance;
-      best = candidate;
+    final int limit = min(_maximumDistance, length ~/ _distanceRatio);
+    if (limit < 1) {
+      return null;
     }
+    String? best;
+    int bestDistance = limit + 1;
+    for (final candidate in candidates) {
+      if ((length - candidate.length).abs() >= bestDistance) {
+        continue;
+      }
+      final int distance = _boundedDistance(this, candidate, bestDistance);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        best = candidate;
+      }
+    }
+    return best;
   }
-  return best;
 }
 
 /// Counts the insertions, deletions and substitutions that turn [left]

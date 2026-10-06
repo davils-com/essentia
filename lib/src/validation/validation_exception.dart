@@ -8,7 +8,6 @@
  */
 
 import 'package:essentia/src/validation/validation_report.dart';
-import 'package:meta/meta.dart';
 
 /// Thrown when validation found something that makes the result unusable.
 ///
@@ -18,7 +17,10 @@ import 'package:meta/meta.dart';
 /// react to particular violations by their code.
 class ValidationException implements Exception {
   /// Creates the exception for [report].
-  @internal
+  ///
+  /// A library that reports through a [ValidationReport] of its own extends
+  /// this class, so that a caller catching [ValidationException] catches
+  /// its failures too.
   const ValidationException(this.report);
 
   /// Everything the pass found, including any warnings that accompanied the

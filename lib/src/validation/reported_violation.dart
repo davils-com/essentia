@@ -21,6 +21,15 @@ final class ReportedViolation implements Violation {
   /// [message].
   const ReportedViolation(this.path, this.code, this.severity, this.message);
 
+  /// Creates a violation at [path] of the kind [code], saying [message],
+  /// with [severity], in the argument order of `Violation.of`.
+  const ReportedViolation.of(
+    this.path,
+    this.code,
+    this.message, {
+    this.severity = Severity.error,
+  });
+
   /// Where the problem is.
   @override
   final ViolationPath path;

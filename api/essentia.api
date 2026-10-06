@@ -159,6 +159,11 @@ extension DurationArithmetic on Duration {
 
 typedef DurationComponents = ({int days, int hours, int microseconds, int minutes, int seconds});
 
+extension DurationParsing on String {
+  Duration toIsoDuration();
+  Duration? toIsoDurationOrNull();
+}
+
 extension DurationUnits on int {
   Duration get days;
   Duration get hours;
@@ -799,7 +804,9 @@ final class Platform {
   bool operator ==(Object other);
   static Platform? current();
   static Platform? of(String osName, String osArch);
+  static Platform parse(String identifier);
   String toString();
+  static Platform? tryParse(String identifier);
 }
 
 enum PreReleasePolicy {
@@ -1124,6 +1131,10 @@ extension StringSearch on String {
   List<String> splitWithLimit(String delimiter, int limit);
 }
 
+extension StringSimilarity on String {
+  String? closestIn(Iterable<String> candidates);
+}
+
 extension StringSlicing on String {
   List<String> chunked(int size);
   String drop(int count);
@@ -1140,6 +1151,15 @@ extension StringSlicing on String {
   String takeLastWhile(bool Function(String) predicate);
   String takeWhile(bool Function(String) predicate);
   List<String> windowed(int size, {int step = 1, WindowRemainder remainder = WindowRemainder.drop});
+}
+
+extension StringWords on String {
+  String toCamelCase();
+  String toKebabCase();
+  String toPascalCase();
+  String toScreamingSnakeCase();
+  String toSnakeCase();
+  List<String> words();
 }
 
 final class Success<T> extends Result<T> {
@@ -1255,6 +1275,7 @@ abstract class ValidatingBuilder<T extends Validatable> implements Builder<T> {
 
 class ValidationException implements Exception {
   final ValidationReport report;
+  const ValidationException(ValidationReport report);
   String get message;
   String toString();
 }
@@ -1272,6 +1293,7 @@ final class ValidationFailure extends ParameterViolation {
 final class ValidationReport {
   final String subject;
   final List<Violation> violations;
+  factory ValidationReport.of(String subject, List<Violation> violations);
   List<Violation> get errors;
   bool get isValid;
   List<Violation> get warnings;
@@ -1333,6 +1355,7 @@ abstract final class VersionViolationCodes {
 }
 
 abstract interface class Violation {
+  const factory Violation.of(ViolationPath path, ViolationCode code, String message, {Severity severity});
   abstract ViolationCode get code;
   abstract String get message;
   abstract ViolationPath get path;

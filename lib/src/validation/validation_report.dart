@@ -26,6 +26,26 @@ final class ValidationReport {
   ValidationReport(this.subject, List<Violation> violations, {this._footer})
     : violations = List<Violation>.unmodifiable(violations);
 
+  /// Creates the report of a pass over [subject] that found [violations].
+  ///
+  /// This is how a library with a validation pass of its own - a decoder
+  /// that reads a whole document before it answers - hands what it found
+  /// to its caller in the shape everything else reports in.
+  ///
+  /// ```dart
+  /// final report = ValidationReport.of('workspace', <Violation>[
+  ///   Violation.of(
+  ///     ViolationPath.of('name'),
+  ///     ViolationCode.required,
+  ///     'is required but was missing',
+  ///   ),
+  /// ]);
+  /// ```
+  ///
+  /// Returns the report, which keeps its own copy of [violations].
+  factory ValidationReport.of(String subject, List<Violation> violations) =>
+      ValidationReport(subject, violations);
+
   /// What was being validated, used in the headline: `"configuration"`,
   /// `"program parameters"`.
   final String subject;
