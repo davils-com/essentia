@@ -15,14 +15,12 @@ final class LongNameParameters extends Parameters {
   LongNameParameters();
 
   /// A required parameter with a name of 37 characters.
-  late final Parameter<int> long = parameter(<String>[
+  final Parameter<int> long = parameter(<String>[
     '--a-parameter-with-a-really-long-name',
   ]).integer().required();
 
   /// A required parameter with a short name.
-  late final Parameter<int> short = parameter(<String>['--b'])
-      .integer()
-      .required();
+  final Parameter<int> short = parameter(<String>['--b']).integer().required();
 
   /// Every parameter, in the order of the usage listing.
   @override

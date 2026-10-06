@@ -17,12 +17,15 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 
 | Path | Purpose |
 |---|---|
-| `lib/essentia.dart` | The web-safe public API: validation, DSL, events, identity, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
-| `lib/arguments.dart` | Program parameters, which need `dart:io` |
+| `lib/essentia.dart` | The web-safe public API: validation, DSL, program parameters, events, identity, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
 | `lib/src/` | Everything else; one directory per area, mirroring Arc's packages |
 | `api/essentia.api` | The recorded public API; `dart run inspectra api check` compares against it |
 | `test/` | `package:test` tests, one directory per area; `test/support/` holds shared fixtures |
-| `tool/` | `verify.dart` and `license_header.txt`, the header template of the style check |
+| `CONTRIBUTING.md`, `TESTING.md` | What a change and a test have to clear; this file wins where they disagree |
+| `SECURITY.md`, `CODE_OF_CONDUCT.md`, `THIRDPARTY.md` | Reporting vulnerabilities, the Code of Conduct, the third-party software |
+| `trivy-secret.yaml` | The rules of the Trivy secret scan, Markdown included |
+| `.gitlab/CODEOWNERS` | The paths that need a maintainer's review |
+| `tool/` | `verify.dart`, `license_header.txt`, the header template of the style check, and `style/`, the custom style rules (`no_late`) |
 
 ## Verify
 
@@ -38,24 +41,30 @@ Nothing is done until it is green. Then:
 dart run inspectra check
 ```
 
-runs every gate configured in the `inspectra:` section of `pubspec.yaml`: format, lint, style, API,
-changelog, the Trivy scans and the 90 % coverage gate. After a deliberate API change, record it with
-`dart run inspectra api dump`.
+runs every gate configured in the `inspectra:` section of `pubspec.yaml`, each at its strictest
+setting: format, lint, style, API, the dependency policy, changelog, the Trivy scans and the 97 %
+coverage gate. Its `policy` locks the gates; never weaken one, add a baseline or an ignore. After a
+deliberate API change, record it with `dart run inspectra api dump`.
 
 ## Code rules
 
 Enforced by `dart analyze --fatal-infos` with `package:inspectra/lints/strict.yaml` and by
-`inspectra style` with the `strict` preset, without exceptions or ignore comments.
+`inspectra style` with the `strict` preset and the custom rules of `tool/style`, without exceptions
+or ignore comments.
 
 - No `else`. Return early. A `switch` over an enum or sealed type is exhaustive and has neither
   `default` nor a wildcard `_` case.
 - No comments: no `//`, no `/* */`. The license header is the only exception.
 - A `///` documentation comment on every declaration, including private ones.
+- No `late`, anywhere: initialise a field where it is declared or in the initialiser list, hand a
+  task started in a constructor out through a `Completer`, and create a test fixture inside the
+  test with `addTearDown` instead of a `late` variable filled by `setUp`.
 - Every file starts with the license header of `tool/license_header.txt`.
 - One top level type per file, named after it in snake case. A sealed class and its direct subtypes
   share one file. A file of functions is named after its role.
 - `strict-casts`, `strict-inference` and `strict-raw-types` are on. No `dynamic` calls.
-- Runtime dependencies are limited to `meta`. Adding one needs a maintainer's approval.
+- Runtime dependencies are limited to `meta`; development dependencies to `analyzer` (for the custom
+  style rules), `build_runner`, `inspectra` and `test`. Adding one needs a maintainer's approval.
 - Essentia runs on every Dart platform: the VM, Flutter, the web and WebAssembly. Nothing under
   `lib/` imports `dart:io`, `dart:ffi` or another platform library directly; host access goes
   through a conditional import (`host_system.dart`, `current_platform*.dart`), and a test that

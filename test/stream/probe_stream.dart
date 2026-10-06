@@ -16,32 +16,43 @@ final class ProbeStream<T> {
   ///
   /// [onCancel] runs after `cancel` was recorded, and the cancel of the
   /// listener waits for the future it returns.
-  ProbeStream({Future<void> Function()? onCancel}) {
-    controller = StreamController<T>(
-      onListen: () => log.add('listen'),
-      onPause: () => log.add('pause'),
-      onResume: () => log.add('resume'),
-      onCancel: () {
-        log.add('cancel');
-        return onCancel?.call();
-      },
+  factory ProbeStream({Future<void> Function()? onCancel}) {
+    final log = <String>[];
+    return ProbeStream._(
+      log,
+      StreamController<T>(
+        onListen: () => log.add('listen'),
+        onPause: () => log.add('pause'),
+        onResume: () => log.add('resume'),
+        onCancel: () {
+          log.add('cancel');
+          return onCancel?.call();
+        },
+      ),
     );
   }
 
   /// Creates a broadcast probe, which records `listen` for its first
   /// listener and `cancel` once its last listener left.
-  ProbeStream.broadcast() {
-    controller = StreamController<T>.broadcast(
-      onListen: () => log.add('listen'),
-      onCancel: () => log.add('cancel'),
+  factory ProbeStream.broadcast() {
+    final log = <String>[];
+    return ProbeStream._(
+      log,
+      StreamController<T>.broadcast(
+        onListen: () => log.add('listen'),
+        onCancel: () => log.add('cancel'),
+      ),
     );
   }
 
+  /// Creates a probe recording into [log] what is done to [controller].
+  ProbeStream._(this.log, this.controller);
+
   /// What the listeners did, in order.
-  final log = <String>[];
+  final List<String> log;
 
   /// The controller feeding the probe.
-  late final StreamController<T> controller;
+  final StreamController<T> controller;
 
   /// The stream to hand to the operator under test.
   Stream<T> get stream => controller.stream;

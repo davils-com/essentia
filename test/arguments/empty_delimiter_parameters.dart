@@ -16,13 +16,12 @@ final class EmptyDelimiterParameters extends Parameters {
   EmptyDelimiterParameters();
 
   /// Splits on nothing.
-  late final Parameter<List<String>> tags = parameter(<String>['--tag'])
-      .split('');
+  final Parameter<List<String>> tags = parameter(<String>['--tag']).split('');
 
   /// Repeatable, and splits on nothing.
-  late final Parameter<List<String>> repeated = parameter(<String>[
-    '--repeated',
-  ]).multiple().split('');
+  final Parameter<List<String>> repeated = parameter(<String>['--repeated'])
+      .multiple()
+      .split('');
 
   /// Every parameter above.
   @override

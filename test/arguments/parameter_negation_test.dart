@@ -94,7 +94,7 @@ void main() {
   test('a negated name clashing with a declared one is refused', () {
     for (final order in <bool>[false, true]) {
       expect(
-        CacheParameters(noCacheFirst: order, negatableCache: true).usage,
+        () => CacheParameters(noCacheFirst: order, negatableCache: true),
         throwsA(
           isA<ArgumentError>().having(
             (error) => error.toString(),

@@ -16,12 +16,12 @@ final class MandatoryParameters extends Parameters {
   MandatoryParameters({super.environmentPrefix});
 
   /// Required.
-  late final Parameter<int> port = parameter(<String>['--port'])
+  final Parameter<int> port = parameter(<String>['--port'])
       .integer()
       .required();
 
   /// Defaults to `localhost`.
-  late final Parameter<String> host = parameter(<String>['--host'])
+  final Parameter<String> host = parameter(<String>['--host'])
       .defaultsTo('localhost');
 
   /// Every parameter above.

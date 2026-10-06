@@ -13,7 +13,7 @@ import 'package:essentia/essentia.dart';
 /// fixed.
 final class EarlyValidationParameters extends Parameters {
   /// Validated as text, then converted.
-  late final Parameter<int?> port = parameter(<String>['--port'])
+  final Parameter<int?> port = parameter(<String>['--port'])
       .validate((it, value) {
         if (value.isEmpty) {
           it.fail('empty');

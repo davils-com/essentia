@@ -16,17 +16,16 @@ final class TaggedParameters extends Parameters {
   TaggedParameters() : super(unknownArguments: UnknownArgumentPolicy.collect);
 
   /// Repeatable text.
-  late final Parameter<List<String>> tags = parameter(<String>['--tag'])
-      .multiple();
+  final Parameter<List<String>> tags = parameter(<String>['--tag']).multiple();
 
   /// Repeatable integers with a default list.
-  late final Parameter<List<int>> ports = parameter(<String>['--port'])
+  final Parameter<List<int>> ports = parameter(<String>['--port'])
       .integer()
       .multiple()
       .defaultsTo(<int>[80, 443]);
 
   /// A deprecated flag.
-  late final Parameter<bool> legacy = flag(<String>['--legacy']).deprecated();
+  final Parameter<bool> legacy = flag(<String>['--legacy']).deprecated();
 
   /// Every parameter above.
   @override

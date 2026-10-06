@@ -22,9 +22,9 @@ import 'package:essentia/src/arguments/parameter_builder.dart';
 /// converted value.
 ///
 /// ```dart
-/// late final Parameter<int> port =
+/// final Parameter<int> port =
 ///     parameter(['--port']).integer().required();
-/// late final Parameter<Duration?> timeout =
+/// final Parameter<Duration?> timeout =
 ///     parameter(['--timeout']).duration();
 /// ```
 extension ParameterConverters on ParameterBuilder<String> {
@@ -38,7 +38,7 @@ extension ParameterConverters on ParameterBuilder<String> {
   ///
   /// Throws a [StateError] if validation was already declared.
   ParameterBuilder<R> convert<R>(String typeName, Converter<R> converter) =>
-      ParameterBuilder<R>(schema, draft.retyped(typeName, converter));
+      ParameterBuilder<R>(draft.retyped(typeName, converter));
 
   /// Converts the value with [converter], reporting it as [typeName], and
   /// checks every converted value and every declared default with
@@ -50,7 +50,6 @@ extension ParameterConverters on ParameterBuilder<String> {
     Converter<R> converter,
     void Function(R value) constraint,
   ) => ParameterBuilder<R>(
-    schema,
     draft.retyped(typeName, converter, (value) => constraint(value as R)),
   );
 

@@ -12,22 +12,20 @@ import 'package:essentia/essentia.dart';
 /// A schema declaring both `--cache` and `--no-cache` as flags of their own.
 final class CacheParameters extends Parameters {
   /// Creates the schema, listing `--no-cache` first when [_noCacheFirst],
-  /// and making `--cache` negatable when [_negatableCache].
-  CacheParameters({required this._noCacheFirst, this._negatableCache = false});
+  /// and making `--cache` negatable when [negatableCache].
+  CacheParameters({required this._noCacheFirst, bool negatableCache = false})
+    : cache = negatableCache
+          ? flag(<String>['--cache']).negatable()
+          : flag(<String>['--cache']);
 
   /// Whether `--no-cache` is listed before `--cache`.
   final bool _noCacheFirst;
 
-  /// Whether `--cache` answers to `--no-cache` as well.
-  final bool _negatableCache;
-
   /// The flag `--cache`.
-  late final Parameter<bool> cache = _negatableCache
-      ? flag(<String>['--cache']).negatable()
-      : flag(<String>['--cache']);
+  final Parameter<bool> cache;
 
   /// The flag `--no-cache`.
-  late final Parameter<bool> noCache = flag(<String>['--no-cache']);
+  final Parameter<bool> noCache = flag(<String>['--no-cache']);
 
   /// Both flags, in the order chosen at construction.
   @override

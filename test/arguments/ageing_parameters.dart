@@ -16,17 +16,17 @@ final class AgeingParameters extends Parameters {
   AgeingParameters() : super(environmentPrefix: 'APP');
 
   /// The parameter to use.
-  late final Parameter<String?> dataDir = parameter(<String>['--data-dir']);
+  final Parameter<String?> dataDir = parameter(<String>['--data-dir']);
 
   /// Deprecated in favour of [dataDir].
-  late final Parameter<String?> oldDir = parameter(<String>['--old-dir'])
+  final Parameter<String?> oldDir = parameter(<String>['--old-dir'])
       .deprecated('use --data-dir instead');
 
   /// Deprecated without advice.
-  late final Parameter<bool> legacy = flag(<String>['--legacy']).deprecated();
+  final Parameter<bool> legacy = flag(<String>['--legacy']).deprecated();
 
   /// Required.
-  late final Parameter<int> port = parameter(<String>['--port'])
+  final Parameter<int> port = parameter(<String>['--port'])
       .integer()
       .required();
 

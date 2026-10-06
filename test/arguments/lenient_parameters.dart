@@ -15,7 +15,7 @@ final class LenientParameters extends Parameters {
   LenientParameters() : super(unknownArguments: UnknownArgumentPolicy.collect);
 
   /// The only declared parameter.
-  late final Parameter<String?> name = parameter(<String>['--name']);
+  final Parameter<String?> name = parameter(<String>['--name']);
 
   /// Every parameter above.
   @override

@@ -14,15 +14,15 @@ import 'package:essentia/essentia.dart';
 /// A schema whose paths are checked against the file system.
 final class PathParameters extends Parameters {
   /// A directory that has to exist.
-  late final Parameter<String?> directory = parameter(<String>['--dir'])
+  final Parameter<String?> directory = parameter(<String>['--dir'])
       .path(mustExist: true, mustBeDirectory: true);
 
   /// A regular file.
-  late final Parameter<File?> file = parameter(<String>['--file'])
+  final Parameter<File?> file = parameter(<String>['--file'])
       .file(mustBeRegularFile: true);
 
   /// Anything that can be read.
-  late final Parameter<String?> readable = parameter(<String>['--readable'])
+  final Parameter<String?> readable = parameter(<String>['--readable'])
       .path(mustBeReadable: true);
 
   /// Every parameter above.

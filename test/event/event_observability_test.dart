@@ -149,15 +149,15 @@ void main() {
     test('a topic declared before a bus-wide one does not get it', () async {
       final log = <String>[];
       final early = TopicKey<UserEvent>('early');
-      final late = TopicKey<AuditEvent>('late');
+      final later = TopicKey<AuditEvent>('later');
       final EventBus bus = eventBus((it) {
         it
           ..topic(early)
           ..intercept(_trace(log, 'bus'))
-          ..topic(late);
+          ..topic(later);
       });
       final EventSubscription first = bus.topic(early).subscribe((_) {});
-      final EventSubscription second = bus.topic(late).subscribe((_) {});
+      final EventSubscription second = bus.topic(later).subscribe((_) {});
       await first.awaitReady();
       await second.awaitReady();
 

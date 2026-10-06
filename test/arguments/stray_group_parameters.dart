@@ -24,19 +24,19 @@ final class StrayGroupParameters extends Parameters {
   }
 
   /// Declared.
-  late final Parameter<bool> quiet = flag(<String>['--quiet']);
+  final Parameter<bool> quiet = flag(<String>['--quiet']);
 
   /// Not declared.
-  late final Parameter<bool> timeout = flag(<String>['--timeout']);
+  final Parameter<bool> timeout = flag(<String>['--timeout']);
 
   /// Declared.
-  late final Parameter<String?> user = parameter(<String>['--user']);
+  final Parameter<String?> user = parameter(<String>['--user']);
 
   /// Not declared.
-  late final Parameter<String?> password = parameter(<String>['--password']);
+  final Parameter<String?> password = parameter(<String>['--password']);
 
   /// Declared and required, so that a resolving pass would fail.
-  late final Parameter<int> port = parameter(<String>['--port'])
+  final Parameter<int> port = parameter(<String>['--port'])
       .integer()
       .required();
 

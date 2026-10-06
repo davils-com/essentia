@@ -14,10 +14,10 @@ All notable changes to this project are documented in this file. The format foll
 - Builder DSL: `Builder` and `ValidatingBuilder` with `nested`, `collect` and `adopt`, so nested
   blocks report every problem at once.
 - Kotlin scope functions for configuration blocks: `apply`, `let`, `takeIf` and `takeUnless`.
-- Program parameters (`package:essentia/arguments.dart`): `Parameters` schemas with flags,
-  required, defaulted and repeatable parameters, conversions, validation, environment fallback,
-  value sources, mutually exclusive groups, dependencies, deprecation warnings, masking of
-  sensitive values and a usage listing.
+- Program parameters: `Parameters` schemas of final fields declared with `parameter` and `flag`
+  and registered as the schema is constructed, with flags, required, defaulted and repeatable
+  parameters, conversions, validation, environment fallback, value sources, mutually exclusive
+  groups, dependencies, deprecation warnings, masking of sensitive values and a usage listing.
 - Event bus: `eventBus`, typed `TopicKey`s, partitions with per-key ordering, consumer groups,
   replay, overflow policies, headers, correlation and causation carried through a `Zone`,
   listeners, interceptors, metrics, `drain` and `dispose`.
@@ -44,8 +44,13 @@ All notable changes to this project are documented in this file. The format foll
   after a topic was declared.
 - `SourceUnavailable`: a value source that throws is reported instead of ending the load.
 - `also` beside the scope functions `apply`, `let`, `takeIf` and `takeUnless`.
-- Inspectra 1.0.0 as the quality gate: format, lint, strict style, API dump, Trivy scans, coverage
-  and changelog checks.
+- Inspectra 2.0.0 as the quality gate, every gate at its strictest setting: format, lint at
+  `info`, the strict style preset with the custom rule `no_late`, API dump, the dependency policy,
+  the secret, license, vulnerability and filesystem scans of Trivy 0.75.0 at every severity, the
+  97 % coverage gate and the changelog check, with no baseline, no ignorable severity and a policy
+  that locks the gates against `INSPECTRA_*` variables and the command line.
+- No `late` variable anywhere: the event bus holds its tasks in completers, and test fixtures are
+  created where they are used.
 
 ### Security
 

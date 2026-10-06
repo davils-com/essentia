@@ -19,16 +19,16 @@ final class GroupedParameters extends Parameters {
   }
 
   /// Exclusive to [keyFile].
-  late final Parameter<String?> token = parameter(<String>['--token']);
+  final Parameter<String?> token = parameter(<String>['--token']);
 
   /// Exclusive to [token].
-  late final Parameter<String?> keyFile = parameter(<String>['--key-file']);
+  final Parameter<String?> keyFile = parameter(<String>['--key-file']);
 
   /// Required by [password].
-  late final Parameter<String?> user = parameter(<String>['--user']);
+  final Parameter<String?> user = parameter(<String>['--user']);
 
   /// Requires [user].
-  late final Parameter<String?> password = parameter(<String>['--password']);
+  final Parameter<String?> password = parameter(<String>['--password']);
 
   /// Every parameter above.
   @override

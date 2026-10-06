@@ -95,23 +95,25 @@ LoggingData logging(void Function(LoggingBuilder it) block) =>
 
 ## Program parameters
 
-Declare what the program accepts, load it once at startup, then read typed values. Dart has no
-delegated properties, so a schema lists its parameters once in `declared`; that list is also the
-order of the usage listing.
+Declare what the program accepts, load it once at startup, then read typed values. Each parameter
+is a final field initialised with `parameter` or `flag`. Dart has no delegated properties, so a
+schema lists its parameters once in `declared` and registers that list as it is constructed; the
+list is also the order of the usage listing. A schema that is wrong - a malformed name, a name or
+an environment variable used twice, a parameter another schema declares - cannot be constructed.
 
 ```dart
 final class AppParameters extends Parameters {
   AppParameters() : super(environmentPrefix: 'APP');
 
-  late final Parameter<int> port =
+  final Parameter<int> port =
       parameter(<String>['--port', '-p']).integer().required();
-  late final Parameter<String> dataDir =
+  final Parameter<String> dataDir =
       parameter(<String>['--data-dir']).path(mustExist: true).required();
-  late final Parameter<String> dbPassword =
+  final Parameter<String> dbPassword =
       parameter(<String>['--db-password']).sensitive().required();
-  late final Parameter<List<String>> tags =
+  final Parameter<List<String>> tags =
       parameter(<String>['--tag']).multiple();
-  late final Parameter<bool> dryRun = flag(<String>['--dry-run']);
+  final Parameter<bool> dryRun = flag(<String>['--dry-run']);
 
   @override
   List<Parameter<Object?>> get declared =>
@@ -244,8 +246,10 @@ Kept deliberately small, and only where Dart has no equivalent:
   `publishAs` and `tryPublishAs` replace Arc's overloads with an explicit principal.
 - A converter or a value source is contained when it throws an `Exception`; an `Error` is a
   programming mistake and is not caught.
-- Parameters register the first time a schema needs them, so a clash of names or environment
-  variables is refused on the first `load`, `usage` or `describe` rather than in the constructor.
+- Parameters are declared with the top level functions `parameter` and `flag` instead of protected
+  methods of the schema: a Dart field initialiser cannot reach `this`, and Essentia uses no `late`.
+  The schema registers them as it is constructed, as Arc's delegates do, so a clash of names or
+  environment variables is refused by the constructor.
 - Dart has no overloading, so where Arc offers two forms there is one with an optional argument:
   `contains(version, [policy])`, `nextPreRelease([label])`, `principal(id, [block])`.
 - `long()` is not needed (Dart's `int` is 64-bit), `default` and `enum` are reserved words
@@ -254,8 +258,11 @@ Kept deliberately small, and only where Dart has no equivalent:
 
 ## Quality gates
 
-Essentia is checked by [Inspectra](https://pub.dev/packages/inspectra) 1.0.0 with every package gate
-it ships, configured in the `inspectra:` section of `pubspec.yaml`:
+Essentia is checked by [Inspectra](https://pub.dev/packages/inspectra) 2.0.0 with every gate it
+ships, each at its strictest setting, configured in the `inspectra:` section of `pubspec.yaml`. A
+`policy` locks the gates, so neither `INSPECTRA_*` variables nor the command line can weaken them,
+no severity may be ignored and there is no baseline. Besides the `strict` style preset, the custom
+rule `no_late` of `tool/style` refuses every `late` variable.
 
 ```bash
 dart run tool/verify.dart
@@ -267,8 +274,16 @@ runs format, analysis, the strict style rules and the tests; CI then runs
 dart run inspectra check
 ```
 
-which adds the public API dump in `api/essentia.api`, the changelog check, the Trivy scans and the
-90 % coverage gate.
+which adds the public API dump in `api/essentia.api`, the dependency policy, the changelog check, the
+secret, license, vulnerability and filesystem scans of Trivy 0.75.0 at every severity and the 97 %
+coverage gate.
+
+## Contributing
+
+Read [CONTRIBUTING.md](CONTRIBUTING.md) before a change and [TESTING.md](TESTING.md) before a test.
+Security problems are reported privately as described in [SECURITY.md](SECURITY.md), and everyone
+taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md). Third-party software is listed in
+[THIRDPARTY.md](THIRDPARTY.md).
 
 ## License
 

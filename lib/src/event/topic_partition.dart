@@ -7,6 +7,8 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'dart:async';
+
 import 'package:essentia/src/event/drop_reason.dart';
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_envelope.dart';
@@ -24,7 +26,7 @@ final class TopicPartition {
   /// envelopes to [_onDiscarded] and delivering through [_deliver].
   TopicPartition(int capacity, this._overflow, this._onDiscarded, this._deliver)
     : _buffer = Mailbox<EventEnvelope<Event>>(capacity) {
-    pump = _pump();
+    _pumped.complete(_pump());
   }
 
   /// How many envelopes one publication that will not wait may evict
@@ -47,9 +49,13 @@ final class TopicPartition {
   /// Whether buffered envelopes are discarded instead of delivered.
   var _disposed = false;
 
+  /// Completes with the task delivering this lane, started by the
+  /// constructor.
+  final _pumped = Completer<void>();
+
   /// The task delivering this lane, which completes once the lane is closed
   /// and empty.
-  late final Future<void> pump;
+  Future<void> get pump => _pumped.future;
 
   /// How many envelopes are waiting in this lane right now.
   int get queueDepth => _buffer.length;

@@ -36,6 +36,7 @@ export 'src/arguments/multiple_parameter_builder.dart';
 export 'src/arguments/parameter.dart';
 export 'src/arguments/parameter_builder.dart';
 export 'src/arguments/parameter_converters.dart';
+export 'src/arguments/parameter_declarations.dart';
 export 'src/arguments/parameter_exception.dart';
 export 'src/arguments/parameter_info.dart';
 export 'src/arguments/parameter_violation.dart';

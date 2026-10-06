@@ -25,7 +25,7 @@ void main() {
       final ConversionFailure violation = singleViolation<ConversionFailure>(
         failureOf(
           () =>
-              ChoiceDefaultParameters(level: 'medium')
+              ChoiceDefaultParameters(levelDefault: 'medium')
                   .load(const <String>[], environment: _nothing),
         ),
       );
@@ -44,7 +44,7 @@ void main() {
     });
 
     test('does not consult the default when a value is given', () {
-      final parameters = ChoiceDefaultParameters(level: 'medium')
+      final parameters = ChoiceDefaultParameters(levelDefault: 'medium')
         ..load(<String>['--level=high'], environment: _nothing);
 
       expect(parameters.level.value, 'high');
@@ -54,7 +54,7 @@ void main() {
       final ConversionFailure violation = singleViolation<ConversionFailure>(
         failureOf(
           () =>
-              ChoiceDefaultParameters(levels: <String>['low', 'medium'])
+              ChoiceDefaultParameters(levelsDefault: <String>['low', 'medium'])
                   .load(const <String>[], environment: _nothing),
         ),
       );
@@ -65,7 +65,7 @@ void main() {
     test('masks a sensitive default it refuses', () {
       final ParameterException failure = failureOf(
         () =>
-            ChoiceDefaultParameters(tier: 'platinum-placeholder')
+            ChoiceDefaultParameters(tierDefault: 'platinum-placeholder')
                 .load(const <String>[], environment: _nothing),
       );
       final ConversionFailure violation = singleViolation<ConversionFailure>(
@@ -80,7 +80,7 @@ void main() {
   test('a bad default does not hide a bad argument', () {
     final ParameterException failure = failureOf(
       () =>
-          ChoiceDefaultParameters(level: 'medium')
+          ChoiceDefaultParameters(levelDefault: 'medium')
               .load(<String>['--unknown'], environment: _nothing),
     );
 

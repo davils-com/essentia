@@ -16,18 +16,21 @@ import '../support/topics.dart';
 ///
 /// Returns the declared names the resulting error carries.
 Set<String> _declaredNamesOfFailedLookup(EventBus bus) {
-  late final Set<String> declared;
+  final captured = <Set<String>>[];
   expect(
     () => bus.topic(audit),
     throwsA(
       isA<TopicNotDeclaredError>().having(
-        (failure) => declared = failure.declared,
+        (failure) => failure.declared,
         'declared',
-        isNotEmpty,
+        predicate<Set<String>>((names) {
+          captured.add(names);
+          return names.isNotEmpty;
+        }, 'not empty'),
       ),
     ),
   );
-  return declared;
+  return captured.single;
 }
 
 /// Tests that the names a bus hands out cannot be changed from outside.

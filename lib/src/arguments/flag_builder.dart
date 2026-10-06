@@ -18,10 +18,10 @@ import 'package:meta/meta.dart';
 /// finds it easier to always pass the parameter: `--dry-run=false` reads as
 /// `false`.
 final class FlagBuilder extends DeclaredParameter<bool> {
-  /// Creates the builder of [draft] on [schema], reading [_fallback] when
+  /// Creates the builder of [draft], reading [_fallback] when
   /// the flag is not given.
   @internal
-  FlagBuilder(super.schema, super.draft, {this._fallback = false});
+  FlagBuilder(super.draft, {this._fallback = false});
 
   /// The value of the flag when it is not given.
   final bool _fallback;
@@ -44,36 +44,33 @@ final class FlagBuilder extends DeclaredParameter<bool> {
   ///
   /// Returns a builder that answers to its negated names as well.
   FlagBuilder negatable() =>
-      FlagBuilder(schema, draft.asNegatable(), fallback: _fallback);
+      FlagBuilder(draft.asNegatable(), fallback: _fallback);
 
   /// Makes the flag `true` when it is not given, which is mostly useful
   /// together with [negatable].
   ///
   /// Returns a builder carrying the default.
-  FlagBuilder enabledByDefault() => FlagBuilder(schema, draft, fallback: true);
+  FlagBuilder enabledByDefault() => FlagBuilder(draft, fallback: true);
 
   /// Reads the value from the environment [variable] when the flag was not
   /// passed on the command line.
   ///
   /// Returns a builder bound to that variable.
   FlagBuilder env(String variable) =>
-      FlagBuilder(schema, draft.withEnvironment(variable), fallback: _fallback);
+      FlagBuilder(draft.withEnvironment(variable), fallback: _fallback);
 
   /// Excludes the flag from the environment fallback its schema would
   /// otherwise derive.
   ///
   /// Returns a builder that is only ever fed from the command line.
   FlagBuilder noEnv() =>
-      FlagBuilder(schema, draft.withoutEnvironment(), fallback: _fallback);
+      FlagBuilder(draft.withoutEnvironment(), fallback: _fallback);
 
   /// Sets the one-line [description] shown in the usage listing.
   ///
   /// Returns a builder carrying the description.
-  FlagBuilder describedAs(String description) => FlagBuilder(
-    schema,
-    draft.withDescription(description),
-    fallback: _fallback,
-  );
+  FlagBuilder describedAs(String description) =>
+      FlagBuilder(draft.withDescription(description), fallback: _fallback);
 
   /// Marks the flag as still honoured but no longer to be used.
   ///
@@ -82,5 +79,5 @@ final class FlagBuilder extends DeclaredParameter<bool> {
   ///
   /// Returns a builder whose flag is marked deprecated.
   FlagBuilder deprecated([String advice = '']) =>
-      FlagBuilder(schema, draft.asDeprecated(advice), fallback: _fallback);
+      FlagBuilder(draft.asDeprecated(advice), fallback: _fallback);
 }

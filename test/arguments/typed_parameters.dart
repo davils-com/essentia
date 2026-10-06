@@ -15,48 +15,45 @@ import 'colour.dart';
 /// schema converts itself.
 final class TypedParameters extends Parameters {
   /// An integer.
-  late final Parameter<int?> count = parameter(<String>['--count']).integer();
+  final Parameter<int?> count = parameter(<String>['--count']).integer();
 
   /// An integer beyond the 32-bit range.
-  late final Parameter<int?> size = parameter(<String>['--size']).integer();
+  final Parameter<int?> size = parameter(<String>['--size']).integer();
 
   /// A decimal number.
-  late final Parameter<double?> ratio = parameter(<String>['--ratio'])
-      .decimal();
+  final Parameter<double?> ratio = parameter(<String>['--ratio']).decimal();
 
   /// A boolean written out.
-  late final Parameter<bool?> enabled = parameter(<String>['--enabled'])
-      .boolean();
+  final Parameter<bool?> enabled = parameter(<String>['--enabled']).boolean();
 
   /// An enum constant.
-  late final Parameter<Colour?> colour = parameter(<String>['--colour'])
+  final Parameter<Colour?> colour = parameter(<String>['--colour'])
       .enumeration(Colour.values);
 
   /// An application mode.
-  late final Parameter<ApplicationMode?> mode = parameter(<String>['--mode'])
+  final Parameter<ApplicationMode?> mode = parameter(<String>['--mode'])
       .applicationMode();
 
   /// A duration.
-  late final Parameter<Duration?> timeout = parameter(<String>['--timeout'])
+  final Parameter<Duration?> timeout = parameter(<String>['--timeout'])
       .duration();
 
   /// A URI.
-  late final Parameter<Uri?> endpoint = parameter(<String>['--endpoint']).uri();
+  final Parameter<Uri?> endpoint = parameter(<String>['--endpoint']).uri();
 
   /// One of two declared choices.
-  late final Parameter<String?> level = parameter(<String>['--level'])
+  final Parameter<String?> level = parameter(<String>['--level'])
       .choice(<String>['low', 'high']);
 
   /// Values split on commas.
-  late final Parameter<List<String>> tags = parameter(<String>['--tags'])
-      .split(',');
+  final Parameter<List<String>> tags = parameter(<String>['--tags']).split(',');
 
   /// A path that is not checked.
-  late final Parameter<String?> directory = parameter(<String>['--directory'])
+  final Parameter<String?> directory = parameter(<String>['--directory'])
       .path();
 
   /// An identifier the schema converts with a converter of its own.
-  late final Parameter<String?> identifier = parameter(<String>['--id'])
+  final Parameter<String?> identifier = parameter(<String>['--id'])
       .convert<String>('identifier', (raw) {
         if (!raw.startsWith('id-')) {
           throw const ConversionException("must start with 'id-'");

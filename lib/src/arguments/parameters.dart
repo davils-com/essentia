@@ -8,16 +8,13 @@
  */
 
 import 'package:essentia/src/arguments/argument_lexer.dart';
-import 'package:essentia/src/arguments/boolean_parser.dart';
 import 'package:essentia/src/arguments/cardinality.dart';
 import 'package:essentia/src/arguments/declared_parameter.dart';
-import 'package:essentia/src/arguments/flag_builder.dart';
 import 'package:essentia/src/arguments/host_system.dart';
 import 'package:essentia/src/arguments/lex_result.dart';
 import 'package:essentia/src/arguments/masking.dart';
 import 'package:essentia/src/arguments/parameter.dart';
-import 'package:essentia/src/arguments/parameter_builder.dart';
-import 'package:essentia/src/arguments/parameter_converters.dart';
+import 'package:essentia/src/arguments/parameter_declarations.dart';
 import 'package:essentia/src/arguments/parameter_draft.dart';
 import 'package:essentia/src/arguments/parameter_exception.dart';
 import 'package:essentia/src/arguments/parameter_info.dart';
@@ -35,10 +32,11 @@ import 'package:meta/meta.dart';
 
 /// The parameters a program is started with.
 ///
-/// A schema extends this class, declares one field per parameter and lists
-/// them in [declared]. Declaring is separate from reading: [load] resolves
-/// every declared parameter in one pass, and from then on each one is an
-/// ordinary immutable value read through [Parameter.value].
+/// A schema extends this class, declares one final field per parameter,
+/// initialised with [parameter] or [flag], and lists them in [declared].
+/// Declaring is separate from reading: [load] resolves every declared
+/// parameter in one pass, and from then on each one is an ordinary immutable
+/// value read through [Parameter.value].
 ///
 /// ```dart
 /// final class AppParameters extends Parameters {
@@ -46,17 +44,17 @@ import 'package:meta/meta.dart';
 ///     exclusive(<Parameter<Object?>>[json, yaml]);
 ///   }
 ///
-///   late final Parameter<int> port =
+///   final Parameter<int> port =
 ///       parameter(<String>['--port', '-p']).integer().required();
-///   late final Parameter<String> dataDir =
+///   final Parameter<String> dataDir =
 ///       parameter(<String>['--data-dir']).path(mustExist: true).required();
-///   late final Parameter<String> dbPassword =
+///   final Parameter<String> dbPassword =
 ///       parameter(<String>['--db-password']).sensitive().required();
-///   late final Parameter<List<String>> tags =
+///   final Parameter<List<String>> tags =
 ///       parameter(<String>['--tag']).multiple();
-///   late final Parameter<bool> dryRun = flag(<String>['--dry-run']);
-///   late final Parameter<bool> json = flag(<String>['--json']);
-///   late final Parameter<bool> yaml = flag(<String>['--yaml']);
+///   final Parameter<bool> dryRun = flag(<String>['--dry-run']);
+///   final Parameter<bool> json = flag(<String>['--json']);
+///   final Parameter<bool> yaml = flag(<String>['--yaml']);
 ///
 ///   @override
 ///   List<Parameter<Object?>> get declared => <Parameter<Object?>>[
@@ -73,8 +71,9 @@ import 'package:meta/meta.dart';
 ///
 /// Dart has no delegated properties, so where Kotlin registers a parameter
 /// as its property is created, a Dart schema lists its parameters once in
-/// [declared]. The order of that list is the order of the usage listing,
-/// and a parameter missing from it fails loudly when it is read.
+/// [declared], and the schema registers that list as it is constructed. The
+/// order of the list is the order of the usage listing, and a parameter
+/// missing from it fails loudly when it is read.
 ///
 /// Reading a parameter costs a list access. Nothing about it converts,
 /// validates or waits, which is why [load] is the only place that has to be
@@ -88,7 +87,8 @@ import 'package:meta/meta.dart';
 /// Two parameters that would read the same variable - whether named with
 /// `env` or derived, so that `--data-dir` and `--data_dir` would both read
 /// `APP_DATA_DIR` - are refused when the schema registers its parameters,
-/// as is a variable name no shell could export.
+/// as is a variable name no shell could export. Registering happens in the
+/// constructor, so a schema that is wrong cannot be constructed at all.
 abstract class Parameters {
   /// Creates a schema.
   ///
@@ -98,10 +98,20 @@ abstract class Parameters {
   /// parameters with an explicit variable have an environment fallback.
   /// [_unknownArguments] decides what happens to arguments the schema does
   /// not declare.
+  ///
+  /// The constructor registers the parameters of [declared], which every
+  /// final field of the subclass has been initialised for by then.
+  ///
+  /// Throws an [ArgumentError] if a parameter of [declared] was not created
+  /// by [parameter] or [flag], is listed twice or by another schema, shares
+  /// a name or an environment variable with another one, or reads a
+  /// malformed environment variable.
   Parameters({
     this._environmentPrefix,
     this._unknownArguments = UnknownArgumentPolicy.reject,
-  });
+  }) {
+    _registered();
+  }
 
   /// The prefix environment variables are derived with, or `null`.
   final String? _environmentPrefix;
@@ -133,7 +143,7 @@ abstract class Parameters {
 
   /// Every parameter of the schema, in the order of the usage listing.
   ///
-  /// Read once, the first time the schema needs its parameters.
+  /// Read once, while the schema is constructed.
   @protected
   List<Parameter<Object?>> get declared;
 
@@ -160,46 +170,6 @@ abstract class Parameters {
   ///
   /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
   List<Violation> get warnings => _requireSnapshot('warnings').warnings;
-
-  /// Declares a parameter answering to [names], each starting with `--`
-  /// or being a single character after one `-`.
-  ///
-  /// Returns a builder reading the value as text; a conversion such as
-  /// [ParameterConverters.integer] changes its type.
-  ///
-  /// Throws an [ArgumentError] if a name is malformed.
-  @protected
-  ParameterBuilder<String> parameter(List<String> names) {
-    _validateNames(names);
-    return ParameterBuilder<String>(
-      this,
-      ParameterDraft(
-        names: List<String>.unmodifiable(names),
-        converter: (raw) => raw,
-        typeName: 'string',
-        isFlag: false,
-      ),
-    );
-  }
-
-  /// Declares a flag answering to [names].
-  ///
-  /// Returns a builder reading `true` when the flag is given.
-  ///
-  /// Throws an [ArgumentError] if a name is malformed.
-  @protected
-  FlagBuilder flag(List<String> names) {
-    _validateNames(names);
-    return FlagBuilder(
-      this,
-      ParameterDraft(
-        names: List<String>.unmodifiable(names),
-        converter: parseBoolean,
-        typeName: 'flag',
-        isFlag: true,
-      ),
-    );
-  }
 
   /// Declares that at most one of [parameters] may be given.
   @protected
@@ -436,9 +406,10 @@ abstract class Parameters {
   ///
   /// Returns the registered parameters.
   ///
-  /// Throws an [ArgumentError] if a parameter is not declared on this
-  /// schema, is listed twice, shares a name or an environment variable with
-  /// another one, or reads a malformed environment variable.
+  /// Throws an [ArgumentError] if a parameter was not created by
+  /// [parameter] or [flag], is listed twice or by another schema, shares a
+  /// name or an environment variable with another one, or reads a malformed
+  /// environment variable.
   List<ParameterSpec> _registered() {
     final List<ParameterSpec>? registered = _specs;
     if (registered != null) {
@@ -458,6 +429,9 @@ abstract class Parameters {
       }
       _claimVariable(spec.info, claimedVariables);
       _ordinals[parameter] = spec.ordinal;
+      if (parameter is DeclaredParameter<Object?>) {
+        parameter.declareOn(this);
+      }
       specs.add(spec);
     }
     return _specs = List<ParameterSpec>.unmodifiable(specs);
@@ -494,14 +468,20 @@ abstract class Parameters {
   ///
   /// Returns the spec.
   ///
-  /// Throws an [ArgumentError] if the parameter is not declared on this
-  /// schema or was listed already.
+  /// Throws an [ArgumentError] if the parameter was not created by
+  /// [parameter] or [flag], another schema lists it, or it was listed
+  /// already.
   ParameterSpec _specFor(Parameter<Object?> parameter, int ordinal) {
-    if (parameter is! DeclaredParameter<Object?> ||
-        !identical(parameter.schema, this)) {
+    if (parameter is! DeclaredParameter<Object?>) {
       throw ArgumentError(
-        'A declared parameter was not created by parameter() or flag() on '
-        'this schema',
+        'A declared parameter was not created by parameter() or flag()',
+      );
+    }
+    final Parameters? owner = parameter.schema;
+    if (owner != null && !identical(owner, this)) {
+      throw ArgumentError(
+        'Parameter "${_nameOf(parameter)}" is declared by another schema. '
+        'A parameter belongs to one schema; declare it on each schema.',
       );
     }
     if (_ordinals.containsKey(parameter)) {
@@ -603,35 +583,5 @@ abstract class Parameters {
       return parameter.draft.names.first;
     }
     return 'a parameter of another schema';
-  }
-
-  /// Checks the declared [names] of one parameter.
-  ///
-  /// Throws an [ArgumentError] if there are none, or one does not start
-  /// with a dash, has nothing after its dashes, or is a short name longer
-  /// than one character.
-  static void _validateNames(List<String> names) {
-    if (names.isEmpty) {
-      throw ArgumentError('A parameter needs at least one name');
-    }
-    for (final name in names) {
-      if (!name.startsWith('-')) {
-        throw ArgumentError('Parameter name "$name" must start with a dash');
-      }
-      if (name.startsWith('--')) {
-        if (name.length <= 2) {
-          throw ArgumentError(
-            'Parameter name "$name" has no name after its dashes',
-          );
-        }
-        continue;
-      }
-      if (name.length != 2) {
-        throw ArgumentError(
-          'Short parameter name "$name" must be exactly one character, or '
-          'start with "--"',
-        );
-      }
-    }
   }
 }

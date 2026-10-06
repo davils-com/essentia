@@ -39,7 +39,7 @@ final class ConsumerGroup {
 
   /// How many envelopes this group can be handling at once, which is
   /// always its topic's partition count.
-  int get workerCount => _mailboxes.workers.length;
+  int get workerCount => _mailboxes.workerCount;
 
   /// Whether this group is still being given work.
   bool get isActive => _mailboxes.isActive;

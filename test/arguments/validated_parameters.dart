@@ -24,7 +24,7 @@ final class ValidatedParameters extends Parameters {
   static const _manyThreads = 256;
 
   /// A port number.
-  late final Parameter<int?> port = parameter(<String>['--port'])
+  final Parameter<int?> port = parameter(<String>['--port'])
       .integer()
       .validate((it, value) {
         if (value < _lowestPort || value > _highestPort) {
@@ -33,7 +33,7 @@ final class ValidatedParameters extends Parameters {
       });
 
   /// A name checked by two rules.
-  late final Parameter<String?> name = parameter(<String>['--name'])
+  final Parameter<String?> name = parameter(<String>['--name'])
       .validate((it, value) {
         if (value.trim().isEmpty) {
           it.fail('must not be blank');
@@ -46,7 +46,7 @@ final class ValidatedParameters extends Parameters {
       });
 
   /// Weights, each checked on its own.
-  late final Parameter<List<int>> weights = parameter(<String>['--weight'])
+  final Parameter<List<int>> weights = parameter(<String>['--weight'])
       .integer()
       .multiple()
       .validate((it, value) {
@@ -56,7 +56,7 @@ final class ValidatedParameters extends Parameters {
       });
 
   /// A thread count with a rule that fails and a rule that only warns.
-  late final Parameter<int?> threads = parameter(<String>['--threads'])
+  final Parameter<int?> threads = parameter(<String>['--threads'])
       .integer()
       .validate((it, value) {
         if (value < 0) {

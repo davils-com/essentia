@@ -157,8 +157,7 @@ void main() {
   test('validate reports the same problems without throwing', () {
     final builder = LoggingBuilder()..sink((it) => it.name = '');
 
-    late ValidationReport report;
-    expect(() => report = builder.validate(), returnsNormally);
+    final ValidationReport report = builder.validate();
 
     expect(report.isValid, isFalse);
     expect(_paths(report), <String>['sinks[0].name', 'sinks']);

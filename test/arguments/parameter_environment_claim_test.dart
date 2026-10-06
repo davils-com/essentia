@@ -39,8 +39,8 @@ void main() {
     );
   });
 
-  test('the collision is refused before anything is loaded', () {
-    expect(DerivedVariableParameters().usage, throwsArgumentError);
+  test('the collision is refused as the schema is constructed', () {
+    expect(DerivedVariableParameters.new, throwsArgumentError);
   });
 
   test('two parameters declaring the same variable are refused', () {

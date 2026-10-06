@@ -16,15 +16,14 @@ final class CarelessParameters extends Parameters {
   CarelessParameters();
 
   /// Converted by [int.parse], which throws a [FormatException].
-  late final Parameter<int?> port = parameter(<String>['--port'])
+  final Parameter<int?> port = parameter(<String>['--port'])
       .convert<int>('port', int.parse);
 
   /// Converted by the built-in integer conversion.
-  late final Parameter<int?> workers = parameter(<String>['--workers'])
-      .integer();
+  final Parameter<int?> workers = parameter(<String>['--workers']).integer();
 
   /// A secret converted by [int.parse], whose exception quotes the value.
-  late final Parameter<int?> pin = parameter(<String>['--pin'])
+  final Parameter<int?> pin = parameter(<String>['--pin'])
       .sensitive()
       .convert<int>('pin', int.parse);
 

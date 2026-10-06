@@ -13,6 +13,7 @@ import 'package:test/test.dart';
 import 'defaulted_port_parameters.dart';
 import 'early_validation_parameters.dart';
 import 'named_parameters.dart';
+import 'shared_parameters.dart';
 
 /// No environment at all.
 const _nothing = <String, String>{};
@@ -127,49 +128,74 @@ void main() {
   group('declaration', () {
     test('a name without a dash is refused', () {
       expect(
-        NamedParameters(<String>['name'], <String>['--other']).usage,
+        () => NamedParameters(<String>['name'], <String>['--other']),
         _argumentErrorContaining('must start with a dash'),
       );
     });
 
     test('a short name longer than one character is refused', () {
       expect(
-        NamedParameters(<String>['-name'], <String>['--other']).usage,
+        () => NamedParameters(<String>['-name'], <String>['--other']),
         _argumentErrorContaining('exactly one character'),
       );
     });
 
     test('a long name with nothing after its dashes is refused', () {
       expect(
-        NamedParameters(<String>['--'], <String>['--other']).usage,
+        () => NamedParameters(<String>['--'], <String>['--other']),
         _argumentErrorContaining('no name after its dashes'),
       );
     });
 
     test('a parameter without any name is refused', () {
       expect(
-        NamedParameters(const <String>[], <String>['--other']).usage,
+        () => NamedParameters(const <String>[], <String>['--other']),
         _argumentErrorContaining('at least one name'),
       );
     });
 
     test('the same name declared twice is refused', () {
       expect(
-        NamedParameters(<String>['--name'], <String>['--name']).usage,
+        () => NamedParameters(<String>['--name'], <String>['--name']),
         _argumentErrorContaining('declared more than once'),
       );
     });
 
     test('a short name declared twice is refused as well', () {
       expect(
-        NamedParameters(<String>['--first', '-x'], <String>['--b', '-x']).usage,
+        () => NamedParameters(<String>['--first', '-x'], <String>['--b', '-x']),
         _argumentErrorContaining('declared more than once'),
+      );
+    });
+
+    test('a parameter listed by a second schema is refused', () {
+      final Parameter<String?> shared = parameter(<String>['--shared']);
+      final first = SharedParameters(shared)
+        ..load(<String>['--shared=a'], environment: _nothing);
+      expect(
+        () => SharedParameters(shared),
+        _argumentErrorContaining('declared by another schema'),
+      );
+      expect(first.shared.value, 'a');
+    });
+
+    test('a parameter no schema lists cannot be read', () {
+      final Parameter<String?> unlisted = parameter(<String>['--unlisted']);
+      expect(
+        () => unlisted.value,
+        throwsA(
+          isA<StateError>().having(
+            (error) => error.message,
+            'message',
+            contains('not listed in the declared parameters'),
+          ),
+        ),
       );
     });
 
     test('validation declared before the type is fixed is refused', () {
       expect(
-        EarlyValidationParameters().usage,
+        EarlyValidationParameters.new,
         throwsA(
           isA<StateError>().having(
             (error) => error.message,

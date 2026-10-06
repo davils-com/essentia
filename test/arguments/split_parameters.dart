@@ -15,16 +15,15 @@ final class SplitParameters extends Parameters {
   SplitParameters();
 
   /// Text split on commas.
-  late final Parameter<List<String>> tags = parameter(<String>['--tag'])
-      .split(',');
+  final Parameter<List<String>> tags = parameter(<String>['--tag']).split(',');
 
   /// Integers split on commas.
-  late final Parameter<List<int>> ports = parameter(<String>['--port'])
+  final Parameter<List<int>> ports = parameter(<String>['--port'])
       .integer()
       .split(',');
 
   /// A repeatable parameter split on a dot.
-  late final Parameter<List<String>> words = parameter(<String>['--word'])
+  final Parameter<List<String>> words = parameter(<String>['--word'])
       .multiple()
       .split('.');
 

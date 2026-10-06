@@ -13,15 +13,18 @@ import 'package:essentia/src/arguments/parameter_draft.dart';
 import 'package:essentia/src/arguments/parameters.dart';
 import 'package:meta/meta.dart';
 
-/// What every builder of a parameter is: a declaration on one schema, and
-/// the handle its value of type [V] is read through.
+/// What every builder of a parameter is: a declaration that one schema
+/// lists, and the handle its value of type [V] is read through.
 @internal
 abstract class DeclaredParameter<V> implements Parameter<V> {
-  /// Creates the declaration [draft] on [schema].
-  DeclaredParameter(this.schema, this.draft);
+  /// Creates the declaration [draft], which no schema lists yet.
+  DeclaredParameter(this.draft);
 
-  /// The schema the parameter is declared on.
-  final Parameters schema;
+  /// The schema listing the parameter, once one registered it.
+  Parameters? _schema;
+
+  /// The schema listing the parameter, or `null` while none registered it.
+  Parameters? get schema => _schema;
 
   /// The declaration so far.
   final ParameterDraft draft;
@@ -39,7 +42,33 @@ abstract class DeclaredParameter<V> implements Parameter<V> {
   List<Object?> collect(List<Object?> values) =>
       List<Object?>.unmodifiable(values);
 
-  /// The resolved value, read from the schema's snapshot.
+  /// Records that [owner] lists the parameter in its declared parameters.
+  ///
+  /// Throws an [ArgumentError] if another schema lists it already; a
+  /// parameter belongs to exactly one schema.
+  void declareOn(Parameters owner) {
+    final Parameters? current = _schema;
+    if (current != null && !identical(current, owner)) {
+      throw ArgumentError(
+        'Parameter "${draft.names.first}" is declared by another schema. '
+        'A parameter belongs to one schema; declare it on each schema.',
+      );
+    }
+    _schema = owner;
+  }
+
+  /// The resolved value, read from the snapshot of the schema listing it.
+  ///
+  /// Throws a `ParametersNotLoadedError` if that schema was not loaded
+  /// yet, and a [StateError] if no schema lists the parameter.
   @override
-  V get value => schema.valueOf(this) as V;
+  V get value {
+    final Parameters owner =
+        _schema ??
+        (throw StateError(
+          'Parameter "${draft.names.first}" is not listed in the declared '
+          'parameters of a schema, so it was never loaded',
+        ));
+    return owner.valueOf(this) as V;
+  }
 }

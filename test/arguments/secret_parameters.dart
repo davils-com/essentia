@@ -16,17 +16,17 @@ final class SecretParameters extends Parameters {
   SecretParameters() : super(environmentPrefix: 'APP');
 
   /// A required secret.
-  late final Parameter<String> token = parameter(<String>['--token'])
+  final Parameter<String> token = parameter(<String>['--token'])
       .sensitive()
       .required();
 
   /// Several secrets.
-  late final Parameter<List<String>> tags = parameter(<String>['--tag'])
+  final Parameter<List<String>> tags = parameter(<String>['--tag'])
       .sensitive()
       .multiple();
 
   /// A secret that is converted.
-  late final Parameter<int?> port = parameter(<String>['--port'])
+  final Parameter<int?> port = parameter(<String>['--port'])
       .integer()
       .sensitive();
 

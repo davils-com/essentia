@@ -18,13 +18,13 @@ final class BundleParameters extends Parameters {
   ]) : super(unknownArguments: policy);
 
   /// A short flag.
-  late final Parameter<bool> all = flag(<String>['-a']);
+  final Parameter<bool> all = flag(<String>['-a']);
 
   /// Another short flag.
-  late final Parameter<bool> colour = flag(<String>['-c']);
+  final Parameter<bool> colour = flag(<String>['-c']);
 
   /// A short parameter taking an integer.
-  late final Parameter<int?> port = parameter(<String>['-p']).integer();
+  final Parameter<int?> port = parameter(<String>['-p']).integer();
 
   /// Every parameter above.
   @override

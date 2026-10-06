@@ -67,7 +67,7 @@ final class EventTopic<T extends Event> implements Disposable {
   /// Starts the topic [_data] describes.
   @internal
   EventTopic(this._data) {
-    _partitions = List<TopicPartition>.unmodifiable(
+    _partitions.addAll(
       List<TopicPartition>.generate(
         _data.partitions,
         (index) => TopicPartition(
@@ -83,8 +83,9 @@ final class EventTopic<T extends Event> implements Disposable {
   /// What this topic was declared to be.
   final EventTopicData<T> _data;
 
-  /// The lanes envelopes are dispatched on.
-  late final List<TopicPartition> _partitions;
+  /// The lanes envelopes are dispatched on; filled by the constructor and
+  /// never changed afterwards.
+  final _partitions = <TopicPartition>[];
 
   /// The broadcast subscribers attached right now.
   ///

@@ -15,16 +15,16 @@ final class ManyFlagParameters extends Parameters {
   ManyFlagParameters();
 
   /// The first numbered flag.
-  late final Parameter<bool> first = flag(<String>['--parameter-number-0']);
+  final Parameter<bool> first = flag(<String>['--parameter-number-0']);
 
   /// The second numbered flag.
-  late final Parameter<bool> second = flag(<String>['--parameter-number-1']);
+  final Parameter<bool> second = flag(<String>['--parameter-number-1']);
 
   /// The third numbered flag.
-  late final Parameter<bool> third = flag(<String>['--parameter-number-2']);
+  final Parameter<bool> third = flag(<String>['--parameter-number-2']);
 
   /// A short flag name.
-  late final Parameter<bool> mode = flag(<String>['--mode']);
+  final Parameter<bool> mode = flag(<String>['--mode']);
 
   /// Every parameter above.
   @override

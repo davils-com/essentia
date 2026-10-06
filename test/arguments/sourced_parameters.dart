@@ -15,11 +15,10 @@ final class SourcedParameters extends Parameters {
   SourcedParameters();
 
   /// A secret.
-  late final Parameter<String?> token = parameter(<String>['--token'])
-      .sensitive();
+  final Parameter<String?> token = parameter(<String>['--token']).sensitive();
 
   /// An integer.
-  late final Parameter<int?> region = parameter(<String>['--region']).integer();
+  final Parameter<int?> region = parameter(<String>['--region']).integer();
 
   /// Every parameter above.
   @override

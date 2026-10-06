@@ -12,9 +12,18 @@ import 'package:essentia/essentia.dart';
 /// A schema whose ports fall back to defaults that are checked by the same
 /// rule as a given value.
 final class DefaultedPortParameters extends Parameters {
-  /// Creates the schema falling back to [_portDefault] for `--port` and to
-  /// [_portsDefault] for `--ports`.
-  DefaultedPortParameters(this._portDefault, this._portsDefault);
+  /// Creates the schema falling back to [portDefault] for `--port` and to
+  /// [portsDefault] for `--ports`.
+  DefaultedPortParameters(int portDefault, List<int> portsDefault)
+    : port = parameter(<String>['--port'])
+          .integer()
+          .validate(_checkPort)
+          .defaultsTo(portDefault),
+      ports = parameter(<String>['--ports'])
+          .integer()
+          .validate(_checkPort)
+          .multiple()
+          .defaultsTo(portsDefault);
 
   /// The lowest port number.
   static const _lowestPort = 1;
@@ -22,24 +31,11 @@ final class DefaultedPortParameters extends Parameters {
   /// The highest port number.
   static const _highestPort = 65535;
 
-  /// The default of `--port`.
-  final int _portDefault;
-
-  /// The default of `--ports`.
-  final List<int> _portsDefault;
-
   /// A single port with a default.
-  late final Parameter<int> port = parameter(<String>['--port'])
-      .integer()
-      .validate(_checkPort)
-      .defaultsTo(_portDefault);
+  final Parameter<int> port;
 
   /// Several ports with a default list.
-  late final Parameter<List<int>> ports = parameter(<String>['--ports'])
-      .integer()
-      .validate(_checkPort)
-      .multiple()
-      .defaultsTo(_portsDefault);
+  final Parameter<List<int>> ports;
 
   /// Every parameter above.
   @override

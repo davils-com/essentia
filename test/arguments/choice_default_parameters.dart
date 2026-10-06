@@ -12,39 +12,32 @@ import 'package:essentia/essentia.dart';
 /// A schema of choices that fall back to defaults given to its
 /// constructor.
 final class ChoiceDefaultParameters extends Parameters {
-  /// Creates the schema falling back to [_level] for `--level`, to
-  /// [_levels] for `--levels` and to [_tier] for `--tier`.
+  /// Creates the schema falling back to [levelDefault] for `--level`, to
+  /// [levelsDefault] for `--levels` and to [tierDefault] for `--tier`.
   ChoiceDefaultParameters({
-    this._level = 'low',
-    this._levels = const <String>['low'],
-    this._tier = 'gold',
-  });
-
-  /// The default of `--level`.
-  final String _level;
-
-  /// The default of `--levels`.
-  final List<String> _levels;
-
-  /// The default of `--tier`.
-  final String _tier;
+    String levelDefault = 'low',
+    List<String> levelsDefault = const <String>['low'],
+    String tierDefault = 'gold',
+  }) : level = parameter(<String>['--level'])
+           .choice(<String>['low', 'high'])
+           .defaultsTo(levelDefault),
+       levels = parameter(<String>['--levels'])
+           .choice(<String>['low', 'high'])
+           .multiple()
+           .defaultsTo(levelsDefault),
+       tier = parameter(<String>['--tier'])
+           .choice(<String>['gold', 'silver'])
+           .sensitive()
+           .defaultsTo(tierDefault);
 
   /// One of `low` and `high`.
-  late final Parameter<String> level = parameter(<String>['--level'])
-      .choice(<String>['low', 'high'])
-      .defaultsTo(_level);
+  final Parameter<String> level;
 
   /// Several of `low` and `high`.
-  late final Parameter<List<String>> levels = parameter(<String>['--levels'])
-      .choice(<String>['low', 'high'])
-      .multiple()
-      .defaultsTo(_levels);
+  final Parameter<List<String>> levels;
 
   /// A secret one of `gold` and `silver`.
-  late final Parameter<String> tier = parameter(<String>['--tier'])
-      .choice(<String>['gold', 'silver'])
-      .sensitive()
-      .defaultsTo(_tier);
+  final Parameter<String> tier;
 
   /// Every parameter above.
   @override

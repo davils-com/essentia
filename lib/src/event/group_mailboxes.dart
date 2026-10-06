@@ -24,7 +24,7 @@ final class GroupMailboxes {
         partitions,
         (_) => Mailbox<EventEnvelope<Event>>(capacity),
       ) {
-    workers = List<Future<void>>.unmodifiable(_mailboxes.map(_work));
+    _workers.addAll(_mailboxes.map(_work));
   }
 
   /// One mailbox per partition.
@@ -47,8 +47,11 @@ final class GroupMailboxes {
   var _disposed = false;
 
   /// One task per partition, each completing once its mailbox is closed and
-  /// empty.
-  late final List<Future<void>> workers;
+  /// empty; filled by the constructor and never changed afterwards.
+  final _workers = <Future<void>>[];
+
+  /// How many workers the group holds, one per partition.
+  int get workerCount => _workers.length;
 
   /// Whether any worker is still being given work.
   bool get isActive => _running > 0 && !_cancelled;
@@ -80,7 +83,7 @@ final class GroupMailboxes {
   }
 
   /// Completes once every worker has finished.
-  Future<void> join() => Future.wait(workers);
+  Future<void> join() => Future.wait(_workers);
 
   /// Discards everything buffered, reporting each envelope.
   void disposeBuffered() {

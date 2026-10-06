@@ -16,31 +16,29 @@ final class ReportedParameters extends Parameters {
   ReportedParameters() : super(environmentPrefix: 'APP');
 
   /// The mode, production unless given.
-  late final Parameter<ApplicationMode> mode = parameter(<String>['--mode'])
+  final Parameter<ApplicationMode> mode = parameter(<String>['--mode'])
       .applicationMode()
       .defaultsTo(ApplicationMode.production);
 
   /// The port, required and described.
-  late final Parameter<int> port = parameter(<String>['--port', '-p'])
+  final Parameter<int> port = parameter(<String>['--port', '-p'])
       .integer()
       .required()
       .describedAs('The port to listen on.');
 
   /// A required data directory.
-  late final Parameter<String> dataDir = parameter(<String>['--data-dir'])
+  final Parameter<String> dataDir = parameter(<String>['--data-dir'])
       .required();
 
   /// An optional secret.
-  late final Parameter<String?> dbPassword = parameter(<String>[
-    '--db-password',
-  ]).sensitive();
+  final Parameter<String?> dbPassword = parameter(<String>['--db-password'])
+      .sensitive();
 
   /// Repeatable tags.
-  late final Parameter<List<String>> tags = parameter(<String>['--tag'])
-      .multiple();
+  final Parameter<List<String>> tags = parameter(<String>['--tag']).multiple();
 
   /// A plain flag.
-  late final Parameter<bool> dryRun = flag(<String>['--dry-run']);
+  final Parameter<bool> dryRun = flag(<String>['--dry-run']);
 
   /// Every parameter above.
   @override

@@ -7,6 +7,8 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'dart:async';
+
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_envelope.dart';
 import 'package:essentia/src/event/mailbox.dart';
@@ -52,8 +54,11 @@ final class Subscriber {
   /// Whether the subscriber was told to stop.
   var _cancelled = false;
 
+  /// Completes with the task once [start] or [refuse] decided what it is.
+  final _ended = Completer<void>();
+
   /// The task, completing once the subscriber has ended.
-  late final Future<void> done;
+  Future<void> get done => _ended.future;
 
   /// Whether the subscriber is still receiving, which it stops doing the
   /// moment it is cancelled even if a handler is still running.
@@ -66,7 +71,7 @@ final class Subscriber {
   void start(Iterable<EventEnvelope<Event>> replay) {
     _registered = true;
     replay.forEach(_mailbox.trySend);
-    done = _run();
+    _ended.complete(_run());
   }
 
   /// Ends the subscriber before it ever received anything, because its
@@ -74,7 +79,7 @@ final class Subscriber {
   void refuse() {
     _finished = true;
     _mailbox.cancel();
-    done = Future<void>.value();
+    _ended.complete();
   }
 
   /// Hands [envelope] to this subscriber, waiting until it is taken.

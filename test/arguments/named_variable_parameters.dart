@@ -12,23 +12,17 @@ import 'package:essentia/essentia.dart';
 /// A schema of two parameters reading the environment variables given to
 /// its constructor.
 final class NamedVariableParameters extends Parameters {
-  /// Creates the schema reading [_firstVariable] for `--first` and
-  /// [_secondVariable] for `--second`.
-  NamedVariableParameters(this._firstVariable, this._secondVariable);
-
-  /// The variable of `--first`.
-  final String _firstVariable;
-
-  /// The variable of `--second`.
-  final String _secondVariable;
+  /// Creates the schema reading [firstVariable] for `--first` and
+  /// [secondVariable] for `--second`.
+  NamedVariableParameters(String firstVariable, String secondVariable)
+    : first = parameter(<String>['--first']).env(firstVariable),
+      second = parameter(<String>['--second']).env(secondVariable);
 
   /// Reads the first variable.
-  late final Parameter<String?> first = parameter(<String>['--first'])
-      .env(_firstVariable);
+  final Parameter<String?> first;
 
   /// Reads the second variable.
-  late final Parameter<String?> second = parameter(<String>['--second'])
-      .env(_secondVariable);
+  final Parameter<String?> second;
 
   /// Every parameter above.
   @override

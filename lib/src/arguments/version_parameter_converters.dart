@@ -21,9 +21,9 @@ import 'package:essentia/src/version/semantic_version_range.dart';
 /// text can be given.
 ///
 /// ```dart
-/// late final Parameter<SemanticVersion?> minimum =
+/// final Parameter<SemanticVersion?> minimum =
 ///     parameter(['--min-version']).semanticVersion();
-/// late final Parameter<SemanticVersionRange?> accepts =
+/// final Parameter<SemanticVersionRange?> accepts =
 ///     parameter(['--accepts']).semanticVersionRange();
 /// ```
 extension VersionParameterConverters on ParameterBuilder<String> {

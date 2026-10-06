@@ -15,12 +15,12 @@ final class QuotingRuleParameters extends Parameters {
   QuotingRuleParameters();
 
   /// A secret whose rule quotes it.
-  late final Parameter<String?> token = parameter(<String>['--token'])
+  final Parameter<String?> token = parameter(<String>['--token'])
       .sensitive()
       .validate(_checkToken);
 
   /// Plain text whose rule quotes it.
-  late final Parameter<String?> name = parameter(<String>['--name'])
+  final Parameter<String?> name = parameter(<String>['--name'])
       .validate(_checkName);
 
   /// Every parameter above.

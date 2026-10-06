@@ -18,10 +18,10 @@ import 'package:meta/meta.dart';
 /// default was declared. Rules added through [validate] run against each
 /// element rather than the list.
 final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
-  /// Creates the builder of [draft] on [schema], falling back to
+  /// Creates the builder of [draft], falling back to
   /// [_fallback] or to an empty list when it is `null`.
   @internal
-  MultipleParameterBuilder(super.schema, super.draft, this._fallback);
+  MultipleParameterBuilder(super.draft, this._fallback);
 
   /// The list used when no source supplies any value, or `null` for an
   /// empty one.
@@ -51,7 +51,6 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   MultipleParameterBuilder<T> validate(
     void Function(ValidationScope it, T value) rule,
   ) => MultipleParameterBuilder<T>(
-    schema,
     draft.withValidator((scope, value) => rule(scope, value as T)),
     _fallback,
   );
@@ -61,7 +60,7 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   ///
   /// Returns a builder whose parameter is masked in all output.
   MultipleParameterBuilder<T> sensitive() =>
-      MultipleParameterBuilder<T>(schema, draft.asSensitive(), _fallback);
+      MultipleParameterBuilder<T>(draft.asSensitive(), _fallback);
 
   /// Reads the values from the environment [variable] when none were passed
   /// on the command line.
@@ -71,28 +70,20 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   ///
   /// Returns a builder bound to that variable.
   MultipleParameterBuilder<T> env(String variable) =>
-      MultipleParameterBuilder<T>(
-        schema,
-        draft.withEnvironment(variable),
-        _fallback,
-      );
+      MultipleParameterBuilder<T>(draft.withEnvironment(variable), _fallback);
 
   /// Excludes the parameter from the environment fallback its schema would
   /// otherwise derive.
   ///
   /// Returns a builder that is only ever fed from the command line.
-  MultipleParameterBuilder<T> noEnv() => MultipleParameterBuilder<T>(
-    schema,
-    draft.withoutEnvironment(),
-    _fallback,
-  );
+  MultipleParameterBuilder<T> noEnv() =>
+      MultipleParameterBuilder<T>(draft.withoutEnvironment(), _fallback);
 
   /// Sets the one-line [description] shown in the usage listing.
   ///
   /// Returns a builder carrying the description.
   MultipleParameterBuilder<T> describedAs(String description) =>
       MultipleParameterBuilder<T>(
-        schema,
         draft.withDescription(description),
         _fallback,
       );
@@ -107,17 +98,13 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   /// Throws an [ArgumentError] if [delimiter] is empty, which would split
   /// between every character.
   MultipleParameterBuilder<T> split(String delimiter) =>
-      MultipleParameterBuilder<T>(
-        schema,
-        draft.withSplit(delimiter),
-        _fallback,
-      );
+      MultipleParameterBuilder<T>(draft.withSplit(delimiter), _fallback);
 
   /// Supplies the list [value] for when no source provides any value.
   ///
   /// Returns a builder carrying the default.
   MultipleParameterBuilder<T> defaultsTo(List<T> value) =>
-      MultipleParameterBuilder<T>(schema, draft, List<T>.unmodifiable(value));
+      MultipleParameterBuilder<T>(draft, List<T>.unmodifiable(value));
 
   /// Marks the parameter as still honoured but no longer to be used.
   ///
@@ -126,9 +113,5 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   ///
   /// Returns a builder whose parameter is marked deprecated.
   MultipleParameterBuilder<T> deprecated([String advice = '']) =>
-      MultipleParameterBuilder<T>(
-        schema,
-        draft.asDeprecated(advice),
-        _fallback,
-      );
+      MultipleParameterBuilder<T>(draft.asDeprecated(advice), _fallback);
 }

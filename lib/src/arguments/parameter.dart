@@ -14,7 +14,7 @@
 /// after the schema was loaded:
 ///
 /// ```dart
-/// late final Parameter<int> port =
+/// final Parameter<int> port =
 ///     parameter(['--port']).integer().required();
 ///
 /// startServer(parameters.port.value);

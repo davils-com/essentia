@@ -12,23 +12,19 @@ import 'package:essentia/essentia.dart';
 /// A schema declaring two parameters under names given from outside, and
 /// one parameter it forgets to list.
 final class NamedParameters extends Parameters {
-  /// Creates the schema declaring [_firstNames] and [_secondNames].
-  NamedParameters(this._firstNames, this._secondNames);
-
-  /// The names of [first].
-  final List<String> _firstNames;
-
-  /// The names of [second].
-  final List<String> _secondNames;
+  /// Creates the schema declaring [firstNames] and [secondNames].
+  NamedParameters(List<String> firstNames, List<String> secondNames)
+    : first = parameter(firstNames),
+      second = parameter(secondNames);
 
   /// Answers to the first names.
-  late final Parameter<String?> first = parameter(_firstNames);
+  final Parameter<String?> first;
 
   /// Answers to the second names.
-  late final Parameter<String?> second = parameter(_secondNames);
+  final Parameter<String?> second;
 
   /// Created on the schema but missing from [declared].
-  late final Parameter<String?> orphan = parameter(<String>['--orphan']);
+  final Parameter<String?> orphan = parameter(<String>['--orphan']);
 
   /// [first] and [second], but not [orphan].
   @override

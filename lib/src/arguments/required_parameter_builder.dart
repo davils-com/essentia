@@ -17,9 +17,9 @@ import 'package:meta/meta.dart';
 /// The value reads as `T`. When no source provides one, loading fails with
 /// a missing parameter rather than the value being `null` later on.
 final class RequiredParameterBuilder<T> extends DeclaredParameter<T> {
-  /// Creates the builder of [draft] on [schema].
+  /// Creates the builder of [draft].
   @internal
-  RequiredParameterBuilder(super.schema, super.draft);
+  RequiredParameterBuilder(super.draft);
 
   /// Always [Cardinality.required].
   @internal
@@ -37,7 +37,6 @@ final class RequiredParameterBuilder<T> extends DeclaredParameter<T> {
   RequiredParameterBuilder<T> validate(
     void Function(ValidationScope it, T value) rule,
   ) => RequiredParameterBuilder<T>(
-    schema,
     draft.withValidator((scope, value) => rule(scope, value as T)),
   );
 
@@ -46,27 +45,27 @@ final class RequiredParameterBuilder<T> extends DeclaredParameter<T> {
   ///
   /// Returns a builder whose parameter is masked in all output.
   RequiredParameterBuilder<T> sensitive() =>
-      RequiredParameterBuilder<T>(schema, draft.asSensitive());
+      RequiredParameterBuilder<T>(draft.asSensitive());
 
   /// Reads the value from the environment [variable] when it was not passed
   /// on the command line.
   ///
   /// Returns a builder bound to that variable.
   RequiredParameterBuilder<T> env(String variable) =>
-      RequiredParameterBuilder<T>(schema, draft.withEnvironment(variable));
+      RequiredParameterBuilder<T>(draft.withEnvironment(variable));
 
   /// Excludes the parameter from the environment fallback its schema would
   /// otherwise derive.
   ///
   /// Returns a builder that is only ever fed from the command line.
   RequiredParameterBuilder<T> noEnv() =>
-      RequiredParameterBuilder<T>(schema, draft.withoutEnvironment());
+      RequiredParameterBuilder<T>(draft.withoutEnvironment());
 
   /// Sets the one-line [description] shown in the usage listing.
   ///
   /// Returns a builder carrying the description.
   RequiredParameterBuilder<T> describedAs(String description) =>
-      RequiredParameterBuilder<T>(schema, draft.withDescription(description));
+      RequiredParameterBuilder<T>(draft.withDescription(description));
 
   /// Marks the parameter as still honoured but no longer to be used.
   ///
@@ -75,5 +74,5 @@ final class RequiredParameterBuilder<T> extends DeclaredParameter<T> {
   ///
   /// Returns a builder whose parameter is marked deprecated.
   RequiredParameterBuilder<T> deprecated([String advice = '']) =>
-      RequiredParameterBuilder<T>(schema, draft.asDeprecated(advice));
+      RequiredParameterBuilder<T>(draft.asDeprecated(advice));
 }

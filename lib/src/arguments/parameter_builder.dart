@@ -21,9 +21,9 @@ import 'package:meta/meta.dart';
 /// that: [required] and [defaultsTo] make it non-null, [multiple] and
 /// [split] turn it into a list.
 final class ParameterBuilder<T> extends DeclaredParameter<T?> {
-  /// Creates the builder of [draft] on [schema].
+  /// Creates the builder of [draft].
   @internal
-  ParameterBuilder(super.schema, super.draft);
+  ParameterBuilder(super.draft);
 
   /// Always [Cardinality.optional].
   @internal
@@ -44,7 +44,6 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   ParameterBuilder<T> validate(
     void Function(ValidationScope it, T value) rule,
   ) => ParameterBuilder<T>(
-    schema,
     draft.withValidator((scope, value) => rule(scope, value as T)),
   );
 
@@ -52,28 +51,27 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   /// renders it.
   ///
   /// Returns a builder whose parameter is masked in all output.
-  ParameterBuilder<T> sensitive() =>
-      ParameterBuilder<T>(schema, draft.asSensitive());
+  ParameterBuilder<T> sensitive() => ParameterBuilder<T>(draft.asSensitive());
 
   /// Reads the value from the environment [variable] when it was not passed
   /// on the command line.
   ///
   /// Returns a builder bound to that variable.
   ParameterBuilder<T> env(String variable) =>
-      ParameterBuilder<T>(schema, draft.withEnvironment(variable));
+      ParameterBuilder<T>(draft.withEnvironment(variable));
 
   /// Excludes the parameter from the environment fallback its schema would
   /// otherwise derive.
   ///
   /// Returns a builder that is only ever fed from the command line.
   ParameterBuilder<T> noEnv() =>
-      ParameterBuilder<T>(schema, draft.withoutEnvironment());
+      ParameterBuilder<T>(draft.withoutEnvironment());
 
   /// Sets the one-line [description] shown in the usage listing.
   ///
   /// Returns a builder carrying the description.
   ParameterBuilder<T> describedAs(String description) =>
-      ParameterBuilder<T>(schema, draft.withDescription(description));
+      ParameterBuilder<T>(draft.withDescription(description));
 
   /// Marks the parameter as still honoured but no longer to be used.
   ///
@@ -83,14 +81,13 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   ///
   /// Returns a builder whose parameter is marked deprecated.
   ParameterBuilder<T> deprecated([String advice = '']) =>
-      ParameterBuilder<T>(schema, draft.asDeprecated(advice));
+      ParameterBuilder<T>(draft.asDeprecated(advice));
 
   /// Makes the parameter mandatory, so that the value reads as `T` rather
   /// than `T?`.
   ///
   /// Returns a builder for a mandatory parameter.
-  RequiredParameterBuilder<T> required() =>
-      RequiredParameterBuilder<T>(schema, draft);
+  RequiredParameterBuilder<T> required() => RequiredParameterBuilder<T>(draft);
 
   /// Supplies [value] for when no source provides one.
   ///
@@ -103,14 +100,14 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   ///
   /// Returns a builder for a parameter that always has a value.
   DefaultedParameterBuilder<T> defaultsTo(T value) =>
-      DefaultedParameterBuilder<T>(schema, draft, value);
+      DefaultedParameterBuilder<T>(draft, value);
 
   /// Collects every occurrence of the parameter instead of expecting a
   /// single one.
   ///
   /// Returns a builder whose value is a list.
   MultipleParameterBuilder<T> multiple() =>
-      MultipleParameterBuilder<T>(schema, draft, null);
+      MultipleParameterBuilder<T>(draft, null);
 
   /// Collects every occurrence and additionally splits each one on
   /// [delimiter].
@@ -126,5 +123,5 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   /// between every character; a parameter that takes one value per
   /// occurrence is [multiple].
   MultipleParameterBuilder<T> split(String delimiter) =>
-      MultipleParameterBuilder<T>(schema, draft.withSplit(delimiter), null);
+      MultipleParameterBuilder<T>(draft.withSplit(delimiter), null);
 }

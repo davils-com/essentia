@@ -771,10 +771,8 @@ abstract class Parameters {
   List<Violation> get warnings;
   String describe();
   void exclusive(List<Parameter<Object?>> parameters);
-  FlagBuilder flag(List<String> names);
   void load(List<String> argv, {Map<String, String>? environment});
   Future<void> loadFrom(List<String> argv, List<ValueSource> sources, {Map<String, String>? environment});
-  ParameterBuilder<String> parameter(List<String> names);
   void requires(Parameter<Object?> parameter, List<Parameter<Object?>> required);
   String usage();
 }
@@ -1377,11 +1375,15 @@ Principal? currentPrincipal();
 
 EventBus eventBus(void Function(EventBusBuilder) block);
 
+FlagBuilder flag(List<String> names);
+
 int Function(T, T) naturalOrder<T extends Comparable<Object>>();
 
 int Function(T?, T?) nullsFirst<T extends Object>(int Function(T, T) comparator);
 
 int Function(T?, T?) nullsLast<T extends Object>(int Function(T, T) comparator);
+
+ParameterBuilder<String> parameter(List<String> names);
 
 Principal principal(String id, [void Function(PrincipalBuilder)? block]);
 

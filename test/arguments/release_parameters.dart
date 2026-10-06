@@ -8,6 +8,7 @@
  */
 
 import 'package:essentia/src/arguments/parameter.dart';
+import 'package:essentia/src/arguments/parameter_declarations.dart';
 import 'package:essentia/src/arguments/parameters.dart';
 import 'package:essentia/src/arguments/version_parameter_converters.dart';
 import 'package:essentia/src/version/semantic_version.dart';
@@ -17,12 +18,11 @@ import 'package:essentia/src/version/semantic_version_range.dart';
 /// release.
 final class ReleaseParameters extends Parameters {
   /// The version released.
-  late final Parameter<SemanticVersion?> version = parameter(<String>[
-    '--version',
-  ]).semanticVersion();
+  final Parameter<SemanticVersion?> version = parameter(<String>['--version'])
+      .semanticVersion();
 
   /// The versions of the host the release accepts.
-  late final Parameter<SemanticVersionRange?> accepts = parameter(<String>[
+  final Parameter<SemanticVersionRange?> accepts = parameter(<String>[
     '--accepts',
   ]).semanticVersionRange();
 

@@ -28,7 +28,6 @@ extension FileParameterConverters on ParameterBuilder<String> {
     bool mustBeDirectory = false,
     bool mustBeRegularFile = false,
   }) => ParameterBuilder<File>(
-    schema,
     draft.retyped(
       'file',
       File.new,
