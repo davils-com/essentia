@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// A schema exercising every way a command line can spell a parameter.
 final class SyntaxParameters extends Parameters {

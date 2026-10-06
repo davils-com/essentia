@@ -16,9 +16,11 @@ import 'package:essentia/src/event/event_listener.dart';
 import 'package:essentia/src/event/event_topic_builder.dart';
 import 'package:essentia/src/event/event_topic_data.dart';
 import 'package:essentia/src/event/event_topic_defaults.dart';
+import 'package:essentia/src/event/event_violation_codes.dart';
 import 'package:essentia/src/event/overflow_policy.dart';
 import 'package:essentia/src/event/topic_key.dart';
 import 'package:essentia/src/validation/validation_report.dart';
+import 'package:essentia/src/validation/validation_scope.dart';
 import 'package:essentia/src/validation/violation.dart';
 import 'package:essentia/src/validation/violation_path.dart';
 import 'package:meta/meta.dart';
@@ -63,32 +65,127 @@ final class EventBusBuilder extends ValidatingBuilder<EventBusData> {
   /// The interceptors added so far.
   final _interceptors = <EventInterceptor>[];
 
-  /// The default for every topic's [EventTopicBuilder.replay].
-  var replay = 0;
+  /// The value behind [replay].
+  var _replay = 0;
 
-  /// The default for every topic's [EventTopicBuilder.bufferCapacity].
-  int bufferCapacity = EventTopicDefaults.defaultBufferCapacity;
+  /// The value behind [bufferCapacity].
+  int _bufferCapacity = EventTopicDefaults.defaultBufferCapacity;
 
-  /// The default for every topic's [EventTopicBuilder.partitions].
-  var partitions = 1;
+  /// The value behind [partitions].
+  var _partitions = 1;
 
-  /// The default for every topic's [EventTopicBuilder.requiresKey].
-  var requiresKey = false;
+  /// The value behind [requiresKey].
+  var _requiresKey = false;
 
-  /// The default for every topic's [EventTopicBuilder.overflow].
+  /// The value behind [overflow].
+  OverflowPolicy _overflow = OverflowPolicy.suspend;
+
+  /// The value behind [listener].
+  EventListener _listener = EventListener.none;
+
+  /// The value behind [onError].
+  EventErrorHandler _onError = EventTopicDefaults.ignoreError;
+
+  /// The defaults set after a topic was declared, each warned about once.
+  final _lateDefaults = <String>{};
+
+  /// The starting value for [EventTopicBuilder.replay] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
+  int get replay => _replay;
+
+  /// Sets [replay] for every topic declared from here on.
+  set replay(int value) {
+    _replay = value;
+    _noteLateDefault('replay');
+  }
+
+  /// The starting value for [EventTopicBuilder.bufferCapacity] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
+  int get bufferCapacity => _bufferCapacity;
+
+  /// Sets [bufferCapacity] for every topic declared from here on.
+  set bufferCapacity(int value) {
+    _bufferCapacity = value;
+    _noteLateDefault('bufferCapacity');
+  }
+
+  /// The starting value for [EventTopicBuilder.partitions] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
+  int get partitions => _partitions;
+
+  /// Sets [partitions] for every topic declared from here on.
+  set partitions(int value) {
+    _partitions = value;
+    _noteLateDefault('partitions');
+  }
+
+  /// The starting value for [EventTopicBuilder.requiresKey] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
+  bool get requiresKey => _requiresKey;
+
+  /// Sets [requiresKey] for every topic declared from here on.
+  set requiresKey(bool value) {
+    _requiresKey = value;
+    _noteLateDefault('requiresKey');
+  }
+
+  /// The starting value for [EventTopicBuilder.overflow] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
   ///
   /// [OverflowPolicy.suspend], which is the default, is the only policy
   /// under which the bus never discards an envelope.
-  OverflowPolicy overflow = OverflowPolicy.suspend;
+  OverflowPolicy get overflow => _overflow;
 
-  /// The default for every topic's [EventTopicBuilder.listener].
+  /// Sets [overflow] for every topic declared from here on.
+  set overflow(OverflowPolicy value) {
+    _overflow = value;
+    _noteLateDefault('overflow');
+  }
+
+  /// The starting value for [EventTopicBuilder.listener] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
   ///
   /// This is where a listener normally goes: one implementation, told about
-  /// every topic, rather than one per topic that has to be kept in step.
-  EventListener listener = EventListener.none;
+  /// every topic declared after it, rather than one per topic that has to
+  /// be kept in step. Set it first.
+  EventListener get listener => _listener;
 
-  /// The default for every topic's [EventTopicBuilder.onError].
-  EventErrorHandler onError = EventTopicDefaults.ignoreError;
+  /// Sets [listener] for every topic declared from here on.
+  set listener(EventListener value) {
+    _listener = value;
+    _noteLateDefault('listener');
+  }
+
+  /// The starting value for [EventTopicBuilder.onError] on every
+  /// topic declared after this is set.
+  ///
+  /// A topic declared above keeps the value in force where it was written,
+  /// and setting this after a topic produces a warning saying so.
+  EventErrorHandler get onError => _onError;
+
+  /// Sets [onError] for every topic declared from here on.
+  set onError(EventErrorHandler value) {
+    _onError = value;
+    _noteLateDefault('onError');
+  }
 
   /// What is being built, used in the headline of the report.
   @override
@@ -100,9 +197,11 @@ final class EventBusBuilder extends ValidatingBuilder<EventBusData> {
   /// Applied outermost first in the order they were added, and always
   /// outside anything a topic adds for itself. A topic declared before this
   /// call does not get it, for the same reason it does not get a default set
-  /// below it: a block means what it says where it is written.
+  /// below it: a block means what it says where it is written. Adding one
+  /// after a topic produces a warning saying so.
   void intercept(EventInterceptor interceptor) {
     _interceptors.add(interceptor);
+    _noteLateDefault('intercept');
   }
 
   /// Declares the topic [key] names, configured by [block] starting from
@@ -144,6 +243,23 @@ final class EventBusBuilder extends ValidatingBuilder<EventBusData> {
   /// Returns the description of the bus.
   @override
   EventBusData assemble() => EventBusData(_declared);
+
+  /// Warns that [property] was set after a topic was declared, once per
+  /// property: it does not reach the topics above it.
+  void _noteLateDefault(String property) {
+    if (_declared.isEmpty || !_lateDefaults.add(property)) {
+      return;
+    }
+    final scope =
+        ValidationScope(ViolationPath.root, EventViolationCodes.lateDefault)
+          ..warn(
+            '"$property" was set after a topic was declared and does not reach '
+            'the topics above it',
+            property: 'topics',
+            code: EventViolationCodes.lateDefault,
+          );
+    adopt(scope.violations(), ViolationPath.root);
+  }
 
   /// The defaults as they stand at this point of the block.
   ///

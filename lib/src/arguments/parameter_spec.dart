@@ -23,6 +23,7 @@ final class ParameterSpec {
     required this.ordinal,
     required this.cardinality,
     required this.converter,
+    required this.constraint,
     required this.validators,
     required this.defaultValue,
     required this.splitDelimiter,
@@ -47,6 +48,10 @@ final class ParameterSpec {
 
   /// Turns raw text into the declared type.
   final Object? Function(String raw) converter;
+
+  /// The check the conversion installed, run on a converted value and on a
+  /// declared default alike, or `null`.
+  final void Function(Object? value)? constraint;
 
   /// The rules a converted value has to satisfy.
   final List<void Function(ValidationScope scope, Object? value)> validators;

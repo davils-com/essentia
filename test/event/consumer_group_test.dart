@@ -20,6 +20,14 @@ import '../support/user_event.dart';
 /// How many partitions, and so how many workers, a partitioned topic has.
 const _partitions = 4;
 
+/// How many distinct keys a test spreads its envelopes over, enough that
+/// they land on more than one partition whatever the topic's hash seed.
+const _spreadKeys = 16;
+
+/// How many workers must be handling an envelope before any of them is let
+/// go.
+const _concurrentBeforeRelease = 2;
+
 /// How many envelopes a test publishes.
 const _publications = 40;
 
@@ -126,6 +134,41 @@ void main() {
     release.complete();
     await bus.drain();
     expect(inFlight, 0);
+  });
+
+  test('a group handles keyed envelopes at once across partitions', () async {
+    final EventBus bus = eventBus((it) {
+      it.topic(users, (it) {
+        it
+          ..partitions = _partitions
+          ..requiresKey = true;
+      });
+    });
+    final release = Completer<void>();
+    var inFlight = 0;
+    var peak = 0;
+    var arrived = 0;
+
+    bus.topic(users).group('indexer', (_) async {
+      inFlight++;
+      peak = max(peak, inFlight);
+      arrived++;
+      if (arrived >= _concurrentBeforeRelease && !release.isCompleted) {
+        release.complete();
+      }
+      await release.future;
+      inFlight--;
+    });
+
+    for (var ordinal = 0; ordinal < _spreadKeys; ordinal++) {
+      await bus
+          .topic(users)
+          .publish(Registered('u-$ordinal'), key: 'k$ordinal');
+    }
+    await release.future;
+    await bus.drain();
+
+    expect(peak, greaterThan(1));
   });
 
   test('a group and a subscriber on one topic do not see each other', () async {
@@ -241,18 +284,28 @@ void main() {
     bus.dispose();
   });
 
-  test('a group attached to a closed topic is never given anything', () async {
+  test('a closed topic refuses a new group', () {
     final EventBus bus = eventBus((it) => it.topic(users))..dispose();
-    final handled = <String>[];
 
-    final ConsumerGroup group = bus
-        .topic(users)
-        .group('indexer', (envelope) => handled.add(_identifier(envelope)));
-    await bus.topic(users).publish(const Registered('u-1'));
-    await _settle();
+    expect(
+      () => bus.topic(users).group('indexer', (_) {}),
+      throwsA(
+        isA<StateError>().having(
+          (error) => error.message,
+          'message',
+          allOf(contains('closed'), contains('indexer')),
+        ),
+      ),
+    );
+    expect(bus.topic(users).metrics.groups, 0);
+  });
 
-    expect(handled, isEmpty);
-    expect(group.isActive, isFalse);
+  test('a draining topic refuses a new group', () async {
+    final EventBus bus = eventBus((it) => it.topic(users));
+    final Future<void> draining = bus.drain();
+
+    expect(() => bus.topic(users).group('indexer', (_) {}), throwsStateError);
+    await draining;
   });
 
   group('detaching a group', () {

@@ -25,11 +25,13 @@ import 'package:essentia/src/event/event_envelope.dart';
 /// path. Work that takes any time belongs behind a queue the
 /// implementation owns.
 ///
-/// **Do not throw.** [onDelivered] runs on the consuming path, so a failure
-/// there is routed to the topic's error handler like any other. [onPublished],
-/// [onDropped] and [onFailed] are reached from `tryPublish`, from an
-/// overflowing partition and from `dispose`, none of which has an error
-/// handler to call, so a failure there is **caught and discarded**.
+/// **Do not throw.** Nothing thrown here can reach the bus: whichever of the
+/// four callbacks it came from, a failure is **caught and discarded**.
+/// Taking down a publisher or abandoning a shutdown halfway is not the
+/// answer, and routing it to a consumer's error handler would report a
+/// failure the consumer did not have. A delivery a listener failed to record
+/// is still counted as delivered and never as failed. An implementation that
+/// needs to know about its own failures catches them itself.
 ///
 /// **Do not publish from here.** Publishing from inside a notification
 /// about a publication is how a loop is written by accident.

@@ -4,14 +4,19 @@ Essentia is the Davils application runtime core for Dart - a port of the Kotlin 
 validates configuration through one model that reports every problem at once, turns the parameters
 a program is started with into typed immutable values, carries events between the parts of one
 program, and holds the small building blocks the rest is made of: layering contracts, RFC 9562
-identifiers and platform detection.
+identifiers, platform detection, a `Result` type and Kotlin's standard library extensions on
+Dart's own classes.
 
 Its only runtime dependency is `package:meta`.
 
-| Library | What it carries | Platforms |
-|---|---|---|
-| `package:essentia/essentia.dart` | Validation, builder DSL, event bus, identifiers, layering contracts, platform detection, scope functions | VM, Flutter, web |
-| `package:essentia/arguments.dart` | Program parameters | Everything with `dart:io` |
+Everything is exported from `package:essentia/essentia.dart`: validation, the builder DSL, program
+parameters, the event bus, identifiers, semantic versions, principals, layering contracts, platform
+detection, scope functions, `Result` and the Kotlin stdlib extensions.
+
+It runs on every Dart platform: the VM and native executables, Flutter, the web and WebAssembly.
+The test suite runs on all of them. Where a platform has no `dart:io`, the program parameters read
+no process environment, a path with a declared check is refused because it cannot be checked, and
+`file()` is not offered, since there is no `File` to convert to.
 
 ## Kotlin lambdas, the Dart way
 
@@ -155,6 +160,63 @@ await bus.topic(users).publish(const UserRegistered('u-42'), key: 'u-42');
 - **Stops cleanly.** `drain()` delivers what is in flight; `dispose()` does not wait and says what
   it dropped.
 
+## Semantic versions
+
+`SemanticVersion` and `SemanticVersionRange` follow semver.org 2.0.0. Ranges are read in npm and
+Cargo syntax, combine with `intersect` and `union`, and select from a list:
+
+```dart
+final SemanticVersion version = SemanticVersion.parse('1.4.0-rc.1');
+final range = SemanticVersionRange.parse('^1.2 || >=2.0.0 <2.1.0');
+
+range.contains(version);                       // true, by precedence
+range.contains(version, PreReleasePolicy.sameCoreOnly); // false, npm's rule
+version.nextMinor();                           // 1.4.0
+'1.2.3'.toSemanticVersionOrNull();
+```
+
+`parameter(<String>['--min-version']).semanticVersion()` reads one as a program parameter, and
+`scope.semanticVersion(text, property: 'version')` validates one inside a `Validatable`.
+
+## Principals
+
+Who is acting: a user, a service or the system, with roles, a tenant, maskable attributes and
+delegation that keeps the originator for audit. The current principal travels in a `Zone`, the
+way Arc carries it in the coroutine context:
+
+```dart
+final Principal alice = principal('alice', (it) => it.roles(<String>['admin']));
+
+await runAsPrincipal(alice, () async {
+  requirePrincipal().hasRole('admin');           // true
+  await bus.topic(users).publish(const UserRegistered('u-42'));
+});
+```
+
+An envelope records the principal that published it, and every consumer handles it as that
+principal, so what a consumer publishes in turn carries the same caller on. `publishAs` names one
+explicitly.
+
+## Kotlin's standard library on Dart's classes
+
+The extensions Kotlin has and Dart does not, under the names Kotlin gives them. Every one says in
+its documentation which Kotlin function it mirrors, and every collection it returns is unmodifiable.
+
+| On | Extensions |
+|---|---|
+| `Iterable` | `associate`, `associateWith`, `groupingBy`, `partitionWhere`, `sumOfInt`, `countWhere`, `indexOfFirst`, `maxBy`, `minOf`, `joinToString`, `sortedByDescending`, `toSortedSet`, `random`, `intersect`, `union`, `subtract`, `mapNotNull`, `distinctBy`, `onEach`, `zip`, `windowed`, `zipWithNext`, `runningFold`, `runningReduce`, `requireNoNulls`, `unzip`, `orEmpty`, `isNullOrEmpty` … |
+| `List`, `Set` | `lastIndex`, `indices`, `getOrElse`, `foldRight`, `reduceRight`, `removeFirstOrNull`, `takeLast`, `dropLastWhile`, `plusElement`, `minusAll` … |
+| `Map` | `getValue`, `getOrElse`, `withDefault`, `mapKeys`, `mapValues`, `minusKey`, `toSortedMap`, `any`, `none`, `countWhere` … |
+| `String` | `removePrefix`, `removeSurrounding`, `substringBefore`, `substringAfterLast`, `take`, `dropLast`, `capitalize`, `equalsIgnoreCase`, `isBlank`, `ifBlank`, `trimIndent`, `trimMargin`, `lines`, `windowed`, `chunked`, `splitWithLimit` … |
+| `int`, `double`, `Duration` | `5.seconds`, `1.5.hours`, `floorDiv`, `mod`, `rangeTo`, `until`, `downTo`, `toComponents`, `toIsoString`, `duration / duration` |
+| `Comparable`, `Comparator` | `coerceIn`, `coerceAtLeast`, `rangeTo`, `rangeUntil`, `thenBy`, `thenByDescending`, with `compareBy`, `naturalOrder` and `nullsLast` beside them |
+| `Future`, `Stream` | `timeoutOrNull`, and the `Flow` operators `mapLatest`, `collectLatest`, `flatMapMerge`, `zip`, `onStart`, `onCompletion`, `onEmpty`, `runningReduce`, `distinctUntilChangedBy` … |
+
+`Result` is Kotlin's: `runCatching`, `valueOrNull`, `getOrThrow`, `fold`, `map`, `mapCatching`,
+`recover`, `onSuccess`, `onFailure`, with extensions on `Future<Result<T>>` and
+`Iterable<Result<T>>`. The ranges `IntRange`, `IntProgression`, `ClosedRange` and `OpenEndRange`
+are what `rangeTo`, `until` and `downTo` hand back.
+
 ## Also in the box
 
 - **Layering contracts.** `DomainModel`, `DataTransferObject`, `Mapper`, `DataSource`, `Repository`
@@ -177,6 +239,15 @@ Kept deliberately small, and only where Dart has no equivalent:
   `@protected` and `@visibleForTesting` take their place.
 - Property references become property names: `scope.fail('msg', property: 'sinks')`.
 - Violation codes are namespaced `essentia.*` instead of `arc.*`.
+- The current principal and the envelope being handled travel in a `Zone` instead of the coroutine
+  context. `tryPublish` therefore reads both as well; Arc's `tryPublish` has no context to read.
+  `publishAs` and `tryPublishAs` replace Arc's overloads with an explicit principal.
+- A converter or a value source is contained when it throws an `Exception`; an `Error` is a
+  programming mistake and is not caught.
+- Parameters register the first time a schema needs them, so a clash of names or environment
+  variables is refused on the first `load`, `usage` or `describe` rather than in the constructor.
+- Dart has no overloading, so where Arc offers two forms there is one with an optional argument:
+  `contains(version, [policy])`, `nextPreRelease([label])`, `principal(id, [block])`.
 - `long()` is not needed (Dart's `int` is 64-bit), `default` and `enum` are reserved words
   (`defaultsTo`, `enumeration`), and errors that are programming mistakes extend `ArgumentError` or
   `StateError` (`TopicNotDeclaredError`, `ParametersNotLoadedError`).

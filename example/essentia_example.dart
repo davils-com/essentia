@@ -9,7 +9,6 @@
 
 import 'dart:io';
 
-import 'package:essentia/arguments.dart';
 import 'package:essentia/essentia.dart';
 
 import 'example_parameters.dart';

@@ -43,8 +43,11 @@ sealed class Uuid implements Comparable<Uuid> {
   ///
   /// Throws a [FormatException] if [text] is not a well-formed RFC 9562
   /// identifier, or is of a version Essentia does not mint.
+  /// The exception says what was wrong without quoting [text], neither in
+  /// its message nor as its source, because [text] may be a token read from
+  /// a request; use [tryParse] for input from outside the program.
   factory Uuid.parse(String text) =>
-      tryParse(text) ?? (throw FormatException(uuidRefusal(text), text));
+      tryParse(text) ?? (throw FormatException(uuidRefusal(text)));
 
   /// The sixteen bytes, most significant first.
   final Uint8List _bytes;
@@ -132,8 +135,11 @@ final class UuidV4 extends Uuid {
   /// Throws a [FormatException] if [text] is not a well-formed UUID, or is
   /// of a version other than 4. A version 7 identifier is refused rather
   /// than accepted and stripped of the timestamp that made it worth having.
+  /// The exception says what was wrong without quoting [text], neither in
+  /// its message nor as its source, because [text] may be a token read from
+  /// a request; use [tryParse] for input from outside the program.
   factory UuidV4.parse(String text) =>
-      tryParse(text) ?? (throw FormatException(uuidRefusal(text), text));
+      tryParse(text) ?? (throw FormatException(uuidRefusal(text)));
 
   /// Reads a random identifier back from its text form, or reports that it
   /// could not.
@@ -187,8 +193,11 @@ final class UuidV7 extends Uuid {
   /// Throws a [FormatException] if [text] is not a well-formed UUID, or is
   /// of a version other than 7. A version 4 identifier is refused rather
   /// than accepted and reported as having been minted in 1970.
+  /// The exception says what was wrong without quoting [text], neither in
+  /// its message nor as its source, because [text] may be a token read from
+  /// a request; use [tryParse] for input from outside the program.
   factory UuidV7.parse(String text) =>
-      tryParse(text) ?? (throw FormatException(uuidRefusal(text), text));
+      tryParse(text) ?? (throw FormatException(uuidRefusal(text)));
 
   /// Reads a time-ordered identifier back from its text form, or reports
   /// that it could not.

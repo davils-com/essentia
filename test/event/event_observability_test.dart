@@ -15,6 +15,7 @@ import '../support/recording_listener.dart';
 import '../support/topics.dart';
 import '../support/user_event.dart';
 import 'broken_exporter_listener.dart';
+import 'delivery_failing_listener.dart';
 
 /// Creates an interceptor that writes to [log], under [label], when the
 /// handling enters it and when it leaves it again.
@@ -203,8 +204,8 @@ void main() {
       },
     );
 
-    test('one that throws does not take the topic down and is reported as a '
-        'failure', () async {
+    test('one that throws does not take the topic down and is not reported '
+        'as a failure of the consumer', () async {
       final failures = <String>[];
       final handled = <String>[];
       final EventBus bus = eventBus((it) {
@@ -226,11 +227,83 @@ void main() {
       await subscription.join();
 
       expect(handled, <String>['u-1', 'u-2']);
-      expect(failures, <String>[
-        BrokenExporterListener.message,
-        BrokenExporterListener.message,
-      ]);
+      expect(failures, isEmpty);
+      expect(bus.topic(users).metrics.delivered, 2);
+      expect(bus.topic(users).metrics.failed, 0);
       expect(bus.topic(users).state, BusState.closed);
+    });
+
+    test('one that throws from onDelivered is not reported as a failure of '
+        'the consumer', () async {
+      final failures = <String>[];
+      final listener = DeliveryFailingListener();
+      final EventBus bus = eventBus((it) {
+        it
+          ..listener = listener
+          ..onError = (error, _) {
+            failures.add(_messageOf(error));
+          }
+          ..topic(users);
+      });
+      final EventSubscription subscription = bus
+          .topic(users)
+          .subscribe((_) {}, name: 'indexer');
+      await subscription.awaitReady();
+
+      await bus.topic(users).publish(const Registered('u-1'));
+      await bus.drain();
+      await subscription.join();
+
+      expect(failures, isEmpty);
+      expect(listener.failedConsumers, isEmpty);
+      expect(bus.topic(users).metrics.delivered, 1);
+      expect(bus.topic(users).metrics.failed, 0);
+    });
+  });
+
+  group('an error handler', () {
+    test('that throws does not end the subscription', () async {
+      final handled = <String>[];
+      final EventBus bus = eventBus((it) => it.topic(users));
+      final EventSubscription subscription = bus.topic(users).subscribe((
+        envelope,
+      ) {
+        final String userId = envelope.payload.userId;
+        if (userId == 'u-1') {
+          throw StateError('indexing failed');
+        }
+        handled.add(userId);
+      }, onError: (_, _) => throw StateError('the logger is full'));
+      await subscription.awaitReady();
+
+      await bus.topic(users).publish(const Registered('u-1'));
+      await bus.topic(users).publish(const Registered('u-2'));
+      await pumpEventQueue();
+
+      expect(subscription.isActive, isTrue);
+      expect(handled, <String>['u-2']);
+      expect(bus.topic(users).metrics.failed, 1);
+      bus.dispose();
+    });
+
+    test("that throws does not end a consumer group's worker", () async {
+      final handled = <String>[];
+      final EventBus bus = eventBus((it) => it.topic(users));
+      final ConsumerGroup group = bus.topic(users).group('indexer', (envelope) {
+        final String userId = envelope.payload.userId;
+        if (userId == 'u-1') {
+          throw StateError('indexing failed');
+        }
+        handled.add(userId);
+      }, onError: (_, _) => throw StateError('the logger is full'));
+
+      await bus.topic(users).publish(const Registered('u-1'));
+      await bus.topic(users).publish(const Registered('u-2'));
+      await pumpEventQueue();
+
+      expect(group.isActive, isTrue);
+      expect(handled, <String>['u-2']);
+      bus.dispose();
     });
   });
 

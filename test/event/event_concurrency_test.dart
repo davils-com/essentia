@@ -7,6 +7,8 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'dart:async';
+
 import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
@@ -22,6 +24,9 @@ const _perPublisher = 250;
 
 /// How many partitions the topic under test has.
 const _partitions = 4;
+
+/// How long a subscriber is given to see everything that was published.
+const _watchTimeout = Duration(seconds: 30);
 
 /// Declares a bus carrying the user topic over [_partitions] partitions of
 /// [capacity] each, requiring a key and reporting to [listener].
@@ -118,20 +123,27 @@ void main() {
   test(
     'a subscriber and a group both keep up with several publishers',
     () async {
+      const int expected = _publishers * _perPublisher;
       final EventBus bus = _busWith(32, EventListener.none);
       final watched = <String>[];
       final worked = <String>[];
-      final EventSubscription subscription = bus
-          .topic(users)
-          .subscribe((it) => _record(it, watched));
+      final watchedEverything = Completer<void>();
+      final EventSubscription subscription = bus.topic(users).subscribe((
+        envelope,
+      ) async {
+        await _record(envelope, watched);
+        if (watched.length == expected) {
+          watchedEverything.complete();
+        }
+      });
       await subscription.awaitReady();
       bus.topic(users).group('worker', (it) => _record(it, worked));
 
       await _publishConcurrently(bus);
+      await watchedEverything.future.timeout(_watchTimeout);
       await bus.drain();
       await subscription.join();
 
-      const int expected = _publishers * _perPublisher;
       expect(watched, hasLength(expected));
       expect(worked, hasLength(expected));
     },

@@ -65,6 +65,16 @@ EventHeaders _headers(Random random) {
   return EventHeaders.of(entries);
 }
 
+/// Removes from [headers] every header whose value contains [secret], so
+/// that the secret cannot turn up in a rendering through an ordinary value
+/// that happens to contain it.
+///
+/// Returns the remaining headers.
+EventHeaders _withoutValuesContaining(EventHeaders headers, String secret) =>
+    headers.names
+        .where((name) => headers[name]?.contains(secret) ?? false)
+        .fold(headers, (remaining, name) => remaining.withoutHeader(name));
+
 /// Checks [property] against [_cases] generated cases, each drawn from a
 /// random source seeded with [seed] so that a failure can be reproduced.
 void _checkAll(int seed, void Function(Random random) property) {
@@ -193,8 +203,10 @@ void main() {
       _checkAll(9, (random) {
         final String name = _name(random);
         final String secret = _value(random);
-        final EventHeaders headers = _headers(random)
-            .withHeader(name, secret, sensitive: true);
+        final EventHeaders headers = _withoutValuesContaining(
+          _headers(random),
+          secret,
+        ).withHeader(name, secret, sensitive: true);
 
         final rendered = headers.toString();
 

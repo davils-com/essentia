@@ -23,6 +23,7 @@ final class ParameterDraft {
     required this.converter,
     required this.typeName,
     required this.isFlag,
+    this.constraint,
     this.validators = const <void Function(ValidationScope, Object?)>[],
     this.environmentVariable,
     this.environmentEnabled = true,
@@ -41,6 +42,13 @@ final class ParameterDraft {
 
   /// The name of the declared type, for the usage listing.
   final String typeName;
+
+  /// The check the conversion installed, or `null`.
+  ///
+  /// It runs on a converted value and on a declared default alike, and
+  /// throws a `ConversionException` for one it refuses. This is what holds a
+  /// default to `choice` or `path(mustExist: true)`.
+  final void Function(Object? value)? constraint;
 
   /// The rules the converted value has to satisfy.
   final List<void Function(ValidationScope scope, Object? value)> validators;
@@ -91,6 +99,7 @@ final class ParameterDraft {
     converter: converter,
     typeName: typeName,
     isFlag: isFlag,
+    constraint: constraint,
     validators: validators,
     environmentEnabled: false,
     isSensitive: isSensitive,
@@ -104,8 +113,20 @@ final class ParameterDraft {
   ParameterDraft withDescription(String text) => _copy(description: text);
 
   /// Returns this draft splitting each occurrence on [delimiter].
-  ParameterDraft withSplit(String delimiter) =>
-      _copy(splitDelimiter: delimiter);
+  ///
+  /// Throws an [ArgumentError] if [delimiter] is empty, which would split
+  /// between every character.
+  ParameterDraft withSplit(String delimiter) {
+    if (delimiter.isEmpty) {
+      throw ArgumentError.value(
+        delimiter,
+        'delimiter',
+        'A split delimiter must not be empty; a parameter that takes one '
+            'value per occurrence is multiple() rather than split("")',
+      );
+    }
+    return _copy(splitDelimiter: delimiter);
+  }
 
   /// Returns this draft answering to its `--no-` names as well.
   ParameterDraft asNegatable() => _copy(isNegatable: true);
@@ -114,27 +135,42 @@ final class ParameterDraft {
   ParameterDraft asDeprecated(String advice) => _copy(deprecation: advice);
 
   /// Returns this draft converting with [newConverter] to the type named
-  /// [newTypeName].
+  /// [newTypeName], checking each value with [newConstraint].
+  ///
+  /// The constraint of the previous type is dropped, since it was written
+  /// against that type.
   ///
   /// Throws a [StateError] if validation was already declared, since a rule
   /// written against the previous type cannot apply to the new one.
   ParameterDraft retyped(
     String newTypeName,
-    Object? Function(String raw) newConverter,
-  ) {
+    Object? Function(String raw) newConverter, [
+    void Function(Object? value)? newConstraint,
+  ]) {
     if (validators.isNotEmpty) {
       throw StateError(
         'Parameter ${names.first} declares validation before its type is '
         'fixed. Move validate() after the conversion.',
       );
     }
-    return _copy(typeName: newTypeName, converter: newConverter);
+    return ParameterDraft(
+      names: names,
+      converter: newConverter,
+      typeName: newTypeName,
+      isFlag: isFlag,
+      constraint: newConstraint,
+      environmentVariable: environmentVariable,
+      environmentEnabled: environmentEnabled,
+      isSensitive: isSensitive,
+      description: description,
+      splitDelimiter: splitDelimiter,
+      isNegatable: isNegatable,
+      deprecation: deprecation,
+    );
   }
 
   /// Returns this draft with the given values replaced.
   ParameterDraft _copy({
-    Object? Function(String raw)? converter,
-    String? typeName,
     List<void Function(ValidationScope, Object?)>? validators,
     String? environmentVariable,
     bool? environmentEnabled,
@@ -145,9 +181,10 @@ final class ParameterDraft {
     String? deprecation,
   }) => ParameterDraft(
     names: names,
-    converter: converter ?? this.converter,
-    typeName: typeName ?? this.typeName,
+    converter: converter,
+    typeName: typeName,
     isFlag: isFlag,
+    constraint: constraint,
     validators: validators ?? this.validators,
     environmentVariable: environmentVariable ?? this.environmentVariable,
     environmentEnabled: environmentEnabled ?? this.environmentEnabled,

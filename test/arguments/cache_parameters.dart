@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// A schema declaring both `--cache` and `--no-cache` as flags of their own.
 final class CacheParameters extends Parameters {

@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 /// Runs [action], which is expected to fail because of what was passed.

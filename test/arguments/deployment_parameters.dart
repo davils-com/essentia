@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// The schema of a deployed service, deriving variables with the prefix
 /// `APP`.

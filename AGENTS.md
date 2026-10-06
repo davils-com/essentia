@@ -17,7 +17,7 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 
 | Path | Purpose |
 |---|---|
-| `lib/essentia.dart` | The web-safe public API: validation, DSL, events, identity, architecture, platform, scope functions |
+| `lib/essentia.dart` | The web-safe public API: validation, DSL, events, identity, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
 | `lib/arguments.dart` | Program parameters, which need `dart:io` |
 | `lib/src/` | Everything else; one directory per area, mirroring Arc's packages |
 | `api/essentia.api` | The recorded public API; `dart run inspectra api check` compares against it |
@@ -31,7 +31,8 @@ dart run tool/verify.dart
 ```
 
 Runs `dart format --set-exit-if-changed`, `dart analyze --fatal-infos`, `inspectra style` and
-`dart test`. Nothing is done until it is green. Then:
+`dart test` on the VM, in Chrome compiled to JavaScript and in Chrome compiled to WebAssembly.
+Nothing is done until it is green. Then:
 
 ```bash
 dart run inspectra check
@@ -55,6 +56,11 @@ Enforced by `dart analyze --fatal-infos` with `package:inspectra/lints/strict.ya
   share one file. A file of functions is named after its role.
 - `strict-casts`, `strict-inference` and `strict-raw-types` are on. No `dynamic` calls.
 - Runtime dependencies are limited to `meta`. Adding one needs a maintainer's approval.
+- Essentia runs on every Dart platform: the VM, Flutter, the web and WebAssembly. Nothing under
+  `lib/` imports `dart:io`, `dart:ffi` or another platform library directly; host access goes
+  through a conditional import (`host_system.dart`, `current_platform*.dart`), and a test that
+  needs `dart:io` is marked `@TestOn('vm')`. On the web an integer is a double, exact up to 2^53,
+  and bit operations are 32-bit: write `0x100000000`, never `1 << 32`.
 
 ## Porting rules
 

@@ -420,6 +420,7 @@ void main() {
           .topic(users)
           .subscribe((envelope) => seen.add(envelope.payload.userId));
       await subscription.awaitReady();
+      await _settle();
       await bus.drain();
       await subscription.join();
 
@@ -509,11 +510,12 @@ void main() {
       final Future<EventEnvelope<UserEvent>> awaited = bus
           .topic(users)
           .next((envelope) => envelope.payload is Deleted);
+      final Future<void> failed = expectLater(awaited, throwsStateError);
 
       await bus.topic(users).publish(const Registered('u-1'));
       await bus.drain();
 
-      await expectLater(awaited, throwsStateError);
+      await failed;
     });
 
     test('fails at once on a topic that is already closed', () async {

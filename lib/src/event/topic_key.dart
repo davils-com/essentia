@@ -45,20 +45,22 @@ final class TopicKey<T extends Event> {
     }
   }
 
-  /// The topic's name. Two keys naming the same topic are the same key.
+  /// The topic's name.
   final String name;
 
   /// The payload type, kept so that a bus can refuse a key that names one of
   /// its topics but disagrees about what it carries.
   Type get eventType => T;
 
-  /// Two keys are equal when they name the same topic.
+  /// Two keys are the same key when they name the same topic **and** agree
+  /// on what it carries, which is what a bus checks when it resolves one.
   @override
-  bool operator ==(Object other) => other is TopicKey && name == other.name;
+  bool operator ==(Object other) =>
+      other is TopicKey && name == other.name && eventType == other.eventType;
 
-  /// The hash of the name.
+  /// The hash of the name and the payload type.
   @override
-  int get hashCode => name.hashCode;
+  int get hashCode => Object.hash(name, eventType);
 
   /// Renders the key as `TopicKey(users: UserEvent)`.
   @override

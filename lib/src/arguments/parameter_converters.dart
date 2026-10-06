@@ -7,13 +7,12 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'dart:io';
-
 import 'package:essentia/src/arguments/application_mode.dart';
 import 'package:essentia/src/arguments/boolean_parser.dart';
 import 'package:essentia/src/arguments/conversion_exception.dart';
 import 'package:essentia/src/arguments/converter.dart';
 import 'package:essentia/src/arguments/duration_parser.dart';
+import 'package:essentia/src/arguments/host_system.dart';
 import 'package:essentia/src/arguments/parameter_builder.dart';
 
 /// The conversions a parameter declared as text can be given.
@@ -40,6 +39,20 @@ extension ParameterConverters on ParameterBuilder<String> {
   /// Throws a [StateError] if validation was already declared.
   ParameterBuilder<R> convert<R>(String typeName, Converter<R> converter) =>
       ParameterBuilder<R>(schema, draft.retyped(typeName, converter));
+
+  /// Converts the value with [converter], reporting it as [typeName], and
+  /// checks every converted value and every declared default with
+  /// [constraint].
+  ///
+  /// Returns a builder producing the converted type.
+  ParameterBuilder<R> _constrained<R>(
+    String typeName,
+    Converter<R> converter,
+    void Function(R value) constraint,
+  ) => ParameterBuilder<R>(
+    schema,
+    draft.retyped(typeName, converter, (value) => constraint(value as R)),
+  );
 
   /// Converts the value to an [int].
   ///
@@ -72,14 +85,17 @@ extension ParameterConverters on ParameterBuilder<String> {
 
   /// Restricts the value to one of [allowed], leaving it a [String].
   ///
+  /// The restriction holds for a declared default as well: a default that
+  /// is not one of [allowed] is reported by `load` like any other bad
+  /// value, under the default's origin.
+  ///
   /// Returns a builder producing one of the allowed values.
   ParameterBuilder<String> choice(List<String> allowed) {
     final accepted = List<String>.unmodifiable(allowed);
-    return convert<String>('choice', (raw) {
-      if (!accepted.contains(raw)) {
+    return _constrained<String>('choice', (raw) => raw, (value) {
+      if (!accepted.contains(value)) {
         throw ConversionException('is not one of ${accepted.join(', ')}');
       }
-      return raw;
     });
   }
 
@@ -109,7 +125,9 @@ extension ParameterConverters on ParameterBuilder<String> {
   ///
   /// The checks run as part of conversion, so a path that does not satisfy
   /// them is reported alongside every other parameter problem instead of
-  /// failing later when the program first opens it. [mustBeReadable],
+  /// failing later when the program first opens it. They apply to a
+  /// declared default too, which is the value used when nothing is given -
+  /// the case a check like [mustExist] exists for. [mustBeReadable],
   /// [mustBeDirectory] and [mustBeRegularFile] each imply [mustExist].
   ///
   /// Returns a builder producing paths.
@@ -118,37 +136,17 @@ extension ParameterConverters on ParameterBuilder<String> {
     bool mustBeReadable = false,
     bool mustBeDirectory = false,
     bool mustBeRegularFile = false,
-  }) => convert<String>('path', (raw) {
-    _checkPath(
-      raw,
+  }) => _constrained<String>(
+    'path',
+    (raw) => raw,
+    (path) => checkPath(
+      path,
       mustExist: mustExist,
       mustBeReadable: mustBeReadable,
       mustBeDirectory: mustBeDirectory,
       mustBeRegularFile: mustBeRegularFile,
-    );
-    return raw;
-  });
-
-  /// Converts the value to a [File], optionally checking what it points at.
-  ///
-  /// The checks are the ones of [path].
-  ///
-  /// Returns a builder producing files.
-  ParameterBuilder<File> file({
-    bool mustExist = false,
-    bool mustBeReadable = false,
-    bool mustBeDirectory = false,
-    bool mustBeRegularFile = false,
-  }) => convert<File>('file', (raw) {
-    _checkPath(
-      raw,
-      mustExist: mustExist,
-      mustBeReadable: mustBeReadable,
-      mustBeDirectory: mustBeDirectory,
-      mustBeRegularFile: mustBeRegularFile,
-    );
-    return File(raw);
-  });
+    ),
+  );
 
   /// Converts the value to a [Uri].
   ///
@@ -192,45 +190,4 @@ extension ParameterConverters on ParameterBuilder<String> {
               '${ApplicationMode.values.map((mode) => mode.value).join(', ')}',
             )),
       );
-}
-
-/// Checks what [path] points at.
-///
-/// Throws a [ConversionException] naming the first requirement it misses.
-void _checkPath(
-  String path, {
-  required bool mustExist,
-  required bool mustBeReadable,
-  required bool mustBeDirectory,
-  required bool mustBeRegularFile,
-}) {
-  final FileSystemEntityType type = FileSystemEntity.typeSync(path);
-  final bool needsToExist =
-      mustExist || mustBeReadable || mustBeDirectory || mustBeRegularFile;
-  if (needsToExist && type == FileSystemEntityType.notFound) {
-    throw const ConversionException('does not exist');
-  }
-  if (mustBeReadable && !_isReadable(path, type)) {
-    throw const ConversionException('is not readable');
-  }
-  if (mustBeDirectory && type != FileSystemEntityType.directory) {
-    throw const ConversionException('is not a directory');
-  }
-  if (mustBeRegularFile && type != FileSystemEntityType.file) {
-    throw const ConversionException('is not a regular file');
-  }
-}
-
-/// Whether [path], of [type], can be read, found out by reading it.
-bool _isReadable(String path, FileSystemEntityType type) {
-  try {
-    if (type == FileSystemEntityType.directory) {
-      Directory(path).listSync();
-      return true;
-    }
-    File(path).openSync().closeSync();
-    return true;
-  } on FileSystemException {
-    return false;
-  }
 }

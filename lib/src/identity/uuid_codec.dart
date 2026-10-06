@@ -81,14 +81,18 @@ String renderUuid(Uint8List bytes) {
 
 /// Explains why [text] could not be read as an identifier.
 ///
+/// The message never quotes [text]: an identifier is routinely a session
+/// token or a capability link, and a rejected one may be arbitrarily long.
+/// It names the length it got, or says that the text is not a well-formed
+/// identifier of a version Essentia mints, in under eighty characters.
+///
 /// Returns the message of the failure.
 @internal
 String uuidRefusal(String text) {
   if (text.length != uuidTextLength) {
-    return 'Not a UUID: "$text" is ${text.length} characters, '
-        'not $uuidTextLength';
+    return 'Not a UUID: ${text.length} characters, not $uuidTextLength';
   }
-  return 'Not a UUID of a version Essentia mints: "$text"';
+  return 'Not a well-formed UUID of a version Essentia mints';
 }
 
 /// Compares two identifiers by their bytes, read unsigned and most

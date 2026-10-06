@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// The parameters the example accepts.
 final class ExampleParameters extends Parameters {

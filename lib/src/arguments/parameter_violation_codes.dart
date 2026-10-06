@@ -66,4 +66,14 @@ abstract final class ParameterViolationCodes {
   /// This is the one code that is a warning: loading succeeds and the value
   /// is used.
   static const deprecated = ViolationCode('essentia.parameter.deprecated');
+
+  /// A value source failed while being asked for a value.
+  ///
+  /// Distinct from every other code here because it is not a problem with
+  /// what anybody passed: the arguments may be fine and the secret store
+  /// down. A program that matches on it can retry, or exit with a different
+  /// status than it would for a bad argument.
+  static const sourceUnavailable = ViolationCode(
+    'essentia.parameter.source-unavailable',
+  );
 }

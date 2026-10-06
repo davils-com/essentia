@@ -33,13 +33,20 @@ void main() {
     );
   });
 
-  test('two keys naming one topic are the same key, whatever they carry', () {
+  test('two keys are the same key when name and payload type agree', () {
+    final one = TopicKey<UserEvent>('users');
+
+    expect(one, TopicKey<UserEvent>('users'));
+    expect(one.hashCode, TopicKey<UserEvent>('users').hashCode);
+    expect(one, isNot(TopicKey<UserEvent>('audit')));
+  });
+
+  test('keys naming one topic with different payloads are different', () {
     final one = TopicKey<UserEvent>('users');
     final other = TopicKey<AuditEvent>('users');
 
-    expect(one, other);
-    expect(one.hashCode, other.hashCode);
-    expect(one, isNot(TopicKey<UserEvent>('audit')));
+    expect(one, isNot(other));
+    expect(<TopicKey<Event>>{one, other}, hasLength(2));
   });
 
   group('a blank name is refused where the key is written', () {

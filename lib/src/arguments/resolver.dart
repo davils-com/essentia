@@ -45,15 +45,21 @@ final class Resolver {
   final List<(int, List<int>)> _dependencies;
 
   /// Resolves every parameter from [lexed] and the values of [external],
-  /// which the environment and the value sources supplied by ordinal.
+  /// which the environment and the value sources supplied by ordinal,
+  /// reporting the [sourceFailures] of sources that could not answer
+  /// alongside.
   ///
   /// Returns the snapshot, or `null` when any error was found, together
   /// with every violation.
   (ParameterSnapshot?, List<ParameterViolation>) resolve(
     LexResult lexed,
-    Map<int, (String, ValueOrigin)> external,
-  ) {
-    final violations = <ParameterViolation>[...lexed.violations];
+    Map<int, (String, ValueOrigin)> external, [
+    List<ParameterViolation> sourceFailures = const <ParameterViolation>[],
+  ]) {
+    final violations = <ParameterViolation>[
+      ...lexed.violations,
+      ...sourceFailures,
+    ];
     final values = List<Object?>.filled(_specs.length, null);
     final origins = List<ValueOrigin?>.filled(_specs.length, null);
     final provided = List<bool>.filled(_specs.length, false);
@@ -131,10 +137,9 @@ final class Resolver {
         violations.add(MissingRequiredParameter(spec.info));
         return (null, null);
       case Cardinality.defaulted:
-        final Object? checked = _validate(
+        final Object? checked = _admitDefault(
           spec,
           spec.defaultValue,
-          ValueOrigin.defaulted,
           violations,
         );
         if (identical(checked, _noValue)) {
@@ -162,7 +167,7 @@ final class Resolver {
     return spec.collect(
       <Object?>[
         for (final Object? element in declared)
-          _validate(spec, element, ValueOrigin.defaulted, violations),
+          _admitDefault(spec, element, violations),
       ].where((element) => !identical(element, _noValue)).toList(),
     );
   }
@@ -193,16 +198,26 @@ final class Resolver {
 
   /// Splits each of [raws] on the delimiter of [spec], if it has one.
   ///
+  /// An empty piece, from a trailing delimiter or two in a row, is dropped
+  /// rather than handed to the converter.
+  ///
   /// Returns the pieces.
   List<String> _splitPieces(ParameterSpec spec, List<String> raws) {
     final String? delimiter = spec.splitDelimiter;
     if (delimiter == null) {
       return raws;
     }
-    return <String>[for (final raw in raws) ...raw.split(delimiter)];
+    return <String>[
+      for (final raw in raws)
+        ...raw.split(delimiter).where((piece) => piece.isNotEmpty),
+    ];
   }
 
   /// Converts and checks [raw].
+  ///
+  /// A converter that throws an [Exception] other than a
+  /// [ConversionException] is reported with a generic reason, because its
+  /// own message is not written for the report and may quote the value.
   ///
   /// Returns the value, or the marker of an unusable one.
   Object? _convertOne(
@@ -216,17 +231,100 @@ final class Resolver {
       converted = spec.converter(raw);
     } on ConversionException catch (failure) {
       violations.add(
-        ConversionFailure(
-          spec.info,
+        _conversionFailure(spec, origin, raw, failure.message, failure),
+      );
+      return _noValue;
+    } on Exception catch (failure) {
+      violations.add(
+        _conversionFailure(
+          spec,
           origin,
-          spec.info.isSensitive ? mask : raw,
-          failure.message,
+          raw,
+          'could not be read as ${spec.info.typeName}',
+          failure,
         ),
       );
       return _noValue;
     }
-    return _validate(spec, converted, origin, violations);
+    final Object? admitted = _constrain(
+      spec,
+      converted,
+      raw,
+      origin,
+      violations,
+    );
+    if (identical(admitted, _noValue)) {
+      return _noValue;
+    }
+    return _validate(spec, admitted, origin, violations);
   }
+
+  /// Holds the declared default [value] of [spec] to the constraint of its
+  /// conversion and to its rules, as if it had been given.
+  ///
+  /// Returns the value, or the marker of an unusable one.
+  Object? _admitDefault(
+    ParameterSpec spec,
+    Object? value,
+    List<ParameterViolation> violations,
+  ) {
+    final Object? admitted = _constrain(
+      spec,
+      value,
+      '$value',
+      ValueOrigin.defaulted,
+      violations,
+    );
+    if (identical(admitted, _noValue)) {
+      return _noValue;
+    }
+    return _validate(spec, admitted, ValueOrigin.defaulted, violations);
+  }
+
+  /// Runs the constraint of [spec] on [value], which is reported as
+  /// [rendered] if it is refused.
+  ///
+  /// Returns the value, or the marker of an unusable one.
+  Object? _constrain(
+    ParameterSpec spec,
+    Object? value,
+    String rendered,
+    ValueOrigin origin,
+    List<ParameterViolation> violations,
+  ) {
+    final void Function(Object? value)? constraint = spec.constraint;
+    if (constraint == null) {
+      return value;
+    }
+    try {
+      constraint(value);
+    } on ConversionException catch (failure) {
+      violations.add(
+        _conversionFailure(spec, origin, rendered, failure.message, failure),
+      );
+      return _noValue;
+    }
+    return value;
+  }
+
+  /// Reports that [raw] of [spec] from [origin] could not be used for
+  /// [reason], because of [cause].
+  ///
+  /// Returns the violation, with the value masked when the parameter is
+  /// sensitive.
+  ConversionFailure _conversionFailure(
+    ParameterSpec spec,
+    ValueOrigin origin,
+    String raw,
+    String reason,
+    Object cause,
+  ) => ConversionFailure(
+    spec.info,
+    origin,
+    spec.info.isSensitive ? mask : raw,
+    reason,
+    cause: cause,
+  );
 
   /// Runs every rule of [spec] on [value].
   ///

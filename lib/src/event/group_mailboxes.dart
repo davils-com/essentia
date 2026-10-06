@@ -54,8 +54,14 @@ final class GroupMailboxes {
   bool get isActive => _running > 0 && !_cancelled;
 
   /// Hands [envelope] to the worker of [partition], waiting for room.
+  ///
+  /// An envelope offered to a mailbox that closed under it is reported as
+  /// [DropReason.closed] rather than swallowed.
   Future<void> offer(int partition, EventEnvelope<Event> envelope) async {
-    await _mailboxes[partition].send(envelope);
+    final bool accepted = await _mailboxes[partition].send(envelope);
+    if (!accepted) {
+      _onDiscarded(envelope, DropReason.closed);
+    }
   }
 
   /// Stops taking envelopes; what is buffered is still handled.

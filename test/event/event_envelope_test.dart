@@ -73,11 +73,12 @@ void main() {
   });
 
   group('what it renders as', () {
-    test('the plain case names the topic and the payload', () {
+    test('the plain case names the topic and the payload type', () {
       final rendered = _envelope().toString();
 
       expect(rendered, contains('topic=users'));
-      expect(rendered, contains('payload=Registered(userId=u-42)'));
+      expect(rendered, contains('payload=Registered)'));
+      expect(rendered, isNot(contains('u-42')));
       expect(rendered, isNot(contains('key=')));
       expect(rendered, isNot(contains('headers=')));
       expect(rendered, isNot(contains('causationId=')));
@@ -94,6 +95,14 @@ void main() {
       expect(rendered, contains('key=u-42'));
       expect(rendered, contains('causationId=$cause'));
       expect(rendered, contains('headers={tenant=acme}'));
+    });
+
+    test("the payload's content is never rendered", () {
+      final rendered = _envelope(
+        payload: const Registered('user@example.invalid'),
+      ).toString();
+
+      expect(rendered, isNot(contains('user@example.invalid')));
     });
 
     test('a sensitive header is masked', () {

@@ -15,7 +15,12 @@ const steps = <(String, List<String>)>[
   ('Format', <String>['format', '--output=none', '--set-exit-if-changed', '.']),
   ('Analyze', <String>['analyze', '--fatal-infos']),
   ('Style', <String>['run', 'inspectra', 'style']),
-  ('Test', <String>['test']),
+  ('Test (VM)', <String>['test']),
+  ('Test (web)', <String>['test', '--platform', 'chrome']),
+  (
+    'Test (WebAssembly)',
+    <String>['test', '--platform', 'chrome', '--compiler', 'dart2wasm'],
+  ),
 ];
 
 /// Runs every verification step of the repository and stops at the first

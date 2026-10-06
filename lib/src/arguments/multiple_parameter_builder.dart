@@ -99,7 +99,13 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
 
   /// Splits each occurrence on [delimiter] before converting the pieces.
   ///
+  /// [delimiter] is matched literally. An empty piece - from a trailing
+  /// delimiter, or two in a row - is dropped rather than converted.
+  ///
   /// Returns a builder that splits its occurrences.
+  ///
+  /// Throws an [ArgumentError] if [delimiter] is empty, which would split
+  /// between every character.
   MultipleParameterBuilder<T> split(String delimiter) =>
       MultipleParameterBuilder<T>(
         schema,

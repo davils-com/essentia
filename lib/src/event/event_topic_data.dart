@@ -12,6 +12,7 @@ import 'package:essentia/src/event/event_error_handler.dart';
 import 'package:essentia/src/event/event_interceptor.dart';
 import 'package:essentia/src/event/event_listener.dart';
 import 'package:essentia/src/event/event_topic.dart';
+import 'package:essentia/src/event/event_topic_defaults.dart';
 import 'package:essentia/src/event/event_violation_codes.dart';
 import 'package:essentia/src/event/overflow_policy.dart';
 import 'package:essentia/src/validation/validatable.dart';
@@ -110,6 +111,22 @@ final class EventTopicData<T extends Event> implements Validatable {
         code: EventViolationCodes.invalidReplay,
       );
     }
+    if (replay > EventTopicDefaults.maxReplay) {
+      scope.fail(
+        'must not exceed ${EventTopicDefaults.maxReplay}, because every '
+        'replayed envelope is held for as long as the topic exists',
+        property: 'replay',
+        code: EventViolationCodes.invalidReplay,
+      );
+    }
+    if (bufferCapacity > EventTopicDefaults.maxBufferCapacity) {
+      scope.fail(
+        'must not exceed ${EventTopicDefaults.maxBufferCapacity}, because a '
+        'buffer that large holds back no publisher',
+        property: 'bufferCapacity',
+        code: EventViolationCodes.invalidBuffer,
+      );
+    }
     if (bufferCapacity < 0) {
       scope.fail(
         'must not be negative',
@@ -131,6 +148,15 @@ final class EventTopicData<T extends Event> implements Validatable {
     if (partitions < 1) {
       scope.fail(
         'must be at least one',
+        property: 'partitions',
+        code: EventViolationCodes.invalidPartitions,
+      );
+    }
+    if (partitions > EventTopicDefaults.maxPartitions) {
+      scope.fail(
+        'must not exceed ${EventTopicDefaults.maxPartitions}, because every '
+        'partition is a mailbox and a task, and every consumer group adds '
+        'that many again',
         property: 'partitions',
         code: EventViolationCodes.invalidPartitions,
       );

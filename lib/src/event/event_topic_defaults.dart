@@ -30,6 +30,18 @@ final class EventTopicDefaults {
     this.onError = ignoreError,
   });
 
+  /// The most envelopes a topic may replay, because every replayed
+  /// envelope is held for as long as the topic exists.
+  static const maxReplay = 1048576;
+
+  /// The largest buffer a partition may have, because a buffer that large
+  /// holds back no publisher.
+  static const maxBufferCapacity = 1048576;
+
+  /// The most partitions a topic may have, because every partition is a
+  /// mailbox and a task, and every consumer group adds that many again.
+  static const maxPartitions = 1024;
+
   /// How many envelopes one partition holds unless something else is
   /// declared.
   static const defaultBufferCapacity = 64;

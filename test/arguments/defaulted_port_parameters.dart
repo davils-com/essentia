@@ -7,7 +7,6 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
 import 'package:essentia/essentia.dart';
 
 /// A schema whose ports fall back to defaults that are checked by the same

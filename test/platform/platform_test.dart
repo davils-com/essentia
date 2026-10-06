@@ -246,6 +246,28 @@ void main() {
     test('it is a cross product, so it holds a pair nobody builds for', () {
       expect(Platform.identifiers, contains('windows-wasm'));
     });
+
+    test('the set refuses to be cleared and still names every platform', () {
+      expect(Platform.identifiers.clear, throwsUnsupportedError);
+
+      expect(Platform.identifiers, hasLength(Platform.entries.length));
+      expect(Platform.identifiers, contains('linux-x86_64'));
+    });
+
+    test('the set refuses a name Essentia does not resolve', () {
+      expect(
+        () => Platform.identifiers.add('solaris-sparc'),
+        throwsUnsupportedError,
+      );
+
+      expect(Platform.identifiers, isNot(contains('solaris-sparc')));
+    });
+
+    test('the entries refuse to be changed', () {
+      expect(Platform.entries.clear, throwsUnsupportedError);
+
+      expect(Platform.entries, isNotEmpty);
+    });
   });
 
   test('the current machine is read once and held', () {

@@ -27,6 +27,10 @@ final class TopicPartition {
     pump = _pump();
   }
 
+  /// How many envelopes one publication that will not wait may evict
+  /// before it gives up and is refused as an overflow itself.
+  static const _evictionAttempts = 16;
+
   /// The buffered envelopes.
   final Mailbox<EventEnvelope<Event>> _buffer;
 
@@ -68,21 +72,37 @@ final class TopicPartition {
   /// Returns `true` when it is in, `false` when it was refused, in which
   /// case it has been reported as discarded.
   bool offer(EventEnvelope<Event> envelope) {
-    while (true) {
-      switch (_buffer.trySend(envelope)) {
-        case MailboxOffer.accepted:
-          return true;
-        case MailboxOffer.closed:
-          _onDiscarded(envelope, DropReason.closed);
-          return false;
-        case MailboxOffer.full:
-          final EventEnvelope<Event>? evicted = _evictOldest();
-          if (evicted == null) {
-            _onDiscarded(envelope, DropReason.overflow);
-            return false;
-          }
-          _onDiscarded(evicted, DropReason.overflow);
+    for (var attempt = 0; attempt < _evictionAttempts; attempt++) {
+      final bool? outcome = _attempt(envelope);
+      if (outcome != null) {
+        return outcome;
       }
+    }
+    _onDiscarded(envelope, DropReason.overflow);
+    return false;
+  }
+
+  /// Tries once to put [envelope] into the lane, evicting the oldest one
+  /// when the policy allows it.
+  ///
+  /// Returns `true` when it is in, `false` when it was refused and
+  /// reported, and `null` when an envelope was evicted to make room and the
+  /// attempt should be repeated.
+  bool? _attempt(EventEnvelope<Event> envelope) {
+    switch (_buffer.trySend(envelope)) {
+      case MailboxOffer.accepted:
+        return true;
+      case MailboxOffer.closed:
+        _onDiscarded(envelope, DropReason.closed);
+        return false;
+      case MailboxOffer.full:
+        final EventEnvelope<Event>? evicted = _evictOldest();
+        if (evicted == null) {
+          _onDiscarded(envelope, DropReason.overflow);
+          return false;
+        }
+        _onDiscarded(evicted, DropReason.overflow);
+        return null;
     }
   }
 

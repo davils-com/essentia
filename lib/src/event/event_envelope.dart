@@ -10,6 +10,7 @@
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_headers.dart';
 import 'package:essentia/src/identity/uuid.dart';
+import 'package:essentia/src/principal/principal.dart';
 import 'package:meta/meta.dart';
 
 /// One event of type [T] as it travelled, with everything the bus knows
@@ -32,6 +33,7 @@ final class EventEnvelope<T extends Event> {
     required this.causationId,
     required this.headers,
     required this.payload,
+    this.principal,
   });
 
   /// What identifies this envelope, and when it happened.
@@ -71,6 +73,14 @@ final class EventEnvelope<T extends Event> {
   /// The event itself, as the publisher passed it.
   final T payload;
 
+  /// Who published it, or `null` when nobody was established.
+  ///
+  /// Read from the zone of the publishing code, and put back into the zone
+  /// of every consumer while it handles this envelope, so a consumer can
+  /// ask `currentPrincipal()` who caused what it is handling, and anything
+  /// it publishes in turn carries the same caller on.
+  final Principal? principal;
+
   /// When this was published, to millisecond resolution, in UTC.
   ///
   /// Read from [id] rather than captured beside it, so that the order
@@ -93,6 +103,7 @@ final class EventEnvelope<T extends Event> {
     causationId: causationId,
     headers: headers,
     payload: payload as R,
+    principal: principal,
   );
 
   /// Two envelopes are equal when their identifiers are.
@@ -103,14 +114,26 @@ final class EventEnvelope<T extends Event> {
   @override
   int get hashCode => id.hashCode;
 
-  /// Renders the envelope with its identity, its ordering, its cause, its
-  /// headers with sensitive values masked, and its payload.
+  /// Renders the envelope as a log line: its identity, where it travelled
+  /// and what was attached, and the **type** of its payload rather than its
+  /// content.
+  ///
+  /// This is what a listener's `onDropped` or `onFailed` ends up logging,
+  /// at whatever rate a saturated topic discards envelopes. A payload is
+  /// domain data, and printing it would send that to a log with the log's
+  /// retention rather than the record's. Sensitive headers are masked as
+  /// they are everywhere, and the [principal] is named by its id alone,
+  /// since its attributes may be personal data. Read [payload] where its
+  /// content is wanted.
   @override
   String toString() {
     final orderedUnder = key == null ? '' : ', key=$key';
     final causedBy = causationId == null ? '' : ', causationId=$causationId';
     final carried = headers.isEmpty ? '' : ', headers=$headers';
+    final publishedBy = principal == null
+        ? ''
+        : ', publishedBy=${principal?.id}';
     return 'EventEnvelope(id=$id, topic=$topic$orderedUnder$causedBy'
-        '$carried, payload=$payload)';
+        '$carried$publishedBy, payload=${payload.runtimeType})';
   }
 }

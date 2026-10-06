@@ -14,10 +14,11 @@ import 'package:meta/meta.dart';
 
 /// Declares a parameter of type [T] that falls back to a fixed value.
 ///
-/// The value reads as `T`. The default is taken as given: it is neither
-/// converted nor checked by a converter, because it was written in Dart
-/// rather than typed by a user. Rules declared through [validate] do apply
-/// to it.
+/// The value reads as `T`. The default is not converted, because it was
+/// written in Dart rather than typed by a user, but it is held to the
+/// constraint its conversion installed - the allowed values of `choice`,
+/// the checks of `path` and `file` - and to the rules declared through
+/// [validate].
 final class DefaultedParameterBuilder<T> extends DeclaredParameter<T> {
   /// Creates the builder of [draft] on [schema], falling back to
   /// [_fallback].

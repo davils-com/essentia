@@ -94,8 +94,12 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
 
   /// Supplies [value] for when no source provides one.
   ///
-  /// The default is taken as given: it is neither converted nor validated,
-  /// because it was written in Dart rather than typed by a user.
+  /// The default is not converted, because it was written in Dart rather
+  /// than typed by a user, but it is held to the same checks as a given
+  /// value: the constraint a conversion such as `choice` or
+  /// `path(mustExist: true)` installed, and every rule declared through
+  /// [validate]. A default that fails one is reported by `load` under the
+  /// default's origin.
   ///
   /// Returns a builder for a parameter that always has a value.
   DefaultedParameterBuilder<T> defaultsTo(T value) =>
@@ -111,9 +115,16 @@ final class ParameterBuilder<T> extends DeclaredParameter<T?> {
   /// Collects every occurrence and additionally splits each one on
   /// [delimiter].
   ///
-  /// This is what turns `--tag=a,b --tag=c` into three values.
+  /// This is what turns `--tag=a,b --tag=c` into three values. [delimiter]
+  /// is matched literally. An empty piece - from a trailing delimiter, or
+  /// two in a row - is dropped rather than converted, so `--tag=a,b,` is
+  /// two values.
   ///
   /// Returns a builder whose value is a list.
+  ///
+  /// Throws an [ArgumentError] if [delimiter] is empty, which would split
+  /// between every character; a parameter that takes one value per
+  /// occurrence is [multiple].
   MultipleParameterBuilder<T> split(String delimiter) =>
       MultipleParameterBuilder<T>(schema, draft.withSplit(delimiter), null);
 }

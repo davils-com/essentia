@@ -9,7 +9,7 @@
 
 import 'dart:math';
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 import 'failure_of.dart';

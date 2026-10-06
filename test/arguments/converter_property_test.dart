@@ -9,7 +9,7 @@
 
 import 'dart:math';
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 import 'colour.dart';
@@ -32,11 +32,20 @@ const _units = <(String, int)>[('d', 86400), ('h', 3600), ('m', 60), ('s', 1)];
 TypedParameters _load(String argument) =>
     TypedParameters()..load(<String>[argument], environment: _nothing);
 
-/// Draws an integer from the whole 64-bit range from [random].
+/// The largest magnitude an integer has on every platform: on the web an
+/// integer is a double, exact up to 2^53.
+const _largestExactInteger = 0x1FFFFFFFFFFFFF;
+
+/// Draws an integer of either sign whose magnitude is exact on every
+/// platform from [random].
 ///
 /// Returns the integer.
-int _randomInteger(Random random) =>
-    (random.nextInt(1 << 32) << 32) | random.nextInt(1 << 32);
+int _randomInteger(Random random) {
+  final int magnitude =
+      (random.nextInt(0x200000) * 0x100000000 + random.nextInt(0xFFFFFFFF)) %
+      _largestExactInteger;
+  return random.nextBool() ? magnitude : -magnitude;
+}
 
 /// Draws a decimal of widely varying magnitude and either sign from
 /// [random].
@@ -104,7 +113,10 @@ void main() {
     test('an integer beyond 32 bits', () {
       final random = Random(2);
       for (var round = 0; round < _cases; round++) {
-        final int value = _randomInteger(random) | (1 << 40);
+        final int drawn = _randomInteger(random);
+        final int value = drawn.isNegative
+            ? drawn ~/ 2 - 0x10000000000
+            : drawn ~/ 2 + 0x10000000000;
         expect(_load('--size=$value').size.value, value);
       }
     });

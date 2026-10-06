@@ -9,7 +9,7 @@
 
 import 'dart:io';
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// A schema whose paths are checked against the file system.
 final class PathParameters extends Parameters {

@@ -56,6 +56,20 @@ final class LexState {
     _violations.add(UnknownArgument(token, closestName(token, _knownNames)));
   }
 
+  /// Records [token], a bundle of short names of which [letter] is not
+  /// declared, so that none of them is applied.
+  void rejectBundle(String letter, String token) {
+    if (_policy == UnknownArgumentPolicy.collect) {
+      _unknown.add(token);
+      return;
+    }
+    if (letter.length == token.length) {
+      _violations.add(UnknownArgument(letter, null));
+      return;
+    }
+    _violations.add(UnknownArgument(letter, null, bundle: token));
+  }
+
   /// Records [token], a value with no parameter, at [position].
   void rejectValue(String token, int position) {
     if (_policy == UnknownArgumentPolicy.collect) {

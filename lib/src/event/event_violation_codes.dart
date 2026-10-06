@@ -44,4 +44,13 @@ abstract final class EventViolationCodes {
   static const keyWithoutPartitions = ViolationCode(
     'essentia.event.key-without-partitions',
   );
+
+  /// A bus-wide default was set, or an interceptor added, after a topic had
+  /// been declared.
+  ///
+  /// A warning: the declaration is valid, but a default reaches only the
+  /// topics declared after it, so the ones above keep what was in force
+  /// where they were written. The usual symptom is a listener meant for
+  /// every topic that is told about none of the early ones.
+  static const lateDefault = ViolationCode('essentia.event.late-default');
 }

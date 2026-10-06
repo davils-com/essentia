@@ -51,6 +51,23 @@ void main() {
     });
   });
 
+  group('also', () {
+    test('returns the value itself after the side effect', () {
+      final seen = <int>[];
+
+      final int value = 7.also(seen.add);
+
+      expect(value, 7);
+      expect(seen, <int>[7]);
+    });
+
+    test('keeps the very same instance', () {
+      final value = <int>[1];
+
+      expect(identical(value.also((_) {}), value), isTrue);
+    });
+  });
+
   group('let', () {
     test('returns what the block returns', () {
       expect('staging'.let((it) => it.length), 7);

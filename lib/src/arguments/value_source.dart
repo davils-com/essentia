@@ -20,6 +20,13 @@ import 'package:essentia/src/arguments/parameter_info.dart';
 /// parameters still without a value, so the first source that answers
 /// wins. A source is asked once per parameter during loading and never
 /// again.
+///
+/// A source that fails - a timeout, a refused connection, a response it
+/// cannot parse - is an operational condition rather than a problem with
+/// the arguments, and it is reported as one: an [Exception] it throws is
+/// caught, and the parameter gets a violation coded
+/// `ParameterViolationCodes.sourceUnavailable`, alongside every other
+/// problem the load found. Later sources are still asked.
 abstract interface class ValueSource {
   /// The name this source is reported under when a value it supplied turns
   /// out to be unusable.
@@ -31,5 +38,8 @@ abstract interface class ValueSource {
   /// conversion and validation as one passed on the command line.
   ///
   /// Returns the value, or `null` when this source does not have one.
+  ///
+  /// Throws any [Exception] when the source cannot answer; it is reported
+  /// rather than propagated.
   Future<String?> read(ParameterInfo parameter);
 }

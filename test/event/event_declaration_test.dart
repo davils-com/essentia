@@ -86,6 +86,51 @@ void main() {
     expect(topics.last.partitions, 16);
   });
 
+  test('a default set after a topic produces a warning naming it', () {
+    final ValidationReport report = _declare((it) {
+      it
+        ..topic(TopicKey<UserEvent>('users'))
+        ..listener = RecordingListener();
+    }).validate();
+
+    expect(report.isValid, isTrue);
+    final Violation warning = report.warnings.single;
+    expect(warning.code, EventViolationCodes.lateDefault);
+    expect(warning.path.toString(), 'topics');
+    expect(
+      warning.message,
+      '"listener" was set after a topic was declared and does not reach the '
+      'topics above it',
+    );
+  });
+
+  test('a default set before every topic produces no warning', () {
+    final ValidationReport report = _declare((it) {
+      it
+        ..listener = RecordingListener()
+        ..partitions = 2
+        ..topic(TopicKey<UserEvent>('users'), (it) => it.requiresKey = true);
+    }).validate();
+
+    expect(report.violations, isEmpty);
+  });
+
+  test('an interceptor added after a topic produces a warning, once however '
+      'often it happens', () {
+    final ValidationReport report = _declare((it) {
+      it
+        ..topic(TopicKey<UserEvent>('users'))
+        ..intercept((_, _, proceed) => proceed())
+        ..intercept((_, _, proceed) => proceed());
+    }).validate();
+
+    expect(
+      report.warnings.single.message,
+      '"intercept" was set after a topic was declared and does not reach the '
+      'topics above it',
+    );
+  });
+
   test('topics keep the order they were declared in', () {
     final EventBusBuilder builder = _declare((it) {
       it

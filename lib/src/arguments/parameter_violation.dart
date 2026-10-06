@@ -32,6 +32,10 @@ import 'package:meta/meta.dart';
 /// For a parameter, [path] is where the reader has to go and fix
 /// something, which is not always the parameter itself: a value that
 /// arrived through `APP_PORT` is reported as `APP_PORT`.
+///
+/// A violation is a report, not a value: members are matched on by type or
+/// by [code], and compared by identity. Its [ValueOrigin], by contrast, is a
+/// value and compares by content.
 @immutable
 sealed class ParameterViolation implements Violation {
   /// Creates a violation.
@@ -99,17 +103,27 @@ final class MissingParameterValue extends ParameterViolation {
 }
 
 /// A token was passed that matches no declared parameter.
+///
+/// A bundle of short flags is one token and is read as one decision, so a
+/// bundle with an undeclared letter in it is refused whole: [token] is that
+/// letter, [bundle] is the token it was part of, and nothing in the bundle
+/// is applied - not even the declared letters before it.
 final class UnknownArgument extends ParameterViolation {
   /// Creates the violation for [token], with the closest declared name as
-  /// [suggestion].
+  /// [suggestion], and the [bundle] of short flags it was part of.
   @internal
-  const UnknownArgument(this.token, this.suggestion);
+  const UnknownArgument(this.token, this.suggestion, {this.bundle});
 
-  /// The token as it appeared on the command line.
+  /// The token as it appeared on the command line, or the one undeclared
+  /// letter of a bundle.
   final String token;
 
   /// The closest declared name, or `null` when nothing was close enough.
   final String? suggestion;
+
+  /// The bundle of short flags [token] was part of, or `null` when it stood
+  /// on its own.
+  final String? bundle;
 
   /// The [token].
   @override
@@ -119,9 +133,14 @@ final class UnknownArgument extends ParameterViolation {
   @override
   ViolationCode get code => ParameterViolationCodes.unknownArgument;
 
-  /// That the token is unknown, and what was probably meant.
+  /// That the token is unknown, and what was probably meant or which
+  /// bundle was not applied because of it.
   @override
   String get message {
+    final String? enclosing = bundle;
+    if (enclosing != null) {
+      return 'is not a known parameter, so nothing in $enclosing was applied';
+    }
     final String? candidate = suggestion;
     if (candidate == null) {
       return 'is not a known parameter';
@@ -194,9 +213,15 @@ final class StrayValue extends ParameterViolation {
 /// A value was present but its converter rejected it.
 final class ConversionFailure extends ParameterViolation {
   /// Creates the violation for [value] of [parameter] from [origin],
-  /// rejected for [reason].
+  /// rejected for [reason], with what the converter threw as [cause].
   @internal
-  const ConversionFailure(this.parameter, this.origin, this.value, this.reason);
+  const ConversionFailure(
+    this.parameter,
+    this.origin,
+    this.value,
+    this.reason, {
+    this.cause,
+  });
 
   /// The parameter the value was resolved for.
   final ParameterInfo parameter;
@@ -209,6 +234,13 @@ final class ConversionFailure extends ParameterViolation {
 
   /// What the converter expected.
   final String reason;
+
+  /// What the converter threw, kept for diagnosis and never rendered.
+  ///
+  /// A converter's own exception is not written for this report and may
+  /// quote the value it rejected, which is why only [reason] reaches
+  /// [message]. `null` when the violation was created without one.
+  final Object? cause;
 
   /// Where the value came from.
   @override
@@ -225,16 +257,30 @@ final class ConversionFailure extends ParameterViolation {
 
 /// A value converted cleanly but failed a validation rule declared for the
 /// parameter.
+///
+/// The rule wrote [detail], and Essentia cannot mask a string somebody else
+/// composed - a rule on a sensitive parameter that says
+/// `it.fail("'$value' is not a valid token")` would put the secret in the
+/// report. So for a parameter declared sensitive, [message] is a fixed
+/// sentence and [detail] is not rendered. The code still travels, so a
+/// program can still match on what went wrong, and [detail] stays
+/// reachable for a caller who deliberately wants it.
 final class ValidationFailure extends ParameterViolation {
-  /// Creates the violation of [parameter] with the value from [origin].
+  /// Creates the violation of [parameter] with the value from [origin],
+  /// which the rule described as [detail].
   @internal
   const ValidationFailure(
     this.parameter,
     this.origin,
-    this.message, {
+    this.detail, {
     this.code = ParameterViolationCodes.validationFailed,
     this.severity = Severity.error,
   });
+
+  /// What a sensitive parameter's failed rule is reported as.
+  static const _withheldDetail =
+      'failed validation - the detail is withheld because the parameter is '
+      'sensitive';
 
   /// The parameter the value was resolved for.
   final ParameterInfo parameter;
@@ -242,9 +288,20 @@ final class ValidationFailure extends ParameterViolation {
   /// Where the value came from.
   final ValueOrigin origin;
 
-  /// What the rule said.
+  /// What the rule reported, verbatim.
+  ///
+  /// Rendered only for a parameter that is not sensitive.
+  final String detail;
+
+  /// What the rule said, or a fixed sentence when the parameter is
+  /// sensitive.
   @override
-  final String message;
+  String get message {
+    if (parameter.isSensitive) {
+      return _withheldDetail;
+    }
+    return detail;
+  }
 
   /// The code the rule reported under.
   @override
@@ -257,6 +314,41 @@ final class ValidationFailure extends ParameterViolation {
   /// Where the value came from.
   @override
   ViolationPath get path => ViolationPath.of(origin.label(parameter));
+}
+
+/// A value source threw while being asked for a value.
+///
+/// Reported under the source's name rather than as a bad value, because
+/// nothing about the arguments has to be wrong for it to happen. The
+/// exception itself is kept in [cause] and not rendered: a transport
+/// error's message is not written for this report.
+final class SourceUnavailable extends ParameterViolation {
+  /// Creates the violation for [parameter], which the source [sourceName]
+  /// failed to read with [cause].
+  @internal
+  const SourceUnavailable(this.parameter, this.sourceName, this.cause);
+
+  /// The parameter the source was asked about.
+  final ParameterInfo parameter;
+
+  /// The name of the source that failed.
+  final String sourceName;
+
+  /// What the source threw, kept for diagnosis and never rendered.
+  final Object cause;
+
+  /// The parameter's primary name and the source: `--token (from vault)`.
+  @override
+  ViolationPath get path =>
+      ViolationPath.of(ExternalOrigin(sourceName).label(parameter));
+
+  /// [ParameterViolationCodes.sourceUnavailable].
+  @override
+  ViolationCode get code => ParameterViolationCodes.sourceUnavailable;
+
+  /// That the value could not be read because the source failed.
+  @override
+  String get message => 'could not be read, because the source failed';
 }
 
 /// A single-valued parameter was passed more than once.

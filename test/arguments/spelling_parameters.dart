@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 
 /// A schema whose assignments are spelt in every legal way, deriving
 /// variables with the prefix `APP`.

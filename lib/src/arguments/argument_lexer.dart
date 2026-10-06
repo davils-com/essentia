@@ -126,17 +126,21 @@ final class ArgumentLexer {
 
   /// Reads the short names bundled at [index].
   ///
+  /// A bundle is one decision: when one of its letters is not declared,
+  /// none of them is applied.
+  ///
   /// Returns the index of the next argument to read.
   int _readShort(List<String> argv, int index, LexState state) {
     final String token = argv[index];
     final String body = token.substring(_shortPrefix.length);
+    final String? undeclared = _firstUndeclaredLetter(body);
+    if (undeclared != null) {
+      state.rejectBundle(undeclared, token);
+      return index + 1;
+    }
     for (var position = 0; position < body.length; position++) {
       final name = '$_shortPrefix${body[position]}';
-      final NameMatch? match = _matches[name];
-      if (match == null) {
-        state.reject(name);
-        return index + 1;
-      }
+      final NameMatch match = _matches[name]!;
       final String remainder = body.substring(position + 1);
       final ParameterSpec spec = match.spec;
       if (!spec.info.isFlag) {
@@ -149,6 +153,35 @@ final class ArgumentLexer {
       state.record(spec, 'true', token);
     }
     return index + 1;
+  }
+
+  /// Finds the first letter of the bundle [body] that names no parameter,
+  /// up to where the bundle ends in a value.
+  ///
+  /// Returns the letter as a short name, or `null` when every letter is
+  /// declared.
+  String? _firstUndeclaredLetter(String body) {
+    for (var position = 0; position < body.length; position++) {
+      final name = '$_shortPrefix${body[position]}';
+      final NameMatch? match = _matches[name];
+      if (match == null) {
+        return name;
+      }
+      if (_endsTheBundle(match, body, position)) {
+        return null;
+      }
+    }
+    return null;
+  }
+
+  /// Whether the letter at [position] of [body], matching [match], is the
+  /// last one of the bundle because what follows it is a value.
+  static bool _endsTheBundle(NameMatch match, String body, int position) {
+    if (!match.spec.info.isFlag) {
+      return true;
+    }
+    final int next = position + 1;
+    return next < body.length && body[next] == _valueSeparator;
   }
 
   /// Records the value of the short name [name] at [index], attached as

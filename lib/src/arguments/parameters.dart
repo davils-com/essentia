@@ -7,13 +7,12 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'dart:io';
-
 import 'package:essentia/src/arguments/argument_lexer.dart';
 import 'package:essentia/src/arguments/boolean_parser.dart';
 import 'package:essentia/src/arguments/cardinality.dart';
 import 'package:essentia/src/arguments/declared_parameter.dart';
 import 'package:essentia/src/arguments/flag_builder.dart';
+import 'package:essentia/src/arguments/host_system.dart';
 import 'package:essentia/src/arguments/lex_result.dart';
 import 'package:essentia/src/arguments/masking.dart';
 import 'package:essentia/src/arguments/parameter.dart';
@@ -80,6 +79,16 @@ import 'package:meta/meta.dart';
 /// Reading a parameter costs a list access. Nothing about it converts,
 /// validates or waits, which is why [load] is the only place that has to be
 /// called at a particular time.
+///
+/// A schema is loaded once. A second [load] or [loadFrom] is refused
+/// whether it comes after the first or while an asynchronous [loadFrom] is
+/// still waiting for a source; a load that failed may be retried.
+///
+/// Each parameter's environment variable belongs to that parameter alone.
+/// Two parameters that would read the same variable - whether named with
+/// `env` or derived, so that `--data-dir` and `--data_dir` would both read
+/// `APP_DATA_DIR` - are refused when the schema registers its parameters,
+/// as is a variable name no shell could export.
 abstract class Parameters {
   /// Creates a schema.
   ///
@@ -114,6 +123,13 @@ abstract class Parameters {
 
   /// What the load resolved, once it ran.
   ParameterSnapshot? _snapshot;
+
+  /// Whether a load is running or has succeeded, which is what refuses a
+  /// second one.
+  var _loadStarted = false;
+
+  /// What a well-formed environment variable name looks like.
+  static final _variableName = RegExp(r'^[A-Za-z_][A-Za-z0-9_]*$');
 
   /// Every parameter of the schema, in the order of the usage listing.
   ///
@@ -215,15 +231,21 @@ abstract class Parameters {
   ///
   /// Throws a [ParameterException] carrying every problem found if anything
   /// about the arguments is wrong, a [StateError] if the schema was already
-  /// loaded, and an [ArgumentError] if the schema itself is wrong.
+  /// loaded or is being loaded, and an [ArgumentError] if the schema itself
+  /// is wrong.
   void load(List<String> argv, {Map<String, String>? environment}) {
     final List<ParameterSpec> specs = _beginLoad();
-    final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
-    _finish(
-      specs,
-      lexed,
-      _environmentValues(specs, lexed, environment ?? Platform.environment),
-    );
+    try {
+      final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
+      _finish(
+        specs,
+        lexed,
+        _environmentValues(specs, lexed, environment ?? hostEnvironment()),
+        const <ParameterViolation>[],
+      );
+    } finally {
+      _loadStarted = _snapshot != null;
+    }
   }
 
   /// Resolves every declared parameter like [load], additionally consulting
@@ -233,7 +255,9 @@ abstract class Parameters {
   /// Precedence is command line, then environment, then each source in the
   /// order given, then the default. This one is asynchronous because a
   /// source may have to reach somewhere slow; the resolution itself is the
-  /// same work [load] does.
+  /// same work [load] does. A source that throws an [Exception] is reported
+  /// as [SourceUnavailable] for the parameter it was asked about, and the
+  /// sources after it are still asked.
   ///
   /// Throws what [load] throws.
   Future<void> loadFrom(
@@ -242,27 +266,32 @@ abstract class Parameters {
     Map<String, String>? environment,
   }) async {
     final List<ParameterSpec> specs = _beginLoad();
-    final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
-    final Map<int, (String, ValueOrigin)> external = _environmentValues(
-      specs,
-      lexed,
-      environment ?? Platform.environment,
-    );
-    for (final source in sources) {
-      for (final spec in specs) {
-        final bool resolved =
-            lexed.occurrences.containsKey(spec.ordinal) ||
-            external.containsKey(spec.ordinal);
-        if (resolved) {
-          continue;
-        }
-        final String? raw = await source.read(spec.info);
-        if (raw != null) {
-          external[spec.ordinal] = (raw, ExternalOrigin(source.name));
+    try {
+      final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
+      final Map<int, (String, ValueOrigin)> external = _environmentValues(
+        specs,
+        lexed,
+        environment ?? hostEnvironment(),
+      );
+      final failures = <ParameterViolation>[];
+      for (final source in sources) {
+        for (final spec in specs) {
+          final bool resolved =
+              lexed.occurrences.containsKey(spec.ordinal) ||
+              external.containsKey(spec.ordinal);
+          if (resolved) {
+            continue;
+          }
+          final String? raw = await _readFrom(source, spec, failures);
+          if (raw != null) {
+            external[spec.ordinal] = (raw, ExternalOrigin(source.name));
+          }
         }
       }
+      _finish(specs, lexed, external, failures);
+    } finally {
+      _loadStarted = _snapshot != null;
     }
-    _finish(specs, lexed, external);
   }
 
   /// Renders the listing of supported parameters.
@@ -304,17 +333,17 @@ abstract class Parameters {
     return snapshot.valueAt(ordinal);
   }
 
-  /// Checks that the schema can be loaded.
+  /// Checks that the schema can be loaded, and marks the load as started.
   ///
   /// Returns the registered parameters.
   ///
-  /// Throws a [StateError] if it was loaded already, and an [ArgumentError]
-  /// if a group names a parameter that is not declared.
+  /// Throws a [StateError] if it was loaded already or is being loaded, and
+  /// an [ArgumentError] if a group names a parameter that is not declared.
   List<ParameterSpec> _beginLoad() {
-    if (_snapshot != null) {
+    if (_loadStarted) {
       throw StateError(
-        'This schema was already loaded. Construct a new instance instead of '
-        'loading twice.',
+        'This schema was already loaded, or is being loaded. Construct a new '
+        'instance instead of loading twice.',
       );
     }
     final List<ParameterSpec> specs = _registered();
@@ -334,16 +363,36 @@ abstract class Parameters {
         'declared parameter. Group members are parameters listed in declared.',
       );
     }
+    _loadStarted = true;
     return specs;
   }
 
-  /// Resolves what was lexed and stores the snapshot.
+  /// Asks [source] for the value of [spec], recording a failure of the
+  /// source in [failures] instead of letting it end the load.
+  ///
+  /// Returns the value, or `null` when the source has none or failed.
+  static Future<String?> _readFrom(
+    ValueSource source,
+    ParameterSpec spec,
+    List<ParameterViolation> failures,
+  ) async {
+    try {
+      return await source.read(spec.info);
+    } on Exception catch (cause) {
+      failures.add(SourceUnavailable(spec.info, source.name, cause));
+      return null;
+    }
+  }
+
+  /// Resolves what was lexed, reporting the [sourceFailures] alongside, and
+  /// stores the snapshot.
   ///
   /// Throws a [ParameterException] if anything is wrong.
   void _finish(
     List<ParameterSpec> specs,
     LexResult lexed,
     Map<int, (String, ValueOrigin)> external,
+    List<ParameterViolation> sourceFailures,
   ) {
     final resolver = Resolver(
       specs,
@@ -360,7 +409,7 @@ abstract class Parameters {
       ],
     );
     final (ParameterSnapshot? snapshot, List<ParameterViolation> violations) =
-        resolver.resolve(lexed, external);
+        resolver.resolve(lexed, external, sourceFailures);
     if (snapshot == null) {
       throw ParameterException(violations, usage());
     }
@@ -388,7 +437,8 @@ abstract class Parameters {
   /// Returns the registered parameters.
   ///
   /// Throws an [ArgumentError] if a parameter is not declared on this
-  /// schema, is listed twice, or shares a name with another one.
+  /// schema, is listed twice, shares a name or an environment variable with
+  /// another one, or reads a malformed environment variable.
   List<ParameterSpec> _registered() {
     final List<ParameterSpec>? registered = _specs;
     if (registered != null) {
@@ -396,6 +446,7 @@ abstract class Parameters {
     }
     final specs = <ParameterSpec>[];
     final claimed = <String>{};
+    final claimedVariables = <String, String>{};
     for (final Parameter<Object?> parameter in declared) {
       final ParameterSpec spec = _specFor(parameter, specs.length);
       for (final String name in spec.matchableNames()) {
@@ -405,10 +456,38 @@ abstract class Parameters {
           );
         }
       }
+      _claimVariable(spec.info, claimedVariables);
       _ordinals[parameter] = spec.ordinal;
       specs.add(spec);
     }
     return _specs = List<ParameterSpec>.unmodifiable(specs);
+  }
+
+  /// Claims the environment variable of [info] in [claimed], which maps
+  /// every variable claimed so far to the primary name of its parameter.
+  ///
+  /// Throws an [ArgumentError] if the variable is not a well-formed name or
+  /// another parameter reads it already.
+  static void _claimVariable(ParameterInfo info, Map<String, String> claimed) {
+    final String? variable = info.environmentVariable;
+    if (variable == null) {
+      return;
+    }
+    if (!_variableName.hasMatch(variable)) {
+      throw ArgumentError(
+        'Parameter "${info.primaryName}" reads the environment variable '
+        '"$variable", which is not a well-formed variable name',
+      );
+    }
+    final String? previous = claimed[variable];
+    if (previous != null) {
+      throw ArgumentError(
+        'Parameters "$previous" and "${info.primaryName}" both read the '
+        'environment variable "$variable". A variable belongs to one '
+        'parameter; use env() or noEnv() to separate them.',
+      );
+    }
+    claimed[variable] = info.primaryName;
   }
 
   /// Builds the spec of [parameter] at [ordinal].
@@ -449,6 +528,7 @@ abstract class Parameters {
       ordinal: ordinal,
       cardinality: cardinality,
       converter: draft.converter,
+      constraint: draft.constraint,
       validators: draft.validators,
       defaultValue: defaultValue,
       splitDelimiter: draft.splitDelimiter,

@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 /// Tests looking an application mode up by the name it is written as.
@@ -36,6 +36,23 @@ void main() {
           'text',
           contains('development, test, staging, production'),
         ),
+      ),
+    );
+  });
+
+  test('the throwing lookup does not quote what it was given', () {
+    const placeholder = 'placeholder-not-a-mode';
+
+    expect(
+      () => ApplicationMode.byValue(placeholder),
+      throwsA(
+        isA<ArgumentError>()
+            .having((error) => error.invalidValue, 'invalidValue', isNull)
+            .having(
+              (error) => error.toString(),
+              'text',
+              isNot(contains(placeholder)),
+            ),
       ),
     );
   });

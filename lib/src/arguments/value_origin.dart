@@ -16,6 +16,10 @@ import 'package:meta/meta.dart';
 /// fix something. A bad value that arrived through `APP_PORT` is reported
 /// as `APP_PORT`, not as `--port`, because the command line is not where
 /// it is wrong.
+///
+/// Every member has value semantics, so an origin can be compared with `==`
+/// against one a caller builds: `origin == const ExternalOrigin('vault')`
+/// is true for a value that source supplied.
 @immutable
 sealed class ValueOrigin {
   /// Creates an origin.
@@ -50,6 +54,10 @@ final class CommandLineOrigin extends ValueOrigin {
   /// The hash shared by every command line origin.
   @override
   int get hashCode => (CommandLineOrigin).hashCode;
+
+  /// `CommandLineOrigin`.
+  @override
+  String toString() => 'CommandLineOrigin';
 }
 
 /// The value was read from an environment variable.
@@ -72,6 +80,10 @@ final class EnvironmentOrigin extends ValueOrigin {
   /// The hash of the variable.
   @override
   int get hashCode => variable.hashCode;
+
+  /// `EnvironmentOrigin(APP_PORT)`.
+  @override
+  String toString() => 'EnvironmentOrigin($variable)';
 }
 
 /// The value was read from a value source supplied by the application.
@@ -95,6 +107,10 @@ final class ExternalOrigin extends ValueOrigin {
   /// The hash of the source name.
   @override
   int get hashCode => sourceName.hashCode;
+
+  /// `ExternalOrigin(vault)`.
+  @override
+  String toString() => 'ExternalOrigin($sourceName)';
 }
 
 /// The value is the declared default rather than something that was passed
@@ -114,4 +130,8 @@ final class DefaultOrigin extends ValueOrigin {
   /// The hash shared by every default origin.
   @override
   int get hashCode => (DefaultOrigin).hashCode;
+
+  /// `DefaultOrigin`.
+  @override
+  String toString() => 'DefaultOrigin';
 }

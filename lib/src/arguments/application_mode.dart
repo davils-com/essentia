@@ -32,13 +32,14 @@ enum ApplicationMode {
 
   /// Returns the mode written as [value], ignoring capitalisation.
   ///
-  /// Throws an [ArgumentError] if nothing matches.
+  /// Throws an [ArgumentError] if nothing matches. The error does not quote
+  /// [value], which may have been read from somewhere the program does not
+  /// control.
   factory ApplicationMode.byValue(String value) =>
       tryByValue(value) ??
-      (throw ArgumentError.value(
-        value,
-        'value',
+      (throw ArgumentError(
         'Not an application mode, expected one of ${_written()}',
+        'value',
       ));
 
   /// The lowercase name the mode is written as.

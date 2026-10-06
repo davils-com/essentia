@@ -9,7 +9,9 @@
 
 import 'dart:async';
 import 'dart:collection';
+import 'dart:math';
 
+import 'package:essentia/essentia.dart' show EventEnvelope;
 import 'package:essentia/src/event/bus_state.dart';
 import 'package:essentia/src/event/consumer_group.dart';
 import 'package:essentia/src/event/drop_reason.dart';
@@ -28,6 +30,8 @@ import 'package:essentia/src/event/topic_metrics.dart';
 import 'package:essentia/src/event/topic_partition.dart';
 import 'package:essentia/src/identity/uuid.dart';
 import 'package:essentia/src/lifecycle/disposable.dart';
+import 'package:essentia/src/principal/principal.dart';
+import 'package:essentia/src/principal/principal_context.dart';
 import 'package:meta/meta.dart';
 
 /// One named stream of events of type [T] on an `EventBus`.
@@ -115,6 +119,15 @@ final class EventTopic<T extends Event> implements Disposable {
   /// Where the topic is in its life.
   BusState _lifecycle = BusState.running;
 
+  /// The multiplier of FNV-1a.
+  static const _fnvPrime = 0x01000193;
+
+  /// The multiplier of the hash finaliser.
+  static const _finaliserMultiplier = 0x85EBCA6B;
+
+  /// The seed of the partition hash, chosen afresh for every topic.
+  final int _partitionSeed = Random().nextInt(0xFFFFFFFF);
+
   /// How many subscriptions were given a generated name.
   var _anonymousConsumers = 0;
 
@@ -133,6 +146,27 @@ final class EventTopic<T extends Event> implements Disposable {
 
   /// Where this topic is in its life.
   BusState get state => _lifecycle;
+
+  /// Whether an envelope published now would reach anybody.
+  ///
+  /// `true` while the topic is running and has a broadcast subscriber, a
+  /// caller waiting in [next], a consumer group, or a replay cache that
+  /// would hand the envelope to a subscriber attaching later.
+  /// [subscriberCount] alone answers the first of those only.
+  ///
+  /// Meant to be asked before every publish by a publisher that would
+  /// rather not build an event nobody receives. The answer is a moment: a
+  /// subscriber can attach right after it, which is harmless for telemetry,
+  /// which is what it is for.
+  bool get hasConsumers {
+    if (_lifecycle != BusState.running) {
+      return false;
+    }
+    return _subscribers.isNotEmpty ||
+        _waiters.isNotEmpty ||
+        _groups.isNotEmpty ||
+        _data.replay > 0;
+  }
 
   /// How many broadcast subscribers are attached right now.
   ///
@@ -172,6 +206,10 @@ final class EventTopic<T extends Event> implements Disposable {
   /// [causedBy] overrides that, and links a chain across a boundary the zone
   /// does not cross.
   ///
+  /// The envelope records the principal the publishing code runs as, if
+  /// there is one, as [EventEnvelope.principal]; [publishAs] states it
+  /// explicitly instead.
+  ///
   /// Returns the envelope that was published, or `null` if the topic was
   /// closed and refused it.
   ///
@@ -182,8 +220,42 @@ final class EventTopic<T extends Event> implements Disposable {
     String? key,
     EventHeaders headers = EventHeaders.empty,
     EventEnvelope<Event>? causedBy,
+  }) => publishAs(
+    currentPrincipal(),
+    event,
+    key: key,
+    headers: headers,
+    causedBy: causedBy,
+  );
+
+  /// Publishes [event] on behalf of the explicitly named [principal],
+  /// waiting for room if there is none.
+  ///
+  /// Everything else is as for [publish]. Use this where the publishing
+  /// code does not run as the caller, such as a callback from a library
+  /// that left the zone, or where the envelope must deliberately carry
+  /// none: `null` publishes without a principal even inside a zone that has
+  /// one.
+  ///
+  /// Returns the envelope that was published, or `null` if the topic was
+  /// closed and refused it.
+  ///
+  /// Throws an [ArgumentError] if the topic requires a key and none was
+  /// given.
+  Future<EventEnvelope<T>?> publishAs(
+    Principal? principal,
+    T event, {
+    String? key,
+    EventHeaders headers = EventHeaders.empty,
+    EventEnvelope<Event>? causedBy,
   }) async {
-    final EventEnvelope<T>? envelope = _envelope(event, key, headers, causedBy);
+    final EventEnvelope<T>? envelope = _envelope(
+      event,
+      key,
+      headers,
+      causedBy,
+      principal,
+    );
     if (envelope == null) {
       return null;
     }
@@ -215,8 +287,40 @@ final class EventTopic<T extends Event> implements Disposable {
     String? key,
     EventHeaders headers = EventHeaders.empty,
     EventEnvelope<Event>? causedBy,
+  }) => tryPublishAs(
+    currentPrincipal(),
+    event,
+    key: key,
+    headers: headers,
+    causedBy: causedBy,
+  );
+
+  /// Publishes [event] on behalf of the explicitly named [principal],
+  /// without ever waiting.
+  ///
+  /// Everything else is as for [tryPublish]; `null` publishes without a
+  /// principal even inside a zone that has one.
+  ///
+  /// Returns the envelope that was published, or `null` if it was refused,
+  /// in which case it has already been reported to the listener with the
+  /// reason.
+  ///
+  /// Throws an [ArgumentError] if the topic requires a key and none was
+  /// given.
+  EventEnvelope<T>? tryPublishAs(
+    Principal? principal,
+    T event, {
+    String? key,
+    EventHeaders headers = EventHeaders.empty,
+    EventEnvelope<Event>? causedBy,
   }) {
-    final EventEnvelope<T>? envelope = _envelope(event, key, headers, causedBy);
+    final EventEnvelope<T>? envelope = _envelope(
+      event,
+      key,
+      headers,
+      causedBy,
+      principal,
+    );
     if (envelope == null) {
       return null;
     }
@@ -332,12 +436,24 @@ final class EventTopic<T extends Event> implements Disposable {
   /// just arrived. [onError] handles a failure of [on] and defaults to the
   /// topic's handler.
   ///
+  /// A topic that is draining or closed takes no new group: attaching one
+  /// there would hand back a handle over workers nothing will ever offer
+  /// to, so it is refused instead.
+  ///
   /// Returns a handle on the group.
+  ///
+  /// Throws a [StateError] if the topic is draining or closed.
   ConsumerGroup group(
     String name,
     EventHandler<T> on, {
     EventErrorHandler? onError,
   }) {
+    if (_lifecycle != BusState.running) {
+      throw StateError(
+        'Topic "${_data.name}" is ${_lifecycle.name} and takes no new '
+        'consumer group, so "$name" was not attached',
+      );
+    }
     final EventErrorHandler handle = onError ?? _data.onError;
     final mailboxes = GroupMailboxes(
       _data.partitions,
@@ -345,11 +461,6 @@ final class EventTopic<T extends Event> implements Disposable {
       _report,
       (envelope) => _consume(envelope as EventEnvelope<T>, name, handle, on),
     );
-    if (_lifecycle != BusState.running) {
-      mailboxes
-        ..close()
-        ..cancel();
-    }
     _groups = List<GroupMailboxes>.unmodifiable(<GroupMailboxes>[
       ..._groups,
       mailboxes,
@@ -469,6 +580,7 @@ final class EventTopic<T extends Event> implements Disposable {
     String? key,
     EventHeaders headers,
     EventEnvelope<Event>? causedBy,
+    Principal? principal,
   ) {
     if (_data.requiresKey && key == null) {
       throw ArgumentError.value(
@@ -487,6 +599,7 @@ final class EventTopic<T extends Event> implements Disposable {
       causationId: cause?.id,
       headers: headers,
       payload: event,
+      principal: principal,
     );
     if (_lifecycle == BusState.running) {
       return envelope;
@@ -583,8 +696,39 @@ final class EventTopic<T extends Event> implements Disposable {
       _nextPartition = (next + 1) % _partitions.length;
       return _partitions[next];
     }
-    final int spread = key.hashCode & 0x3FFFFFFF;
+    final int spread = _spreadOf(key) & 0x7FFFFFFF;
     return _partitions[spread % _partitions.length];
+  }
+
+  /// Hashes [key] with a seed chosen afresh for this topic: FNV-1a over its
+  /// code units, followed by a finaliser that spreads the bits.
+  ///
+  /// Which partition a key lands on is not part of the contract, and keys
+  /// chosen to collide under `String.hashCode` do not all end up in one
+  /// lane.
+  ///
+  /// Returns an unsigned 32-bit hash.
+  int _spreadOf(String key) {
+    int hash = _partitionSeed;
+    for (final int codeUnit in key.codeUnits) {
+      hash = _multiply32(hash ^ codeUnit, _fnvPrime);
+    }
+    hash = hash ^ (hash >>> 16);
+    hash = _multiply32(hash, _finaliserMultiplier);
+    return hash ^ (hash >>> 13);
+  }
+
+  /// Multiplies [left] and [right] modulo 2^32, exactly on every platform,
+  /// the web included.
+  ///
+  /// Returns the unsigned 32-bit product.
+  static int _multiply32(int left, int right) {
+    final int leftLow = left & 0xFFFF;
+    final int leftHigh = (left >>> 16) & 0xFFFF;
+    final int rightLow = right & 0xFFFF;
+    final int rightHigh = (right >>> 16) & 0xFFFF;
+    final int cross = (leftHigh * rightLow + leftLow * rightHigh) & 0xFFFF;
+    return (leftLow * rightLow + cross * 0x10000) & 0xFFFFFFFF;
   }
 
   /// Attaches a subscriber running [on] for the envelopes matching
@@ -636,20 +780,51 @@ final class EventTopic<T extends Event> implements Disposable {
     EventHandler<T> on,
   ) async {
     try {
-      await handling(
+      await _asPublisher(
         envelope,
-        () => _proceed(0, envelope, consumer, () async {
-          await on(envelope);
-          _delivered++;
-          _data.listener.onDelivered(envelope, consumer);
-        }),
+        () => handling(
+          envelope,
+          () => _proceed(0, envelope, consumer, () async {
+            await on(envelope);
+            _delivered++;
+            _observe(() => _data.listener.onDelivered(envelope, consumer));
+          }),
+        ),
       );
     } on Object catch (failure, stackTrace) {
       _failed++;
       _observe(
         () => _data.listener.onFailed(envelope, consumer, failure, stackTrace),
       );
-      await onError(failure, stackTrace);
+      await _observeAsync(() => onError(failure, stackTrace));
+    }
+  }
+
+  /// Runs [body] as the principal that published [envelope], so that a
+  /// consumer can ask who caused what it handles and anything it publishes
+  /// carries the same caller on. An envelope without one leaves the
+  /// consumer's own principal in place.
+  ///
+  /// Returns the future of [body].
+  Future<void> _asPublisher(
+    EventEnvelope<Event> envelope,
+    Future<void> Function() body,
+  ) {
+    final Principal? principal = envelope.principal;
+    if (principal == null) {
+      return body();
+    }
+    return runAsPrincipal(principal, body);
+  }
+
+  /// Runs an error [handler], discarding anything it throws: the failure of
+  /// the thing that reports failures has nowhere left to go, and the
+  /// consumer carries on with its next envelope.
+  Future<void> _observeAsync(FutureOr<void> Function() handler) async {
+    try {
+      await handler();
+    } on Object catch (_) {
+      return;
     }
   }
 

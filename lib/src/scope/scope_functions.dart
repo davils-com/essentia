@@ -33,6 +33,17 @@ extension ScopeFunctions<T> on T {
     return this;
   }
 
+  /// Runs [action] on this value and returns the value itself.
+  ///
+  /// The same as [apply]; Kotlin keeps both names to say whether the block
+  /// configures the value or merely looks at it, and so does this.
+  ///
+  /// Returns this value.
+  T also(void Function(T it) action) {
+    action(this);
+    return this;
+  }
+
   /// Runs [block] on this value and returns what the block returns.
   ///
   /// Returns the result of [block].

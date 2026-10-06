@@ -7,14 +7,11 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'dart:io';
-
-import 'package:essentia/arguments.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 import 'colour.dart';
 import 'failure_of.dart';
-import 'path_parameters.dart';
 import 'typed_parameters.dart';
 
 /// No environment at all.
@@ -143,91 +140,6 @@ void main() {
     expect(violation.reason, 'is not a valid integer');
     expect(violation.code, ParameterViolationCodes.conversionFailed);
     expect(violation.origin, isA<CommandLineOrigin>());
-  });
-
-  group('path conversion', () {
-    late Directory temporary;
-
-    setUp(() {
-      temporary = Directory.systemTemp.createTempSync('essentia-parameters');
-    });
-
-    tearDown(() {
-      temporary.deleteSync(recursive: true);
-    });
-
-    test('accepts a directory that is there', () {
-      final parameters = PathParameters()
-        ..load(<String>['--dir=${temporary.path}'], environment: _nothing);
-
-      expect(parameters.directory.value, temporary.path);
-    });
-
-    test('reports a missing path in the same report as everything else', () {
-      final ConversionFailure violation = singleViolation<ConversionFailure>(
-        failureOf(
-          () => PathParameters().load(<String>[
-            '--dir=${temporary.path}/missing',
-          ], environment: _nothing),
-        ),
-      );
-
-      expect(violation.reason, 'does not exist');
-    });
-
-    test('reports a file where a directory is expected', () {
-      final file = File('${temporary.path}/plain.txt')..writeAsStringSync('x');
-
-      final ConversionFailure violation = singleViolation<ConversionFailure>(
-        failureOf(
-          () => PathParameters().load(<String>[
-            '--dir=${file.path}',
-          ], environment: _nothing),
-        ),
-      );
-
-      expect(violation.reason, 'is not a directory');
-    });
-
-    test('converts a regular file to a file', () {
-      final file = File('${temporary.path}/plain.txt')..writeAsStringSync('x');
-
-      final parameters = PathParameters()
-        ..load(<String>['--file=${file.path}'], environment: _nothing);
-
-      expect(parameters.file.value?.path, file.path);
-    });
-
-    test('reports a directory where a regular file is expected', () {
-      final ConversionFailure violation = singleViolation<ConversionFailure>(
-        failureOf(
-          () => PathParameters().load(<String>[
-            '--file=${temporary.path}',
-          ], environment: _nothing),
-        ),
-      );
-
-      expect(violation.reason, 'is not a regular file');
-    });
-
-    test('accepts something that can be read', () {
-      final parameters = PathParameters()
-        ..load(<String>['--readable=${temporary.path}'], environment: _nothing);
-
-      expect(parameters.readable.value, temporary.path);
-    });
-
-    test('reports something that cannot be read because it is missing', () {
-      final ConversionFailure violation = singleViolation<ConversionFailure>(
-        failureOf(
-          () => PathParameters().load(<String>[
-            '--readable=${temporary.path}/missing',
-          ], environment: _nothing),
-        ),
-      );
-
-      expect(violation.reason, 'does not exist');
-    });
   });
 
   group('a converter the schema brings itself', () {
