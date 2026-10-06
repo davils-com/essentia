@@ -1,0 +1,557 @@
+/*
+ * Copyright (c) 2026 Davils GmbH
+ * All rights reserved.
+ *
+ * This software is the property of Davils GmbH.
+ * Unauthorized copying, modification, distribution, or use of this code,
+ * in whole or in part, is strictly prohibited without prior written permission.
+ */
+
+import 'dart:io';
+
+import 'package:essentia/src/arguments/argument_lexer.dart';
+import 'package:essentia/src/arguments/boolean_parser.dart';
+import 'package:essentia/src/arguments/cardinality.dart';
+import 'package:essentia/src/arguments/declared_parameter.dart';
+import 'package:essentia/src/arguments/flag_builder.dart';
+import 'package:essentia/src/arguments/lex_result.dart';
+import 'package:essentia/src/arguments/masking.dart';
+import 'package:essentia/src/arguments/parameter.dart';
+import 'package:essentia/src/arguments/parameter_builder.dart';
+import 'package:essentia/src/arguments/parameter_converters.dart';
+import 'package:essentia/src/arguments/parameter_draft.dart';
+import 'package:essentia/src/arguments/parameter_exception.dart';
+import 'package:essentia/src/arguments/parameter_info.dart';
+import 'package:essentia/src/arguments/parameter_snapshot.dart';
+import 'package:essentia/src/arguments/parameter_spec.dart';
+import 'package:essentia/src/arguments/parameter_violation.dart';
+import 'package:essentia/src/arguments/parameters_not_loaded_error.dart';
+import 'package:essentia/src/arguments/resolver.dart';
+import 'package:essentia/src/arguments/unknown_argument_policy.dart';
+import 'package:essentia/src/arguments/usage_renderer.dart';
+import 'package:essentia/src/arguments/value_origin.dart';
+import 'package:essentia/src/arguments/value_source.dart';
+import 'package:essentia/src/validation/violation.dart';
+import 'package:meta/meta.dart';
+
+/// The parameters a program is started with.
+///
+/// A schema extends this class, declares one field per parameter and lists
+/// them in [declared]. Declaring is separate from reading: [load] resolves
+/// every declared parameter in one pass, and from then on each one is an
+/// ordinary immutable value read through [Parameter.value].
+///
+/// ```dart
+/// final class AppParameters extends Parameters {
+///   AppParameters() : super(environmentPrefix: 'APP') {
+///     exclusive(<Parameter<Object?>>[json, yaml]);
+///   }
+///
+///   late final Parameter<int> port =
+///       parameter(<String>['--port', '-p']).integer().required();
+///   late final Parameter<String> dataDir =
+///       parameter(<String>['--data-dir']).path(mustExist: true).required();
+///   late final Parameter<String> dbPassword =
+///       parameter(<String>['--db-password']).sensitive().required();
+///   late final Parameter<List<String>> tags =
+///       parameter(<String>['--tag']).multiple();
+///   late final Parameter<bool> dryRun = flag(<String>['--dry-run']);
+///   late final Parameter<bool> json = flag(<String>['--json']);
+///   late final Parameter<bool> yaml = flag(<String>['--yaml']);
+///
+///   @override
+///   List<Parameter<Object?>> get declared => <Parameter<Object?>>[
+///     port, dataDir, dbPassword, tags, dryRun, json, yaml,
+///   ];
+/// }
+///
+/// void main(List<String> argv) {
+///   final parameters = AppParameters()..load(argv);
+///   logger.info(parameters.describe());
+///   startServer(parameters.port.value);
+/// }
+/// ```
+///
+/// Dart has no delegated properties, so where Kotlin registers a parameter
+/// as its property is created, a Dart schema lists its parameters once in
+/// [declared]. The order of that list is the order of the usage listing,
+/// and a parameter missing from it fails loudly when it is read.
+///
+/// Reading a parameter costs a list access. Nothing about it converts,
+/// validates or waits, which is why [load] is the only place that has to be
+/// called at a particular time.
+abstract class Parameters {
+  /// Creates a schema.
+  ///
+  /// [_environmentPrefix] derives an environment variable for each parameter,
+  /// so that `--data-dir` falls back to `APP_DATA_DIR`. Parameters opt out
+  /// with `noEnv` and override it with `env`. Without a prefix only
+  /// parameters with an explicit variable have an environment fallback.
+  /// [_unknownArguments] decides what happens to arguments the schema does
+  /// not declare.
+  Parameters({
+    this._environmentPrefix,
+    this._unknownArguments = UnknownArgumentPolicy.reject,
+  });
+
+  /// The prefix environment variables are derived with, or `null`.
+  final String? _environmentPrefix;
+
+  /// What happens to arguments the schema does not declare.
+  final UnknownArgumentPolicy _unknownArguments;
+
+  /// The groups of which at most one parameter may be given.
+  final _exclusive = <List<Parameter<Object?>>>[];
+
+  /// The parameters that need others, and the ones they need.
+  final _requirements = <(Parameter<Object?>, List<Parameter<Object?>>)>[];
+
+  /// The position of every registered parameter.
+  final _ordinals = Map<Parameter<Object?>, int>.identity();
+
+  /// The registered parameters, once [declared] was read.
+  List<ParameterSpec>? _specs;
+
+  /// What the load resolved, once it ran.
+  ParameterSnapshot? _snapshot;
+
+  /// Every parameter of the schema, in the order of the usage listing.
+  ///
+  /// Read once, the first time the schema needs its parameters.
+  @protected
+  List<Parameter<Object?>> get declared;
+
+  /// Whether [load] has run.
+  bool get isLoaded => _snapshot != null;
+
+  /// The arguments that followed the `--` terminator, untouched.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
+  List<String> get rest => _requireSnapshot('rest').rest;
+
+  /// The arguments that matched no declared parameter.
+  ///
+  /// This is always empty under [UnknownArgumentPolicy.reject], since an
+  /// undeclared argument is a violation there.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
+  List<String> get unknown => _requireSnapshot('unknown').unknown;
+
+  /// Everything the load reported that did not stop it.
+  ///
+  /// A deprecated parameter that was given ends up here, as does a rule
+  /// that reported through `warn` rather than `fail`.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
+  List<Violation> get warnings => _requireSnapshot('warnings').warnings;
+
+  /// Declares a parameter answering to [names], each starting with `--`
+  /// or being a single character after one `-`.
+  ///
+  /// Returns a builder reading the value as text; a conversion such as
+  /// [ParameterConverters.integer] changes its type.
+  ///
+  /// Throws an [ArgumentError] if a name is malformed.
+  @protected
+  ParameterBuilder<String> parameter(List<String> names) {
+    _validateNames(names);
+    return ParameterBuilder<String>(
+      this,
+      ParameterDraft(
+        names: List<String>.unmodifiable(names),
+        converter: (raw) => raw,
+        typeName: 'string',
+        isFlag: false,
+      ),
+    );
+  }
+
+  /// Declares a flag answering to [names].
+  ///
+  /// Returns a builder reading `true` when the flag is given.
+  ///
+  /// Throws an [ArgumentError] if a name is malformed.
+  @protected
+  FlagBuilder flag(List<String> names) {
+    _validateNames(names);
+    return FlagBuilder(
+      this,
+      ParameterDraft(
+        names: List<String>.unmodifiable(names),
+        converter: parseBoolean,
+        typeName: 'flag',
+        isFlag: true,
+      ),
+    );
+  }
+
+  /// Declares that at most one of [parameters] may be given.
+  @protected
+  void exclusive(List<Parameter<Object?>> parameters) {
+    _exclusive.add(List<Parameter<Object?>>.unmodifiable(parameters));
+  }
+
+  /// Declares that [parameter] may only be given together with every one of
+  /// [required].
+  @protected
+  void requires(
+    Parameter<Object?> parameter,
+    List<Parameter<Object?>> required,
+  ) {
+    _requirements.add((
+      parameter,
+      List<Parameter<Object?>>.unmodifiable(required),
+    ));
+  }
+
+  /// Resolves every declared parameter from [argv], [environment] and the
+  /// declared defaults.
+  ///
+  /// Precedence is command line, then environment, then default. Values
+  /// from the environment go through the same conversion and validation as
+  /// those from the command line, and a problem with one is reported under
+  /// the name of the variable it came from. [environment] defaults to the
+  /// environment of the process.
+  ///
+  /// Throws a [ParameterException] carrying every problem found if anything
+  /// about the arguments is wrong, a [StateError] if the schema was already
+  /// loaded, and an [ArgumentError] if the schema itself is wrong.
+  void load(List<String> argv, {Map<String, String>? environment}) {
+    final List<ParameterSpec> specs = _beginLoad();
+    final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
+    _finish(
+      specs,
+      lexed,
+      _environmentValues(specs, lexed, environment ?? Platform.environment),
+    );
+  }
+
+  /// Resolves every declared parameter like [load], additionally consulting
+  /// [sources] for anything the command line and the environment did not
+  /// supply.
+  ///
+  /// Precedence is command line, then environment, then each source in the
+  /// order given, then the default. This one is asynchronous because a
+  /// source may have to reach somewhere slow; the resolution itself is the
+  /// same work [load] does.
+  ///
+  /// Throws what [load] throws.
+  Future<void> loadFrom(
+    List<String> argv,
+    List<ValueSource> sources, {
+    Map<String, String>? environment,
+  }) async {
+    final List<ParameterSpec> specs = _beginLoad();
+    final LexResult lexed = ArgumentLexer(specs, _unknownArguments).lex(argv);
+    final Map<int, (String, ValueOrigin)> external = _environmentValues(
+      specs,
+      lexed,
+      environment ?? Platform.environment,
+    );
+    for (final source in sources) {
+      for (final spec in specs) {
+        final bool resolved =
+            lexed.occurrences.containsKey(spec.ordinal) ||
+            external.containsKey(spec.ordinal);
+        if (resolved) {
+          continue;
+        }
+        final String? raw = await source.read(spec.info);
+        if (raw != null) {
+          external[spec.ordinal] = (raw, ExternalOrigin(source.name));
+        }
+      }
+    }
+    _finish(specs, lexed, external);
+  }
+
+  /// Renders the listing of supported parameters.
+  ///
+  /// This is what a failed load appends to its report, and what a program
+  /// prints when it wants to show what it accepts.
+  ///
+  /// Returns the listing, without a trailing newline.
+  String usage() => renderUsage(_registered());
+
+  /// Renders the resolved values together with where each one came from.
+  ///
+  /// Sensitive parameters are masked, which is what makes this safe to
+  /// write to a startup log.
+  ///
+  /// Returns the rendered values, without a trailing newline.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
+  String describe() =>
+      renderValues(_registered(), _requireSnapshot('describe()'));
+
+  /// The resolved value of [parameter].
+  ///
+  /// Returns the value.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded,
+  /// and a [StateError] if [parameter] is not one of [declared].
+  @internal
+  Object? valueOf(Parameter<Object?> parameter) {
+    final String name = _nameOf(parameter);
+    final ParameterSnapshot snapshot =
+        _snapshot ?? (throw ParametersNotLoadedError('Parameter "$name"'));
+    final int ordinal =
+        _ordinals[parameter] ??
+        (throw StateError(
+          'Parameter "$name" is not listed in the declared parameters of '
+          'its schema, so it was never loaded',
+        ));
+    return snapshot.valueAt(ordinal);
+  }
+
+  /// Checks that the schema can be loaded.
+  ///
+  /// Returns the registered parameters.
+  ///
+  /// Throws a [StateError] if it was loaded already, and an [ArgumentError]
+  /// if a group names a parameter that is not declared.
+  List<ParameterSpec> _beginLoad() {
+    if (_snapshot != null) {
+      throw StateError(
+        'This schema was already loaded. Construct a new instance instead of '
+        'loading twice.',
+      );
+    }
+    final List<ParameterSpec> specs = _registered();
+    final Iterable<Parameter<Object?>> references = <Parameter<Object?>>[
+      for (final group in _exclusive) ...group,
+      for (final (parameter, required)
+          in _requirements) ...<Parameter<Object?>>[parameter, ...required],
+    ];
+    final List<String> missing = <String>{
+      for (final reference in references)
+        if (!_ordinals.containsKey(reference)) _nameOf(reference),
+    }.toList();
+    if (missing.isNotEmpty) {
+      throw ArgumentError(
+        'The schema declares a parameter group naming '
+        '${missing.map((name) => '"$name"').join(', ')}, which is not a '
+        'declared parameter. Group members are parameters listed in declared.',
+      );
+    }
+    return specs;
+  }
+
+  /// Resolves what was lexed and stores the snapshot.
+  ///
+  /// Throws a [ParameterException] if anything is wrong.
+  void _finish(
+    List<ParameterSpec> specs,
+    LexResult lexed,
+    Map<int, (String, ValueOrigin)> external,
+  ) {
+    final resolver = Resolver(
+      specs,
+      <List<int>>[
+        for (final group in _exclusive)
+          <int>[for (final member in group) _ordinals[member]!],
+      ],
+      <(int, List<int>)>[
+        for (final (parameter, required) in _requirements)
+          (
+            _ordinals[parameter]!,
+            <int>[for (final member in required) _ordinals[member]!],
+          ),
+      ],
+    );
+    final (ParameterSnapshot? snapshot, List<ParameterViolation> violations) =
+        resolver.resolve(lexed, external);
+    if (snapshot == null) {
+      throw ParameterException(violations, usage());
+    }
+    _snapshot = snapshot;
+  }
+
+  /// Reads the environment value of every parameter the command line did
+  /// not supply.
+  ///
+  /// Returns the values by ordinal.
+  Map<int, (String, ValueOrigin)> _environmentValues(
+    List<ParameterSpec> specs,
+    LexResult lexed,
+    Map<String, String> environment,
+  ) => <int, (String, ValueOrigin)>{
+    for (final spec in specs)
+      if (!lexed.occurrences.containsKey(spec.ordinal))
+        if (spec.info.environmentVariable case final String variable)
+          if (environment[variable] case final String raw)
+            spec.ordinal: (raw, EnvironmentOrigin(variable)),
+  };
+
+  /// Registers the parameters of [declared], once.
+  ///
+  /// Returns the registered parameters.
+  ///
+  /// Throws an [ArgumentError] if a parameter is not declared on this
+  /// schema, is listed twice, or shares a name with another one.
+  List<ParameterSpec> _registered() {
+    final List<ParameterSpec>? registered = _specs;
+    if (registered != null) {
+      return registered;
+    }
+    final specs = <ParameterSpec>[];
+    final claimed = <String>{};
+    for (final Parameter<Object?> parameter in declared) {
+      final ParameterSpec spec = _specFor(parameter, specs.length);
+      for (final String name in spec.matchableNames()) {
+        if (!claimed.add(name)) {
+          throw ArgumentError(
+            'Parameter name "$name" is declared more than once',
+          );
+        }
+      }
+      _ordinals[parameter] = spec.ordinal;
+      specs.add(spec);
+    }
+    return _specs = List<ParameterSpec>.unmodifiable(specs);
+  }
+
+  /// Builds the spec of [parameter] at [ordinal].
+  ///
+  /// Returns the spec.
+  ///
+  /// Throws an [ArgumentError] if the parameter is not declared on this
+  /// schema or was listed already.
+  ParameterSpec _specFor(Parameter<Object?> parameter, int ordinal) {
+    if (parameter is! DeclaredParameter<Object?> ||
+        !identical(parameter.schema, this)) {
+      throw ArgumentError(
+        'A declared parameter was not created by parameter() or flag() on '
+        'this schema',
+      );
+    }
+    if (_ordinals.containsKey(parameter)) {
+      throw ArgumentError(
+        'Parameter "${_nameOf(parameter)}" is listed twice in declared',
+      );
+    }
+    final ParameterDraft draft = parameter.draft;
+    final Cardinality cardinality = parameter.cardinality;
+    final Object? defaultValue = parameter.defaultValue;
+    return ParameterSpec(
+      info: ParameterInfo(
+        names: draft.names,
+        environmentVariable: _environmentVariableFor(draft),
+        typeName: draft.typeName,
+        isRequired: cardinality == Cardinality.required,
+        isSensitive: draft.isSensitive,
+        acceptsMultiple: cardinality == Cardinality.multiple,
+        isFlag: draft.isFlag,
+        defaultDisplay: _defaultDisplayFor(draft, defaultValue),
+        description: draft.description,
+        deprecation: draft.deprecation,
+      ),
+      ordinal: ordinal,
+      cardinality: cardinality,
+      converter: draft.converter,
+      validators: draft.validators,
+      defaultValue: defaultValue,
+      splitDelimiter: draft.splitDelimiter,
+      isNegatable: draft.isNegatable,
+      collect: parameter.collect,
+    );
+  }
+
+  /// The environment variable [draft] falls back to.
+  ///
+  /// Returns the variable named explicitly, else the one derived from the
+  /// prefix and the first long name, else `null`.
+  String? _environmentVariableFor(ParameterDraft draft) {
+    if (!draft.environmentEnabled) {
+      return null;
+    }
+    final String? explicit = draft.environmentVariable;
+    if (explicit != null) {
+      return explicit;
+    }
+    final String? prefix = _environmentPrefix;
+    if (prefix == null) {
+      return null;
+    }
+    final Iterable<String> longNames = draft.names.where(
+      (name) => name.startsWith('--'),
+    );
+    if (longNames.isEmpty) {
+      return null;
+    }
+    final String body = longNames.first
+        .substring(2)
+        .replaceAll('-', '_')
+        .toUpperCase();
+    final String trimmed = prefix.replaceFirst(RegExp(r'_+$'), '');
+    return '${trimmed}_$body';
+  }
+
+  /// Renders [defaultValue] for the usage listing.
+  ///
+  /// Returns the rendered default, or `null` when there is nothing worth
+  /// showing.
+  String? _defaultDisplayFor(ParameterDraft draft, Object? defaultValue) {
+    if (defaultValue == null) {
+      return null;
+    }
+    if (draft.isFlag && defaultValue == false) {
+      return null;
+    }
+    if (defaultValue is List<Object?> && defaultValue.isEmpty) {
+      return null;
+    }
+    if (draft.isSensitive) {
+      return mask;
+    }
+    return '$defaultValue';
+  }
+
+  /// The snapshot, which [subject] needs.
+  ///
+  /// Returns the snapshot.
+  ///
+  /// Throws a [ParametersNotLoadedError] if the schema has not been loaded.
+  ParameterSnapshot _requireSnapshot(String subject) =>
+      _snapshot ?? (throw ParametersNotLoadedError(subject));
+
+  /// The name [parameter] is reported under.
+  ///
+  /// Returns its first name, or a placeholder for a foreign parameter.
+  static String _nameOf(Parameter<Object?> parameter) {
+    if (parameter is DeclaredParameter<Object?>) {
+      return parameter.draft.names.first;
+    }
+    return 'a parameter of another schema';
+  }
+
+  /// Checks the declared [names] of one parameter.
+  ///
+  /// Throws an [ArgumentError] if there are none, or one does not start
+  /// with a dash, has nothing after its dashes, or is a short name longer
+  /// than one character.
+  static void _validateNames(List<String> names) {
+    if (names.isEmpty) {
+      throw ArgumentError('A parameter needs at least one name');
+    }
+    for (final name in names) {
+      if (!name.startsWith('-')) {
+        throw ArgumentError('Parameter name "$name" must start with a dash');
+      }
+      if (name.startsWith('--')) {
+        if (name.length <= 2) {
+          throw ArgumentError(
+            'Parameter name "$name" has no name after its dashes',
+          );
+        }
+        continue;
+      }
+      if (name.length != 2) {
+        throw ArgumentError(
+          'Short parameter name "$name" must be exactly one character, or '
+          'start with "--"',
+        );
+      }
+    }
+  }
+}

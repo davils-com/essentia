@@ -1,0 +1,19 @@
+/*
+ * Copyright (c) 2026 Davils GmbH
+ * All rights reserved.
+ *
+ * This software is the property of Davils GmbH.
+ * Unauthorized copying, modification, distribution, or use of this code,
+ * in whole or in part, is strictly prohibited without prior written permission.
+ */
+
+import 'package:essentia/essentia.dart';
+
+/// Somebody was greeted, the event the example publishes.
+final class Greeting implements Event {
+  /// Creates the greeting of [name].
+  const Greeting(this.name);
+
+  /// Who was greeted.
+  final String name;
+}

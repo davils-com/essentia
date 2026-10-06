@@ -1,0 +1,51 @@
+name: essentia
+description: >-
+  The Davils application runtime core for Dart, ported from Arc: validation
+  that reports every problem at once, validating configuration builders,
+  program parameters, an in-process event bus, layering contracts, RFC 9562
+  identifiers and platform detection.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  build_runner: ^2.16.1
+  inspectra: ^1.0.0
+  test: ^1.30.0
+
+# Essentia is checked by Inspectra 1.0.0 with every package gate it ships:
+# `dart run inspectra check` runs them all, `dart run build_runner build`
+# runs the ones marked run_on_build.
+inspectra:
+  format:
+    enabled: true
+    run_on_build: true
+  lint:
+    enabled: true
+    run_on_build: true
+  style:
+    enabled: true
+    run_on_build: true
+    preset: strict
+    license_header: tool/license_header.txt
+  api:
+    enabled: true
+  trivy:
+    enabled: true
+    license:
+      run_on_build: true
+    vulnerability:
+      run_on_build: true
+    filesystem:
+      enabled: true
+      scanners: [vuln, secret, misconfig]
+  coverage:
+    enabled: true
+    min_line_coverage: 90
+  changelog:
+    enabled: true

@@ -1,0 +1,26 @@
+# Essentia analyzes itself with the strict lint preset of Inspectra,
+# tightened by the repository rules of AGENTS.md: documented API, exhaustive
+# switches without default cases and no unawaited futures.
+include: package:inspectra/lints/strict.yaml
+
+analyzer:
+  errors:
+    unawaited_futures: error
+    discarded_futures: error
+    public_member_api_docs: error
+    no_default_cases: error
+    exhaustive_cases: error
+    avoid_dynamic_calls: error
+  exclude:
+    - build/**
+    - .dart_tool/**
+
+linter:
+  rules:
+    - avoid_catches_without_on_clauses
+    - avoid_void_async
+    - comment_references
+    - literal_only_boolean_expressions
+    - no_default_cases
+    - public_member_api_docs
+    - throw_in_finally
