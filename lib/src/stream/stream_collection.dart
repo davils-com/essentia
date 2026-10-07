@@ -7,6 +7,15 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'dart:async';
+
+import 'package:essentia/src/coroutines/cancellation_exception.dart';
+import 'package:essentia/src/coroutines/coroutine_scope.dart';
+import 'package:essentia/src/coroutines/coroutine_scope_builders.dart';
+import 'package:essentia/src/coroutines/job.dart';
+import 'package:essentia/src/coroutines/suspension.dart';
+import 'package:essentia/src/stream/stream_cancellation.dart';
+import 'package:essentia/src/stream/subscription_cancel.dart';
 import 'package:essentia/src/stream/switch_map.dart';
 
 /// Kotlin's terminal `Flow` operators for streams.
@@ -15,8 +24,11 @@ extension StreamCollection<T> on Stream<T> {
   /// as soon as the next one arrives, the counterpart of Kotlin's
   /// `collectLatest`.
   ///
-  /// Dart cannot cancel a running future, so an abandoned action keeps
-  /// running; only its completion is no longer waited for.
+  /// Every action runs in a job of its own, which is cancelled when the
+  /// next element arrives, so its cancellable waits such as `delay` end
+  /// with a `CancellationException`. A plain future it awaits cannot be
+  /// interrupted; such an action keeps running, and only its completion is
+  /// no longer waited for.
   ///
   /// Returns a future that completes once this stream ended and the action
   /// of its last element completed, or with the first error of this stream
@@ -26,6 +38,120 @@ extension StreamCollection<T> on Stream<T> {
         this,
         (element) => Stream<void>.fromFuture(action(element)),
       ).drain<void>();
+
+  /// Runs [action] for every element, waiting for each to complete before
+  /// taking the next, Kotlin's `collect`.
+  ///
+  /// The stream is paused while [action] runs, so a slow action slows a
+  /// [Stream] made with `async*` or a shared flow down instead of letting
+  /// values pile up. Without [action] the elements are taken and dropped,
+  /// Kotlin's `collect()`. Collecting is cancellable: once the job of the
+  /// collecting code is cancelled, the subscription is cancelled and no
+  /// further element is handed to [action].
+  ///
+  /// ```dart
+  /// scope.launch((it) => counter.collect((value) => print(value)));
+  /// ```
+  ///
+  /// Returns a future that completes once the stream ended.
+  ///
+  /// Throws the first error of the stream or of [action], ending the
+  /// collection, and a [CancellationException] if the collecting job is
+  /// cancelled.
+  Future<void> collect([FutureOr<void> Function(T value)? action]) {
+    final done = Completer<void>();
+    final StreamSubscription<T> subscription = cancellable().listen(null);
+
+    void fail(Object error, StackTrace stackTrace) {
+      if (done.isCompleted) {
+        return;
+      }
+      afterCancel(
+        subscription.cancel(),
+        () => done.completeError(error, stackTrace),
+      );
+    }
+
+    subscription
+      ..onData((value) {
+        final Object? pending;
+        try {
+          ensureActive();
+          pending = action?.call(value);
+        } on Object catch (error, stackTrace) {
+          fail(error, stackTrace);
+          return;
+        }
+        if (pending is Future<void>) {
+          subscription.pause();
+          pending.then((_) => subscription.resume(), onError: fail).ignore();
+        }
+      })
+      ..onError(fail)
+      ..onDone(done.complete);
+    return done.future;
+  }
+
+  /// Collects the stream in a coroutine started in [scope], Kotlin's
+  /// `launchIn`.
+  ///
+  /// Elements are dropped, so the stream is used for what it does on the
+  /// way, typically with `onEach`:
+  ///
+  /// ```dart
+  /// events.onEach(handle).launchIn(scope);
+  /// ```
+  ///
+  /// Returns the job of the collecting coroutine; cancelling it cancels the
+  /// subscription. An error of the stream fails the job.
+  Job launchIn(CoroutineScope scope) => scope.launch((it) => collect());
+
+  /// The first element, or `null` when the stream ends without one,
+  /// Kotlin's `firstOrNull`.
+  ///
+  /// Stops listening to the stream once the first element arrived.
+  ///
+  /// Returns the element or `null`; the future fails with the first error
+  /// of the stream.
+  Future<T?> get firstOrNull {
+    final found = Completer<T?>();
+    final StreamSubscription<T> subscription = listen(
+      null,
+      onError: found.completeError,
+      onDone: () => found.complete(null),
+      cancelOnError: true,
+    );
+    subscription.onData((value) {
+      afterCancel(subscription.cancel(), () => found.complete(value));
+    });
+    return found.future;
+  }
+
+  /// The only element, or `null` when the stream ends without one or emits
+  /// more than one, Kotlin's `singleOrNull`.
+  ///
+  /// Stops listening to the stream once a second element arrived.
+  ///
+  /// Returns the element or `null`; the future fails with the first error
+  /// of the stream.
+  Future<T?> get singleOrNull {
+    final single = Completer<T?>();
+    ({T value})? found;
+    final StreamSubscription<T> subscription = listen(
+      null,
+      onError: single.completeError,
+      onDone: () => single.complete(found?.value),
+      cancelOnError: true,
+    );
+    subscription.onData((value) {
+      if (found == null) {
+        found = (value: value);
+        return;
+      }
+      afterCancel(subscription.cancel(), () => single.complete(null));
+    });
+    return single.future;
+  }
 
   /// Finds the first element that satisfies [test], the counterpart of
   /// Kotlin's `firstOrNull` with a predicate.

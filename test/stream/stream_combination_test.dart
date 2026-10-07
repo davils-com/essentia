@@ -9,12 +9,12 @@
 
 import 'dart:async';
 
-import 'package:essentia/src/stream/stream_combination.dart';
+import 'package:essentia/essentia.dart';
 import 'package:test/test.dart';
 
 import 'probe_stream.dart';
 
-/// Checks `zip`.
+/// Checks `zip` and `combine`.
 void main() {
   group('pairing', () {
     test('pairs the elements of two streams up to the shorter one', () async {
@@ -163,6 +163,102 @@ void main() {
           <(int, String)>[(1, 'a')],
         ],
       );
+    });
+  });
+
+  group('combine', () {
+    test('combines the latest elements once both emitted', () async {
+      final left = ProbeStream<int>();
+      final right = ProbeStream<String>();
+      final Future<List<String>> combined = left.stream
+          .combine(right.stream, (a, b) => '$a$b')
+          .toList();
+
+      left.controller.add(1);
+      await settle();
+      left.controller.add(2);
+      await settle();
+      right.controller.add('a');
+      await settle();
+      left.controller.add(3);
+      await settle();
+      right.controller.add('b');
+      await settle();
+      await left.emitAll(<int>[]);
+      await right.emitAll(<String>[]);
+
+      expect(await combined, <String>['2a', '3a', '3b']);
+    });
+
+    test('passes errors of both streams and of the transform on', () async {
+      final left = ProbeStream<int>();
+      final right = ProbeStream<int>();
+      final Future<void> checked = expectLater(
+        left.stream.combine(right.stream, (a, b) {
+          if (a == 0) {
+            throw const FormatException('transform');
+          }
+          return a + b;
+        }),
+        emitsInOrder(<Object>[
+          emitsError(isStateError),
+          emitsError(isFormatException),
+          11,
+          emitsDone,
+        ]),
+      );
+
+      right.controller
+        ..addError(StateError('right'))
+        ..add(10);
+      await settle();
+      left.controller.add(0);
+      await settle();
+      left.controller.add(1);
+      await settle();
+      await left.emitAll(<int>[]);
+      await right.emitAll(<int>[]);
+
+      await checked;
+    });
+
+    test('passes pause, resume and cancel to both streams', () async {
+      final left = ProbeStream<int>();
+      final right = ProbeStream<int>();
+
+      final List<String> log = await lifecycleOf(
+        left,
+        (source) => source.combine(right.stream, (a, b) => a + b),
+      );
+
+      const lifecycle = <String>['listen', 'pause', 'resume', 'cancel'];
+      expect(log, lifecycle);
+      expect(right.log, lifecycle);
+    });
+
+    test('combines a list of streams with the top level combine', () async {
+      final Stream<int> total = combine(<Stream<int>>[
+        Stream<int>.value(1),
+        Stream<int>.value(2),
+        Stream<int>.value(3),
+      ], (values) => values.fold(0, (sum, value) => sum + value));
+
+      expect(await total.last, 6);
+    });
+
+    test('ends at once without streams', () async {
+      await expectLater(
+        combine(<Stream<int>>[], (values) => values.length),
+        emitsDone,
+      );
+    });
+
+    test('hands the transform an unmodifiable snapshot', () async {
+      final List<List<int>> snapshots = await combine(<Stream<int>>[
+        Stream<int>.value(1),
+      ], (values) => values).toList();
+
+      expect(() => snapshots.single.add(2), throwsUnsupportedError);
     });
   });
 }

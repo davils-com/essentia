@@ -9,24 +9,36 @@
 
 import 'dart:async';
 
+import 'package:essentia/src/channels/channel_closed.dart';
+import 'package:essentia/src/channels/channel_result.dart';
+import 'package:essentia/src/coroutines/coroutine_scope.dart';
+import 'package:essentia/src/coroutines/coroutine_scope_builders.dart';
+import 'package:essentia/src/coroutines/coroutine_start.dart';
+import 'package:essentia/src/coroutines/job.dart';
+import 'package:essentia/src/coroutines/non_cancellable.dart';
 import 'package:essentia/src/event/drop_reason.dart';
+import 'package:essentia/src/event/envelope_lane.dart';
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_envelope.dart';
-import 'package:essentia/src/event/mailbox.dart';
-import 'package:essentia/src/event/mailbox_offer.dart';
 import 'package:essentia/src/event/overflow_policy.dart';
 import 'package:meta/meta.dart';
 
-/// One lane of a topic: a buffer of envelopes and the task that delivers
-/// them in order.
+/// One lane of a topic: a buffer of envelopes and the coroutine that
+/// delivers them in order.
 @internal
 final class TopicPartition {
   /// Creates a lane buffering up to [capacity] envelopes, applying
   /// [_overflow] to a publisher that will not wait, reporting discarded
-  /// envelopes to [_onDiscarded] and delivering through [_deliver].
-  TopicPartition(int capacity, this._overflow, this._onDiscarded, this._deliver)
-    : _buffer = Mailbox<EventEnvelope<Event>>(capacity) {
-    _pumped.complete(_pump());
+  /// envelopes to [_onDiscarded] and delivering through [_deliver] in a
+  /// coroutine of [work].
+  TopicPartition(
+    int capacity,
+    this._overflow,
+    this._onDiscarded,
+    this._deliver,
+    CoroutineScope work,
+  ) : _buffer = EnvelopeLane(capacity) {
+    _pumping = work.launch((it) => _pump(), start: CoroutineStart.undispatched);
   }
 
   /// How many envelopes one publication that will not wait may evict
@@ -34,7 +46,7 @@ final class TopicPartition {
   static const _evictionAttempts = 16;
 
   /// The buffered envelopes.
-  final Mailbox<EventEnvelope<Event>> _buffer;
+  final EnvelopeLane _buffer;
 
   /// What happens when the buffer is full and a publisher will not wait.
   final OverflowPolicy _overflow;
@@ -49,13 +61,12 @@ final class TopicPartition {
   /// Whether buffered envelopes are discarded instead of delivered.
   var _disposed = false;
 
-  /// Completes with the task delivering this lane, started by the
-  /// constructor.
-  final _pumped = Completer<void>();
+  /// The coroutine delivering this lane, started by the constructor.
+  Job _pumping = NonCancellable.instance;
 
-  /// The task delivering this lane, which completes once the lane is closed
-  /// and empty.
-  Future<void> get pump => _pumped.future;
+  /// Waits for the coroutine delivering this lane, which completes once the
+  /// lane is closed and empty.
+  Future<void> get pump => _pumping.join();
 
   /// How many envelopes are waiting in this lane right now.
   int get queueDepth => _buffer.length;
@@ -96,12 +107,12 @@ final class TopicPartition {
   /// attempt should be repeated.
   bool? _attempt(EventEnvelope<Event> envelope) {
     switch (_buffer.trySend(envelope)) {
-      case MailboxOffer.accepted:
+      case ChannelSuccess<void>():
         return true;
-      case MailboxOffer.closed:
+      case ChannelClosed<void>():
         _onDiscarded(envelope, DropReason.closed);
         return false;
-      case MailboxOffer.full:
+      case ChannelFailure<void>():
         final EventEnvelope<Event>? evicted = _evictOldest();
         if (evicted == null) {
           _onDiscarded(envelope, DropReason.overflow);

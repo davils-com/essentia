@@ -3,6 +3,13 @@
 
 library package:essentia/essentia.dart
 
+mixin AbstractCoroutineContextElement on Object implements CoroutineContextElement {
+  CoroutineContext operator +(CoroutineContext other);
+  R fold<R>(R initial, R Function(R, CoroutineContextElement) operation);
+  E? get<E extends CoroutineContextElement>(CoroutineContextKey<E> key);
+  CoroutineContext minusKey(CoroutineContextKey<CoroutineContextElement> key);
+}
+
 enum ApplicationMode {
   development, test, staging, production;
   final String value;
@@ -18,6 +25,14 @@ enum Architecture {
   static Architecture? resolve(String osArch);
 }
 
+extension AwaitAll<T> on Iterable<Deferred<T>> {
+  Future<List<T>> awaitAll();
+}
+
+enum BufferOverflow {
+  suspend, dropOldest, dropLatest;
+}
+
 abstract interface class Builder<T> {
   abstract T build();
 }
@@ -26,12 +41,106 @@ enum BusState {
   running, draining, closed;
 }
 
+abstract interface class CancellableContinuation<T> {
+  abstract bool get isActive;
+  abstract bool get isCancelled;
+  abstract bool get isCompleted;
+  abstract bool cancel([Object? cause]);
+  abstract void invokeOnCancellation(void Function(Object?) handler);
+  abstract void resume(T value, {void Function(Object, T)? onCancellation});
+  abstract void resumeWithException(Object error, [StackTrace? stackTrace]);
+}
+
+base class CancellationException implements Exception {
+  final Object? cause;
+  final String? message;
+  const CancellationException([String? message, Object? cause]);
+  String toString();
+}
+
+abstract interface class Channel<E> implements SendChannel<E>, ReceiveChannel<E> {
+  static const int conflated = -1;
+  static const int buffered = -2;
+  static const int rendezvous = 0;
+  static const int unlimited = 0x7fffffff;
+  static const int defaultCapacity = 64;
+  factory Channel<E>({int capacity = rendezvous, BufferOverflow onBufferOverflow = BufferOverflow.suspend, void Function(E)? onUndeliveredElement});
+}
+
+final class ChannelClosed<T> extends ChannelFailure<T> {
+  final Object? cause;
+  const ChannelClosed<T>(Object? cause);
+  int get hashCode;
+  bool get isClosed;
+  bool operator ==(Object other);
+  Object? exceptionOrNull();
+  T getOrThrow();
+  String toString();
+}
+
+base class ChannelFailure<T> extends ChannelResult<T> {
+  const ChannelFailure<T>();
+  int get hashCode;
+  bool get isClosed;
+  bool get isSuccess;
+  bool operator ==(Object other);
+  Object? exceptionOrNull();
+  T? getOrNull();
+  T getOrThrow();
+  String toString();
+}
+
+sealed class ChannelResult<T> {
+  const ChannelResult<T>();
+  abstract bool get isClosed;
+  bool get isFailure;
+  abstract bool get isSuccess;
+  abstract Object? exceptionOrNull();
+  abstract T? getOrNull();
+  abstract T getOrThrow();
+}
+
+extension ChannelStreams<E> on ReceiveChannel<E> {
+  Future<R> consume<R>(FutureOr<R> Function(ReceiveChannel<E>) block);
+  Stream<E> consumeAsStream();
+  Future<void> consumeEach(FutureOr<void> Function(E) action);
+  Stream<E> receiveAsStream();
+}
+
+final class ChannelSuccess<T> extends ChannelResult<T> {
+  final T value;
+  const ChannelSuccess<T>(T value);
+  int get hashCode;
+  bool get isClosed;
+  bool get isSuccess;
+  bool operator ==(Object other);
+  Object? exceptionOrNull();
+  T? getOrNull();
+  T getOrThrow();
+  String toString();
+}
+
+abstract interface class Clock {
+  static const Clock system = SystemClock();
+  abstract DateTime now();
+}
+
 abstract interface class ClosedRange<T extends Comparable<Object>> {
   const factory ClosedRange<T>(T start, T endInclusive);
   abstract T get endInclusive;
   abstract bool get isEmpty;
   abstract T get start;
   abstract bool contains(T value);
+}
+
+final class ClosedReceiveChannelException extends StateError {
+  ClosedReceiveChannelException([String message = 'Channel was closed']);
+  String toString();
+}
+
+final class ClosedSendChannelException extends StateError {
+  ClosedSendChannelException([String message = 'Channel was closed']);
+  String toString();
 }
 
 final class CommandLineOrigin extends ValueOrigin {
@@ -64,6 +173,27 @@ extension ComparatorChaining<T> on int Function(T, T) {
   int Function(T, T) thenDescending(int Function(T, T) tieBreaker);
 }
 
+abstract interface class CompletableDeferred<T> implements Deferred<T> {
+  factory CompletableDeferred<T>([Job? parent]);
+  abstract bool complete(T value);
+  abstract bool completeExceptionally(Object exception, [StackTrace? stackTrace]);
+}
+
+abstract interface class CompletableJob implements Job {
+  factory CompletableJob([Job? parent]);
+  abstract bool complete();
+  abstract bool completeExceptionally(Object exception, [StackTrace? stackTrace]);
+}
+
+typedef CompletionHandler = void Function(Object?);
+
+final class CompletionHandlerException implements Exception {
+  final Object cause;
+  final StackTrace stackTrace;
+  const CompletionHandlerException(Object cause, StackTrace stackTrace);
+  String toString();
+}
+
 final class ConsumerGroup {
   final String name;
   bool get isActive;
@@ -91,6 +221,75 @@ final class ConversionFailure extends ParameterViolation {
 }
 
 typedef Converter<out T> = T Function(String);
+
+abstract interface class CoroutineContext {
+  static const CoroutineContext empty = CombinedCoroutineContext.empty;
+  abstract CoroutineContext operator +(CoroutineContext other);
+  abstract R fold<R>(R initial, R Function(R, CoroutineContextElement) operation);
+  abstract E? get<E extends CoroutineContextElement>(CoroutineContextKey<E> key);
+  abstract CoroutineContext minusKey(CoroutineContextKey<CoroutineContextElement> key);
+}
+
+extension CoroutineContextAccess on CoroutineContext {
+  bool get isActive;
+  Job get job;
+  void cancel([CancellationException? cause]);
+  void cancelChildren([CancellationException? cause]);
+  void ensureActive();
+}
+
+abstract interface class CoroutineContextElement implements CoroutineContext {
+  abstract CoroutineContextKey<CoroutineContextElement> get contextKey;
+}
+
+final class CoroutineContextKey<E extends CoroutineContextElement> {
+  final String name;
+  const CoroutineContextKey<E>(String name);
+  String toString();
+}
+
+abstract class CoroutineDispatcher with AbstractCoroutineContextElement {
+  static const CoroutineContextKey<CoroutineDispatcher> key = CoroutineContextKey<CoroutineDispatcher>('CoroutineDispatcher');
+  const CoroutineDispatcher();
+  CoroutineContextKey<CoroutineDispatcher> get contextKey;
+  abstract void dispatch(CoroutineContext context, Zone zone, void Function() block);
+  bool isDispatchNeeded(CoroutineContext context);
+  abstract CoroutineDispatcher limitedParallelism(int parallelism);
+}
+
+abstract interface class CoroutineExceptionHandler implements CoroutineContextElement {
+  static const CoroutineContextKey<CoroutineExceptionHandler> key = CoroutineContextKey<CoroutineExceptionHandler>('CoroutineExceptionHandler');
+  factory CoroutineExceptionHandler(void Function(CoroutineContext, Object, StackTrace) handler);
+  abstract void handleException(CoroutineContext context, Object error, StackTrace stackTrace);
+}
+
+final class CoroutineName with AbstractCoroutineContextElement {
+  static const CoroutineContextKey<CoroutineName> key = CoroutineContextKey<CoroutineName>('CoroutineName');
+  final String name;
+  const CoroutineName(String name);
+  CoroutineContextKey<CoroutineName> get contextKey;
+  int get hashCode;
+  bool operator ==(Object other);
+  String toString();
+}
+
+abstract interface class CoroutineScope {
+  factory CoroutineScope(CoroutineContext context);
+  abstract CoroutineContext get coroutineContext;
+}
+
+extension CoroutineScopeBuilders on CoroutineScope {
+  bool get isActive;
+  CoroutineScope operator +(CoroutineContext context);
+  Deferred<T> async<T>(FutureOr<T> Function(CoroutineScope) block, {CoroutineContext context = CoroutineContext.empty, CoroutineStart start = CoroutineStart.defaultStart});
+  void cancel([CancellationException? cause]);
+  void ensureActive();
+  Job launch(FutureOr<void> Function(CoroutineScope) block, {CoroutineContext context = CoroutineContext.empty, CoroutineStart start = CoroutineStart.defaultStart});
+}
+
+enum CoroutineStart {
+  defaultStart, lazy, atomic, undispatched;
+}
 
 abstract interface class DataSource {}
 
@@ -128,6 +327,15 @@ final class DefaultedParameterBuilder<T> extends DeclaredParameter<T> {
   DefaultedParameterBuilder<T> validate(void Function(ValidationScope, T) rule);
 }
 
+abstract interface class Deferred<T> implements Job, Future<T> {
+  abstract T getCompleted();
+  abstract Object? getCompletionExceptionOrNull();
+}
+
+extension DeferredSelectClauses<T> on Deferred<T> {
+  SelectClause<T> get onAwait;
+}
+
 final class DeprecatedParameter extends ParameterViolation {
   final String advice;
   final ParameterInfo parameter;
@@ -135,6 +343,12 @@ final class DeprecatedParameter extends ParameterViolation {
   String get message;
   ViolationPath get path;
   Severity get severity;
+}
+
+abstract final class Dispatchers {
+  static const CoroutineDispatcher main = EventLoopDispatcher();
+  static const CoroutineDispatcher isolate = IsolateDispatcher();
+  static const CoroutineDispatcher unconfined = UnconfinedDispatcher();
 }
 
 abstract interface class Disposable {
@@ -365,8 +579,22 @@ final class FlagBuilder extends DeclaredParameter<bool> {
   FlagBuilder noEnv();
 }
 
+abstract interface class FlowCollector<T> {
+  abstract Future<void> emit(T value);
+}
+
+extension FutureAsDeferred<T> on Future<T> {
+  Deferred<T> asDeferred();
+}
+
 extension FutureTimeout<T> on Future<T> {
   Future<T?> timeoutOrNull(Duration limit);
+}
+
+final class GlobalScope implements CoroutineScope {
+  static const GlobalScope instance = GlobalScope._();
+  CoroutineContext get coroutineContext;
+  String toString();
 }
 
 final class Grouping<T, K> {
@@ -420,6 +648,12 @@ extension IntRangeBuilding on int {
   IntProgression downTo(int end);
   IntRange rangeTo(int end);
   IntRange until(int end);
+}
+
+final class IsolateBodyNotSendableError extends ArgumentError {
+  final Object? cause;
+  final bool inResult;
+  String toString();
 }
 
 extension IterableAccumulation<T> on Iterable<T> {
@@ -511,6 +745,41 @@ extension IterableWindowing<T> on Iterable<T> {
   List<T> takeLast(int count);
   List<T> takeLastWhile(bool Function(T) predicate);
   Iterable<List<T>> windowed(int size, {int step = 1, WindowRemainder remainder = WindowRemainder.drop});
+}
+
+abstract interface class Job implements CoroutineContextElement {
+  static const CoroutineContextKey<Job> key = CoroutineContextKey<Job>('Job');
+  factory Job([Job? parent]);
+  abstract Iterable<Job> get children;
+  abstract bool get isActive;
+  abstract bool get isCancelled;
+  abstract bool get isCompleted;
+  abstract Job? get parent;
+  abstract void cancel([CancellationException? cause]);
+  abstract CancellationException getCancellationException();
+  abstract Disposable invokeOnCompletion(void Function(Object?) handler, {bool onCancelling = false});
+  abstract Future<void> join();
+  abstract bool start();
+}
+
+final class JobCancellationException extends CancellationException {
+  final Job? job;
+  JobCancellationException(String message, {Job? job, Object? cause});
+  String toString();
+}
+
+extension JobOperations on Job {
+  Future<void> cancelAndJoin([CancellationException? cause]);
+  void cancelChildren([CancellationException? cause]);
+  void ensureActive();
+}
+
+extension JobSelectClauses on Job {
+  SelectClause<void> get onJoin;
+}
+
+extension JoinAll on Iterable<Job> {
+  Future<void> joinAll();
 }
 
 final class JoinFormat {
@@ -637,6 +906,11 @@ final class MissingRequiredParameter extends ParameterViolation {
   ViolationPath get path;
 }
 
+final class MonotonicTimeSource extends TimeSource {
+  Duration read();
+  String toString();
+}
+
 final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   MultipleParameterBuilder<T> defaultsTo(List<T> value);
   MultipleParameterBuilder<T> deprecated([String advice = '']);
@@ -646,6 +920,42 @@ final class MultipleParameterBuilder<T> extends DeclaredParameter<List<T>> {
   MultipleParameterBuilder<T> sensitive();
   MultipleParameterBuilder<T> split(String delimiter);
   MultipleParameterBuilder<T> validate(void Function(ValidationScope, T) rule);
+}
+
+abstract interface class MutableSharedFlow<T> implements SharedFlow<T>, FlowCollector<T> {
+  factory MutableSharedFlow<T>({int replay = 0, int extraBufferCapacity = 0, BufferOverflow onBufferOverflow = BufferOverflow.suspend});
+  abstract StateFlow<int> get subscriptionCount;
+  abstract SharedFlow<T> asSharedFlow();
+  abstract Future<void> emit(T value);
+  abstract void resetReplayCache();
+  abstract bool tryEmit(T value);
+}
+
+abstract interface class MutableStateFlow<T> implements StateFlow<T>, MutableSharedFlow<T> {
+  factory MutableStateFlow<T>(T value);
+  abstract T get value;
+  abstract set value(T value);
+  abstract StateFlow<T> asStateFlow();
+  abstract bool compareAndSet(T expect, T update);
+  abstract Future<void> emit(T value);
+  abstract void resetReplayCache();
+  abstract bool tryEmit(T value);
+}
+
+extension MutableStateFlowUpdate<T> on MutableStateFlow<T> {
+  T getAndUpdate(T Function(T) function);
+  void update(T Function(T) function);
+  T updateAndGet(T Function(T) function);
+}
+
+final class Mutex {
+  Mutex({bool locked = false});
+  bool get isLocked;
+  Future<void> lock();
+  String toString();
+  bool tryLock();
+  void unlock();
+  Future<R> withLock<R>(FutureOr<R> Function() action);
 }
 
 final class MutuallyExclusiveParameters extends ParameterViolation {
@@ -660,6 +970,22 @@ final class NameSegment extends PathSegment {
   const NameSegment(String value);
   int get hashCode;
   bool operator ==(Object other);
+  String toString();
+}
+
+final class NonCancellable with AbstractCoroutineContextElement implements Job {
+  static const NonCancellable instance = NonCancellable._();
+  Iterable<Job> get children;
+  CoroutineContextKey<Job> get contextKey;
+  bool get isActive;
+  bool get isCancelled;
+  bool get isCompleted;
+  Job? get parent;
+  void cancel([CancellationException? cause]);
+  CancellationException getCancellationException();
+  Disposable invokeOnCompletion(void Function(Object?) handler, {bool onCancelling = false});
+  Future<void> join();
+  bool start();
   String toString();
 }
 
@@ -867,6 +1193,14 @@ final class PrincipalBuilder extends ValidatingBuilder<Principal> {
   void roles(Iterable<String> names);
 }
 
+final class PrincipalElement with AbstractCoroutineContextElement {
+  static const CoroutineContextKey<PrincipalElement> key = CoroutineContextKey<PrincipalElement>('Principal');
+  final Principal principal;
+  const PrincipalElement(Principal principal);
+  CoroutineContextKey<PrincipalElement> get contextKey;
+  String toString();
+}
+
 enum PrincipalKind {
   user, service, system;
 }
@@ -884,6 +1218,29 @@ abstract final class PrincipalViolationCodes {
   static const ViolationCode delegationTooDeep = ViolationCode('essentia.principal.delegation-too-deep');
   static const ViolationCode invalidAttribute = ViolationCode('essentia.principal.invalid-attribute');
   static const ViolationCode selfDelegation = ViolationCode('essentia.principal.self-delegation');
+}
+
+extension Produce on CoroutineScope {
+  ReceiveChannel<E> produce<E>(FutureOr<void> Function(ProducerScope<E>) block, {int capacity = Channel.rendezvous, BufferOverflow onBufferOverflow = BufferOverflow.suspend, CoroutineContext context = CoroutineContext.empty});
+}
+
+extension ProducerAwait on ProducerScope<Object?> {
+  Future<void> awaitClose([void Function()? block]);
+}
+
+abstract interface class ProducerScope<E> implements CoroutineScope, SendChannel<E> {
+  abstract SendChannel<E> get channel;
+}
+
+abstract interface class ReceiveChannel<E> {
+  abstract bool get isClosedForReceive;
+  abstract bool get isEmpty;
+  abstract SelectClause<E> get onReceive;
+  abstract SelectClause<ChannelResult<E>> get onReceiveCatching;
+  abstract void cancel([CancellationException? cause]);
+  abstract Future<E> receive();
+  abstract Future<ChannelResult<E>> receiveCatching();
+  abstract ChannelResult<E> tryReceive();
 }
 
 extension RecordIterableUnzip<A, B> on Iterable<(A, B)> {
@@ -964,6 +1321,23 @@ extension ResultIterable<T> on Iterable<Result<T>> {
   Result<List<T>> sequence();
 }
 
+abstract interface class ScheduledTask {
+  abstract bool get isActive;
+  abstract void cancel();
+}
+
+abstract class Scheduler with AbstractCoroutineContextElement {
+  static const CoroutineContextKey<Scheduler> key = CoroutineContextKey<Scheduler>('Scheduler');
+  static const Scheduler system = SystemScheduler();
+  const Scheduler();
+  abstract Clock get clock;
+  CoroutineContextKey<Scheduler> get contextKey;
+  static Scheduler get current;
+  abstract TimeSource get timeSource;
+  Future<void> delay(Duration duration);
+  abstract ScheduledTask schedule(Duration delay, void Function() action);
+}
+
 extension ScopeFunctions<T> on T {
   T also(void Function(T) action);
   T apply(void Function(T) block);
@@ -971,6 +1345,22 @@ extension ScopeFunctions<T> on T {
   T? takeIf(bool Function(T) predicate);
   T? takeUnless(bool Function(T) predicate);
 }
+
+abstract interface class SelectBuilder<R> {
+  abstract void invoke<Q>(SelectClause<Q> clause, FutureOr<R> Function(Q) block);
+  abstract void onTimeout(Duration timeout, FutureOr<R> Function() block);
+}
+
+extension SelectBuilderClauses<R> on SelectBuilder<R> {
+  void onAwait<T>(Deferred<T> deferred, FutureOr<R> Function(T) block);
+  void onFuture<T>(Future<T> future, FutureOr<R> Function(T) block);
+  void onJoin(Job job, FutureOr<R> Function() block);
+  void onReceive<E>(ReceiveChannel<E> channel, FutureOr<R> Function(E) block);
+  void onReceiveCatching<E>(ReceiveChannel<E> channel, FutureOr<R> Function(ChannelResult<E>) block);
+  void onSend<E>(SendChannel<E> channel, E element, FutureOr<R> Function(SendChannel<E>) block);
+}
+
+abstract interface class SelectClause<Q> {}
 
 final class SemanticVersion implements Comparable<SemanticVersion> {
   final List<String> build;
@@ -1030,6 +1420,30 @@ final class SemanticVersionRange {
   SemanticVersionRange union(SemanticVersionRange other);
 }
 
+final class Semaphore {
+  bool fair;
+  Semaphore(int permits, {int acquiredPermits = 0, bool fair = true});
+  int get availablePermits;
+  int get permits;
+  int get waitingCount;
+  Future<void> acquire();
+  void release();
+  void resize(int permits);
+  String toString();
+  bool tryAcquire();
+  Future<bool> tryAcquireWithin(Duration timeout, {Scheduler? scheduler});
+  Future<R> withPermit<R>(FutureOr<R> Function() action);
+}
+
+abstract interface class SendChannel<E> {
+  abstract bool get isClosedForSend;
+  abstract bool close([Object? cause]);
+  abstract void invokeOnClose(void Function(Object?) handler);
+  abstract SelectClause<SendChannel<E>> onSend(E element);
+  abstract Future<void> send(E element);
+  abstract ChannelResult<void> trySend(E element);
+}
+
 extension SetAlgebra<T> on Set<T> {
   Set<T> minusAll(Iterable<T> elements);
   Set<T> minusElement(T element);
@@ -1038,6 +1452,21 @@ extension SetAlgebra<T> on Set<T> {
 
 enum Severity {
   warning, error;
+}
+
+abstract interface class SharedFlow<T> implements Stream<T> {
+  abstract List<T> get replayCache;
+}
+
+enum SharingCommand {
+  start, stop, stopAndResetReplayCache;
+}
+
+abstract interface class SharingStarted {
+  static const SharingStarted eagerly = StartedEagerly();
+  static const SharingStarted lazily = StartedLazily();
+  abstract Stream<SharingCommand> command(StateFlow<int> subscriptionCount);
+  static SharingStarted whileSubscribed({Duration stopTimeout = Duration.zero, Duration? replayExpiration});
 }
 
 final class SourceUnavailable extends ParameterViolation {
@@ -1049,6 +1478,10 @@ final class SourceUnavailable extends ParameterViolation {
   ViolationPath get path;
 }
 
+abstract interface class StateFlow<T> implements SharedFlow<T> {
+  abstract T get value;
+}
+
 final class StrayValue extends ParameterViolation {
   final int position;
   ViolationCode get code;
@@ -1057,17 +1490,33 @@ final class StrayValue extends ParameterViolation {
 }
 
 extension StreamAccumulation<T> on Stream<T> {
+  Stream<R> runningFold<R>(R initial, R Function(R, T) operation);
   Stream<T> runningReduce(T Function(T, T) combine);
+  Stream<R> scan<R>(R initial, R Function(R, T) operation);
+}
+
+extension StreamBuffering<T> on Stream<T> {
+  Stream<T> buffer(int capacity, {BufferOverflow onBufferOverflow = BufferOverflow.suspend});
+  Stream<T> conflate();
+}
+
+extension StreamCancellation<T> on Stream<T> {
+  Stream<T> cancellable();
 }
 
 extension StreamCollection<T> on Stream<T> {
+  Future<T?> get firstOrNull;
+  Future<T?> get singleOrNull;
+  Future<void> collect([FutureOr<void> Function(T)? action]);
   Future<void> collectLatest(Future<void> Function(T) action);
   Future<int> countWhere(bool Function(T) test);
   Future<T?> firstWhereOrNull(bool Function(T) test);
+  Job launchIn(CoroutineScope scope);
 }
 
 extension StreamCombination<T> on Stream<T> {
   Stream<(T, R)> zip<R>(Stream<R> other);
+  Stream<R> combine<S, R>(Stream<S> other, R Function(T, S) transform);
 }
 
 extension StreamDistinctness<T> on Stream<T> {
@@ -1082,9 +1531,34 @@ extension StreamLifecycle<T> on Stream<T> {
 
 extension StreamMapping<T> on Stream<T> {
   Stream<(int, T)> get indexed;
+  Stream<R> flatMapConcat<R>(Stream<R> Function(T) transform);
+  Stream<R> flatMapLatest<R>(Stream<R> Function(T) transform);
   Stream<R> flatMapMerge<R>(Stream<R> Function(T) transform, {int concurrency = _defaultConcurrency});
   Stream<R> mapLatest<R>(Future<R> Function(T) transform);
   Stream<R> mapNotNull<R extends Object>(R? Function(T) transform);
+  Stream<T> onEach(FutureOr<void> Function(T) action);
+  Stream<R> transformLatest<R>(FutureOr<void> Function(FlowCollector<R>, T) transform);
+}
+
+extension StreamProduceIn<T> on Stream<T> {
+  ReceiveChannel<T> produceIn(CoroutineScope scope);
+}
+
+extension StreamRecovery<T> on Stream<T> {
+  Stream<T> catchError(FutureOr<void> Function(FlowCollector<T>, Object, StackTrace) action);
+  Stream<T> retry({int retries = _unlimited, FutureOr<bool> Function(Object) predicate = _always});
+  Stream<T> retryWhen(FutureOr<bool> Function(Object, int) predicate);
+}
+
+extension StreamSharing<T> on Stream<T> {
+  Future<StateFlow<T>> awaitStateIn(CoroutineScope scope);
+  SharedFlow<T> shareIn(CoroutineScope scope, SharingStarted started, {int replay = 0});
+  StateFlow<T> stateIn(CoroutineScope scope, SharingStarted started, T initialValue);
+}
+
+extension StreamTiming<T> on Stream<T> {
+  Stream<T> debounce(Duration timeout);
+  Stream<T> sample(Duration period);
 }
 
 extension StringAffixes on String {
@@ -1172,6 +1646,76 @@ final class Success<T> extends Result<T> {
   const Success<T>(T value);
   int get hashCode;
   bool operator ==(Object other);
+  String toString();
+}
+
+abstract interface class SupervisorJob implements CompletableJob {
+  factory SupervisorJob([Job? parent]);
+}
+
+final class SystemClock implements Clock {
+  DateTime now();
+  String toString();
+}
+
+final class SystemScheduler extends Scheduler {
+  Clock get clock;
+  TimeSource get timeSource;
+  ScheduledTask schedule(Duration delay, void Function() action);
+  String toString();
+}
+
+final class TestScheduler extends Scheduler implements TimeSource, Clock, VirtualTime {
+  final DateTime start;
+  TestScheduler({DateTime? start});
+  Clock get clock;
+  Duration get currentTime;
+  int get pendingTasks;
+  TimeSource get timeSource;
+  Zone get zone;
+  Future<void> advanceTimeBy(Duration duration);
+  Future<void> advanceUntilIdle();
+  TimeMark markNow();
+  DateTime now();
+  Duration read();
+  R run<R>(R Function() body);
+  Future<void> runCurrent();
+  ScheduledTask schedule(Duration delay, void Function() action);
+  String toString();
+}
+
+final class TestTimeSource extends TimeSource {
+  TestTimeSource();
+  void advance(Duration duration);
+  Duration read();
+  String toString();
+}
+
+final class TimeMark implements Comparable<TimeMark> {
+  final Duration reading;
+  final TimeSource source;
+  const TimeMark(TimeSource source, Duration reading);
+  int get hashCode;
+  TimeMark operator +(Duration duration);
+  TimeMark operator -(Duration duration);
+  bool operator ==(Object other);
+  int compareTo(TimeMark other);
+  Duration difference(TimeMark other);
+  Duration elapsedNow();
+  bool hasNotPassedNow();
+  bool hasPassedNow();
+  String toString();
+}
+
+abstract class TimeSource {
+  static final TimeSource monotonic;
+  const TimeSource();
+  TimeMark markNow();
+  abstract Duration read();
+}
+
+final class TimeoutCancellationException extends CancellationException {
+  const TimeoutCancellationException(String message, {Object? coroutine});
   String toString();
 }
 
@@ -1393,21 +1937,39 @@ enum WindowRemainder {
   bool get keepsPartialWindows;
 }
 
+Future<Never> awaitCancellation();
+
+Stream<R> combine<T, R>(Iterable<Stream<T>> streams, R Function(List<T>) transform);
+
 int Function(T, T) compareBy<T, K extends Comparable<Object>>(K Function(T) keyOf);
 
 int Function(T, T) compareByDescending<T, K extends Comparable<Object>>(K Function(T) keyOf);
 
 int compareValues<T extends Comparable<Object>>(T? left, T? right);
 
+Future<R> coroutineScope<R>(FutureOr<R> Function(CoroutineScope) block);
+
+CoroutineContext currentCoroutineContext();
+
 Principal? currentPrincipal();
+
+Future<void> delay(Duration duration);
+
+void ensureActive();
 
 EventBus eventBus(void Function(EventBusBuilder) block);
 
 FlagBuilder flag(List<String> names);
 
+void handleCoroutineException(CoroutineContext context, Object error, StackTrace stackTrace, {Zone? zone});
+
+bool isCurrentCancellation(Object error);
+
 Lazy<T> lazy<T>(T Function() initializer);
 
 Lazy<T> lazyOf<T>(T value);
+
+CoroutineScope mainScope();
 
 int Function(T, T) naturalOrder<T extends Comparable<Object>>();
 
@@ -1428,3 +1990,86 @@ R runAsPrincipal<R>(Principal principal, R Function() body);
 Result<T> runCatching<T>(T Function() block);
 
 Future<Result<T>> runCatchingAsync<T>(Future<T> Function() block);
+
+Future<R> select<R>(void Function(SelectBuilder<R>) block);
+
+Future<R> selectUnbiased<R>(void Function(SelectBuilder<R>) block);
+
+Future<R> supervisorScope<R>(FutureOr<R> Function(CoroutineScope) block);
+
+List<Object> suppressedExceptionsOf(Object error);
+
+Future<T> suspendCancellableCoroutine<T>(void Function(CancellableContinuation<T>) block);
+
+Future<R> withContext<R>(CoroutineContext context, FutureOr<R> Function(CoroutineScope) block);
+
+Future<R> withTimeout<R>(Duration timeout, FutureOr<R> Function(CoroutineScope) block);
+
+Future<R?> withTimeoutOrNull<R>(Duration timeout, FutureOr<R> Function(CoroutineScope) block);
+
+Future<void> yieldNow();
+
+library package:essentia/testing.dart
+
+final class StandardTestDispatcher extends TestDispatcher {
+  final String? name;
+  final TestScheduler scheduler;
+  StandardTestDispatcher({TestScheduler? scheduler, String? name});
+  void dispatch(CoroutineContext context, Zone zone, void Function() block);
+  CoroutineDispatcher limitedParallelism(int parallelism);
+  String toString();
+}
+
+abstract class TestDispatcher extends CoroutineDispatcher {
+  const TestDispatcher();
+  abstract TestScheduler get scheduler;
+}
+
+final class TestScheduler extends Scheduler implements TimeSource, Clock, VirtualTime {
+  final DateTime start;
+  TestScheduler({DateTime? start});
+  Clock get clock;
+  Duration get currentTime;
+  int get pendingTasks;
+  TimeSource get timeSource;
+  Zone get zone;
+  Future<void> advanceTimeBy(Duration duration);
+  Future<void> advanceUntilIdle();
+  TimeMark markNow();
+  DateTime now();
+  Duration read();
+  R run<R>(R Function() body);
+  Future<void> runCurrent();
+  ScheduledTask schedule(Duration delay, void Function() action);
+  String toString();
+}
+
+abstract interface class TestScope implements CoroutineScope {
+  abstract CoroutineScope get backgroundScope;
+  abstract TestScheduler get testScheduler;
+}
+
+extension TestScopeTime on TestScope {
+  Duration get currentTime;
+  TimeSource get testTimeSource;
+  void advanceTimeBy(Duration duration);
+  void advanceUntilIdle();
+  void runCurrent();
+}
+
+final class UncompletedCoroutinesError extends AssertionError {
+  UncompletedCoroutinesError(String message);
+  String toString();
+}
+
+final class UnconfinedTestDispatcher extends TestDispatcher {
+  final String? name;
+  final TestScheduler scheduler;
+  UnconfinedTestDispatcher({TestScheduler? scheduler, String? name});
+  void dispatch(CoroutineContext context, Zone zone, void Function() block);
+  bool isDispatchNeeded(CoroutineContext context);
+  CoroutineDispatcher limitedParallelism(int parallelism);
+  String toString();
+}
+
+Future<void> runTest(FutureOr<void> Function(TestScope) body, {CoroutineContext context = CoroutineContext.empty, Duration timeout = const Duration(seconds: 60)});

@@ -9,9 +9,14 @@
 
 import 'dart:async';
 
+import 'package:essentia/src/coroutines/completable_job.dart';
+import 'package:essentia/src/coroutines/coroutine_scope.dart';
+import 'package:essentia/src/coroutines/coroutine_scope_builders.dart';
+import 'package:essentia/src/coroutines/coroutine_start.dart';
+import 'package:essentia/src/coroutines/job.dart';
+import 'package:essentia/src/event/envelope_lane.dart';
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_envelope.dart';
-import 'package:essentia/src/event/mailbox.dart';
 import 'package:meta/meta.dart';
 
 /// One broadcast attachment to a topic: its mailbox and the task working
@@ -27,13 +32,13 @@ final class Subscriber {
     this._consume,
     this._detach, {
     required this._once,
-  }) : _mailbox = Mailbox<EventEnvelope<Event>>(capacity);
+  }) : _mailbox = EnvelopeLane(capacity);
 
   /// What this subscriber is reported under.
   final String name;
 
   /// The envelopes handed to this subscriber and not yet taken.
-  final Mailbox<EventEnvelope<Event>> _mailbox;
+  final EnvelopeLane _mailbox;
 
   /// Runs the consumer for one envelope, answering whether the envelope
   /// matched what the subscriber listens for.
@@ -54,11 +59,11 @@ final class Subscriber {
   /// Whether the subscriber was told to stop.
   var _cancelled = false;
 
-  /// Completes with the task once [start] or [refuse] decided what it is.
-  final _ended = Completer<void>();
+  /// Completes once [start] or [refuse] decided what the subscriber is.
+  final _decided = Completer<Job>();
 
-  /// The task, completing once the subscriber has ended.
-  Future<void> get done => _ended.future;
+  /// Waits until the subscriber has ended.
+  Future<void> get done => _decided.future.then((task) => task.join());
 
   /// Whether the subscriber is still receiving, which it stops doing the
   /// moment it is cancelled even if a handler is still running.
@@ -67,11 +72,16 @@ final class Subscriber {
   /// Whether the subscriber was attached to a running topic.
   bool get isRegistered => _registered;
 
-  /// Starts receiving, first the envelopes of [replay].
-  void start(Iterable<EventEnvelope<Event>> replay) {
+  /// Starts receiving in a coroutine of [work], first the envelopes of
+  /// [replay].
+  void start(Iterable<EventEnvelope<Event>> replay, CoroutineScope work) {
     _registered = true;
     replay.forEach(_mailbox.trySend);
-    _ended.complete(_run());
+    final Job task = work.launch(
+      (it) => _run(),
+      start: CoroutineStart.undispatched,
+    );
+    _decided.complete(task);
   }
 
   /// Ends the subscriber before it ever received anything, because its
@@ -79,7 +89,7 @@ final class Subscriber {
   void refuse() {
     _finished = true;
     _mailbox.cancel();
-    _ended.complete();
+    _decided.complete(CompletableJob()..complete());
   }
 
   /// Hands [envelope] to this subscriber, waiting until it is taken.

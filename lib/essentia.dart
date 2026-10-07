@@ -11,11 +11,11 @@
 ///
 /// Validation that reports every problem at once, validating configuration
 /// builders, an in-process event bus, layering contracts, RFC 9562
-/// identifiers, semantic versions, principals, platform detection, a
-/// `Result` type, Kotlin's `lazy`, Kotlin's standard library extensions on
-/// Dart's own classes and program parameters. It runs on every Dart
-/// platform, the web and WebAssembly included; `file()` is offered where
-/// `dart:io` is.
+/// identifiers, semantic versions, principals, platform detection, time
+/// sources, schedulers with virtual time, jobs and locks, a `Result` type,
+/// Kotlin's `lazy`, Kotlin's standard library extensions on Dart's own
+/// classes and program parameters. It runs on every Dart platform, the web
+/// and WebAssembly included; `file()` is offered where `dart:io` is.
 library;
 
 export 'src/architecture/data_source.dart';
@@ -49,7 +49,19 @@ export 'src/arguments/unknown_argument_policy.dart';
 export 'src/arguments/value_origin.dart';
 export 'src/arguments/value_source.dart';
 export 'src/arguments/version_parameter_converters.dart';
-export 'src/async/future_timeout.dart';
+export 'src/channels/buffer_overflow.dart';
+export 'src/channels/channel.dart';
+export 'src/channels/channel_closed.dart';
+export 'src/channels/channel_result.dart';
+export 'src/channels/channel_streams.dart';
+export 'src/channels/closed_receive_channel_exception.dart';
+export 'src/channels/closed_send_channel_exception.dart';
+export 'src/channels/produce.dart';
+export 'src/channels/producer_await.dart';
+export 'src/channels/producer_scope.dart';
+export 'src/channels/receive_channel.dart';
+export 'src/channels/send_channel.dart';
+export 'src/channels/stream_produce_in.dart';
 export 'src/collection/comparable_iterable_ordering.dart';
 export 'src/collection/grouping.dart';
 export 'src/collection/iterable_accumulation.dart';
@@ -83,6 +95,47 @@ export 'src/collection/window_remainder.dart';
 export 'src/comparison/comparable_coercion.dart';
 export 'src/comparison/comparator_chaining.dart';
 export 'src/comparison/comparison_dsl.dart';
+export 'src/coroutines/abstract_coroutine_context_element.dart';
+export 'src/coroutines/await_all.dart';
+export 'src/coroutines/cancellable_continuation.dart';
+export 'src/coroutines/cancellation_exception.dart';
+export 'src/coroutines/completable_deferred.dart';
+export 'src/coroutines/completable_job.dart';
+export 'src/coroutines/completion_handler.dart';
+export 'src/coroutines/completion_handler_exception.dart';
+export 'src/coroutines/coroutine_context.dart';
+export 'src/coroutines/coroutine_context_access.dart';
+export 'src/coroutines/coroutine_context_element.dart';
+export 'src/coroutines/coroutine_context_key.dart';
+export 'src/coroutines/coroutine_context_zone.dart'
+    show currentCoroutineContext;
+export 'src/coroutines/coroutine_dispatcher.dart';
+export 'src/coroutines/coroutine_exception_handler.dart';
+export 'src/coroutines/coroutine_name.dart';
+export 'src/coroutines/coroutine_scope.dart';
+export 'src/coroutines/coroutine_scope_builders.dart';
+export 'src/coroutines/coroutine_start.dart';
+export 'src/coroutines/deferred.dart';
+export 'src/coroutines/dispatchers.dart';
+export 'src/coroutines/exception_handling.dart';
+export 'src/coroutines/future_as_deferred.dart';
+export 'src/coroutines/future_timeout.dart';
+export 'src/coroutines/global_scope.dart';
+export 'src/coroutines/isolate_body_not_sendable_error.dart';
+export 'src/coroutines/job.dart';
+export 'src/coroutines/job_cancellation_exception.dart';
+export 'src/coroutines/job_operations.dart';
+export 'src/coroutines/join_all.dart';
+export 'src/coroutines/non_cancellable.dart';
+export 'src/coroutines/scheduled_task.dart';
+export 'src/coroutines/scheduler.dart';
+export 'src/coroutines/scoping.dart';
+export 'src/coroutines/supervisor_job.dart';
+export 'src/coroutines/suppressed_exceptions.dart' show suppressedExceptionsOf;
+export 'src/coroutines/suspension.dart';
+export 'src/coroutines/system_scheduler.dart';
+export 'src/coroutines/timeout_cancellation_exception.dart';
+export 'src/coroutines/timeouts.dart';
 export 'src/dsl/builder.dart';
 export 'src/dsl/validating_builder.dart';
 export 'src/event/bus_state.dart';
@@ -108,6 +161,15 @@ export 'src/event/topic_key.dart';
 export 'src/event/topic_metrics.dart';
 export 'src/event/topic_not_declared_error.dart';
 export 'src/event/topic_type_mismatch_error.dart';
+export 'src/flow/flow_collector.dart';
+export 'src/flow/mutable_shared_flow.dart';
+export 'src/flow/mutable_state_flow.dart';
+export 'src/flow/mutable_state_flow_update.dart';
+export 'src/flow/shared_flow.dart';
+export 'src/flow/sharing_command.dart';
+export 'src/flow/sharing_started.dart';
+export 'src/flow/state_flow.dart';
+export 'src/flow/stream_sharing.dart';
 export 'src/identity/uuid.dart';
 export 'src/identity/uuid_version.dart';
 export 'src/lazy/lazy.dart';
@@ -122,6 +184,7 @@ export 'src/principal/principal.dart';
 export 'src/principal/principal_attributes.dart';
 export 'src/principal/principal_builder.dart';
 export 'src/principal/principal_context.dart';
+export 'src/principal/principal_element.dart';
 export 'src/principal/principal_kind.dart';
 export 'src/principal/principal_missing_exception.dart';
 export 'src/principal/principal_violation_codes.dart';
@@ -138,12 +201,26 @@ export 'src/result/result_flatten.dart';
 export 'src/result/result_future.dart';
 export 'src/result/result_iterable.dart';
 export 'src/scope/scope_functions.dart';
+export 'src/selects/deferred_select_clauses.dart';
+export 'src/selects/job_select_clauses.dart';
+export 'src/selects/select.dart';
+export 'src/selects/select_builder.dart';
+export 'src/selects/select_builder_clauses.dart';
+export 'src/selects/select_clause.dart';
+export 'src/stream/combine_latest.dart' show combine;
 export 'src/stream/stream_accumulation.dart';
+export 'src/stream/stream_buffering.dart';
+export 'src/stream/stream_cancellation.dart';
 export 'src/stream/stream_collection.dart';
 export 'src/stream/stream_combination.dart';
 export 'src/stream/stream_distinctness.dart';
 export 'src/stream/stream_lifecycle.dart';
 export 'src/stream/stream_mapping.dart';
+export 'src/stream/stream_recovery.dart';
+export 'src/stream/stream_timing.dart';
+export 'src/sync/mutex.dart';
+export 'src/sync/semaphore.dart';
+export 'src/testing/test_scheduler.dart';
 export 'src/text/nullable_string.dart';
 export 'src/text/string_affixes.dart';
 export 'src/text/string_blankness.dart';
@@ -154,11 +231,17 @@ export 'src/text/string_search.dart';
 export 'src/text/string_similarity.dart';
 export 'src/text/string_slicing.dart';
 export 'src/text/string_words.dart';
+export 'src/time/clock.dart';
 export 'src/time/decimal_duration_units.dart';
 export 'src/time/duration_arithmetic.dart';
 export 'src/time/duration_components.dart';
 export 'src/time/duration_parsing.dart';
 export 'src/time/duration_units.dart';
+export 'src/time/monotonic_time_source.dart';
+export 'src/time/system_clock.dart';
+export 'src/time/test_time_source.dart';
+export 'src/time/time_mark.dart';
+export 'src/time/time_source.dart';
 export 'src/validation/path_segment.dart';
 export 'src/validation/severity.dart';
 export 'src/validation/validatable.dart';

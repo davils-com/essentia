@@ -10,8 +10,10 @@ Dart's own classes.
 Its only runtime dependency is `package:meta`.
 
 Everything is exported from `package:essentia/essentia.dart`: validation, the builder DSL, program
-parameters, the event bus, identifiers, semantic versions, principals, layering contracts, platform
-detection, scope functions, `Result`, `lazy` and the Kotlin stdlib extensions.
+parameters, the event bus, identifiers, semantic versions, principals, time sources, coroutines,
+channels, `select`, hot flows, locks, layering contracts, platform detection, scope functions,
+`Result`, `lazy` and the Kotlin stdlib extensions. Testing on virtual time comes from
+`package:essentia/testing.dart`.
 
 It runs on every Dart platform: the VM and native executables, Flutter, the web and WebAssembly.
 The test suite runs on all of them. Where a platform has no `dart:io`, the program parameters read
@@ -175,6 +177,8 @@ await bus.topic(users).publish(const UserRegistered('u-42'), key: 'u-42');
   overflow policy discards nothing at all.
 - **Causation travels with the work.** Publishing from inside a consumer joins the chain being
   handled; the chain is carried by a `Zone`, so it survives every `await` of the handler.
+- **On coroutines.** Every lane is a channel and every lane, subscriber and group worker a coroutine
+  of its topic; a publisher waiting for room is cancelled with its job.
 - **Stops cleanly.** `drain()` delivers what is in flight; `dispose()` does not wait and says what
   it dropped.
 
@@ -215,6 +219,93 @@ An envelope records the principal that published it, and every consumer handles 
 principal, so what a consumer publishes in turn carries the same caller on. `publishAs` names one
 explicitly.
 
+## Coroutines
+
+Kotlin's `kotlinx-coroutines-core` on Dart's futures and zones: structured concurrency, cancellation,
+timeouts, dispatchers and a virtual event loop for tests. The context of a coroutine - its job, its
+name, its exception handler, its dispatcher, its scheduler and its principal - travels in one `Zone`
+value, so it reaches every `await` of the work.
+
+```dart
+final scope = CoroutineScope(SupervisorJob());
+
+final Job polling = scope.launch((it) async {
+  while (true) {
+    await delay(30.seconds);
+    await refresh();
+  }
+});
+
+final (User user, List<Order> orders) = await coroutineScope((it) async {
+  final Deferred<User> user = it.async((it) => loadUser(id));
+  final Deferred<List<Order>> orders = it.async((it) => loadOrders(id));
+  return (await user, await orders);
+});
+
+final Report? report = await withTimeoutOrNull(5.seconds, (it) => build());
+await polling.cancelAndJoin();
+```
+
+- **Structured.** A coroutine is a child of the job of its scope; a parent completes only once its
+  children did, and a failing child cancels its parent and its siblings unless the parent is a
+  `SupervisorJob`. `coroutineScope`, `supervisorScope`, `withContext` and `withTimeout` wait for
+  everything they started.
+- **Cancellable.** A `Future` cannot be interrupted, so cancellation is cooperative, as in Kotlin:
+  `delay`, `yieldNow`, `join`, `await` on a `Deferred`, channels, `select`, `Mutex` and `Semaphore`
+  end with a `CancellationException`, and `suspendCancellableCoroutine` makes any wait of one's own
+  cancellable.
+- **Dispatched.** `Dispatchers.main` is the event loop; `Dispatchers.isolate` runs a body on a pool
+  of worker isolates, one per processor, and on the event loop on the web.
+- **Tested on virtual time.** `runTest` from `package:essentia/testing.dart` runs a test body on the
+  virtual event loop of a `TestScheduler`: delays, timers and timeouts take no real time, and the
+  test fails with every failure of the coroutines it started.
+
+```dart
+test('polls every half minute', () => runTest((it) async {
+  it.backgroundScope.launch((it) => poll());
+  await delay(100.seconds);
+  expect(polls, 3);
+}));
+```
+
+A component that waits, measures or stamps takes a `Scheduler` - a `TimeSource`, a `Clock` and
+cancellable timers in one -, defaulting to `Scheduler.system`, which runs on virtual time inside a
+test. `Semaphore` and `Mutex` are fair and cancellable; a `Semaphore` can be resized while its
+permits are held.
+
+## Channels, select and hot flows
+
+```dart
+final ReceiveChannel<int> squares = scope.produce((it) async {
+  for (var x = 1; x <= 5; x++) {
+    await it.send(x * x);
+  }
+});
+await squares.consumeEach(print);
+
+final String winner = await select((it) {
+  it.onReceive(fast, (value) => 'fast: $value');
+  it.onReceive(slow, (value) => 'slow: $value');
+  it.onTimeout(1.seconds, () => 'none in time');
+});
+
+final counter = MutableStateFlow(0);
+counter.update((it) => it + 1);
+final Job watching = counter.launchIn(scope);
+```
+
+- **Channels.** `Channel` with Kotlin's capacities - rendezvous, buffered, conflated, unlimited -
+  and `BufferOverflow`, `trySend`, `receiveCatching`, `close` that still delivers what was sent,
+  `cancel` that reports every element it drops to `onUndeliveredElement`, `produce`, and
+  `receiveAsStream` / `consumeAsStream` instead of Kotlin's `receiveAsFlow` / `consumeAsFlow`.
+- **select.** Biased and unbiased, over `onAwait`, `onJoin`, `onReceive`, `onReceiveCatching`,
+  `onSend`, `onTimeout` and, added for Dart, `onFuture`. A losing clause never consumes an element.
+- **Streams are flows.** Dart's `Stream` plays Kotlin's `Flow`: `SharedFlow` and `StateFlow` are
+  streams, `shareIn`, `stateIn` and `SharingStarted` share any stream, and the operators Kotlin
+  has and Dart lacks are extensions - `collect`, `launchIn`, `buffer`, `conflate`, `debounce`,
+  `sample`, `combine`, `flatMapLatest`, `flatMapConcat`, `transformLatest`, `runningFold`,
+  `retry`, `retryWhen`, `catchError`, `cancellable`. On `runTest` their time is virtual.
+
 ## Kotlin's standard library on Dart's classes
 
 The extensions Kotlin has and Dart does not, under the names Kotlin gives them. Every one says in
@@ -249,7 +340,25 @@ are what `rangeTo`, `until` and `downTo` hand back.
 
 Kept deliberately small, and only where Dart has no equivalent:
 
-- No coroutine scopes or dispatchers: topics run on the isolate's event loop.
+- A topic runs its lanes and consumers as coroutines under a supervisor of its own and does not
+  take a `CoroutineScope`; a consumer runs as the principal that attached it.
+- `select` clauses are calls on the builder, `it.onReceive(channel, ...)`, since Dart has no
+  receiver-scoped syntax; the clause getters `onAwait`, `onJoin`, `onReceive` and `onSend` exist as
+  well. `onFuture` never selects while the clauses register, because a future reports in a later
+  microtask, and a future it loses to is only no longer listened to.
+- `catch` is a reserved word: the `Flow` operator is `catchError`. Kotlin's suspending
+  `stateIn(scope)` is `awaitStateIn`, and `firstOrNull` and `singleOrNull` are getters, like
+  `Stream.first`.
+- A hot flow listened to inside a coroutine ends with that coroutine's `CancellationException` once
+  it is cancelled; prefer `collect` and `launchIn`. `shareIn`, `stateIn`, `retry` and `retryWhen`
+  listen to their upstream again, so it has to be re-listenable; a single-subscription stream fails
+  visibly.
+- An `await` on a future that completed in the root zone, such as the one `StreamSubscription.cancel`
+  returns when there is nothing to wait for, resumes outside the virtual event loop. `runTest` lets
+  the real loop run before virtual time moves on, so such work never comes late; the synchronous
+  advance methods inside a test do not, and the operators of Essentia avoid such futures.
+- If `onUndeliveredElement` throws, the operation that dropped the element throws it, instead of
+  Kotlin's `UndeliveredElementException`.
 - No concurrent collections. An isolate shares no memory, so Arc's `CopyOnWriteList`,
   `CopyOnWriteSet`, `CopyOnWriteMap`, `ConcurrentMap` and `LongAdder` are not ported. Where Arc
   uses one internally, Essentia uses the Dart idiom: an unmodifiable list that is replaced on every
@@ -272,6 +381,31 @@ Kept deliberately small, and only where Dart has no equivalent:
 - `lazy` has no `LazyThreadSafetyMode`: an isolate runs one thing at a time, so every `Lazy` keeps
   the `SYNCHRONIZED` contract. A read of the value from inside its own initializer throws a
   `StateError` instead of recursing.
+- Coroutines are Dart's `async` functions, so cancellation is cooperative at every suspension
+  Essentia provides, never inside a plain `await` of a `Future`; `future.asDeferred()` makes such a
+  wait cancellable. Code resumed after an `await` goes on in a microtask of its zone, not through
+  the dispatcher; a dispatcher only decides where a body starts. A value resumed into code whose job
+  was cancelled in the same microtask is handed to `onCancellation` instead, never lost.
+- `await` and `yield` are reserved inside asynchronous functions: `Deferred` is a `Future`, so
+  `await deferred` is Kotlin's `deferred.await()`, and Kotlin's `yield()` is `yieldNow()`.
+  `CoroutineStart.DEFAULT` is `defaultStart`, since `default` is reserved, and `MainScope()` is
+  `mainScope()`.
+- Dart operators cannot be generic: `context[Job]` is `context.get(Job.key)` or `context.job`, and
+  an element names its key with `contextKey`. `Job()` returns a `CompletableJob` but is typed
+  `Job`; create a `CompletableJob()` to call `complete`.
+- There are no threads: `Dispatchers.main` is Kotlin's `Main`, `Default` and `IO` on the event loop,
+  and `Dispatchers.isolate` plays `Default` on worker isolates. A body sent there must be sendable;
+  only its `CoroutineName` and `PrincipalElement` cross, and its children are not children of the
+  caller. A body that ignores its cancellation for a second has its isolate killed.
+- `Scheduler` bundles what Kotlin spreads over a dispatcher's `Delay`, a `TimeSource` and a
+  `Clock`, and is an element of the coroutine context. `TestScheduler` plays
+  `TestCoroutineScheduler` and is also the virtual event loop: inside it `Timer`, `Future.delayed`
+  and `Scheduler.system` are virtual, `DateTime.now`, `Stopwatch` and `TimeSource.monotonic` are not.
+  Driven from outside, its advance methods let the real event loop settle between tasks.
+  `TestTimeSource.advance` replaces `+=`, and refuses a negative duration.
+- `runTest` reports a failure of a coroutine at its end, as Kotlin does; an error that escapes a
+  plain `Future` fails the test at once through the test's own zone. The test dispatchers are
+  classes rather than functions.
 - `long()` is not needed (Dart's `int` is 64-bit), `default` and `enum` are reserved words
   (`defaultsTo`, `enumeration`), and errors that are programming mistakes extend `ArgumentError` or
   `StateError` (`TopicNotDeclaredError`, `ParametersNotLoadedError`).

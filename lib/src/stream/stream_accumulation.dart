@@ -41,4 +41,42 @@ extension StreamAccumulation<T> on Stream<T> {
           onCancel: ignoringCancel,
         );
       });
+
+  /// Emits [initial] and then every element folded into the value emitted
+  /// before it with [operation], Kotlin's `runningFold`.
+  ///
+  /// `[1, 2, 3]` folded from `0` by addition becomes `[0, 1, 3, 6]`.
+  /// [initial] is emitted as soon as a listener subscribes. An error thrown
+  /// by [operation] becomes an error event and leaves the running value
+  /// unchanged; errors of this stream are passed on unchanged.
+  ///
+  /// Every listener keeps its own running value, and pause, resume and
+  /// cancel reach this stream.
+  ///
+  /// Returns a stream that is a broadcast stream exactly when this one is.
+  Stream<R> runningFold<R>(
+    R initial,
+    R Function(R accumulator, T element) operation,
+  ) => relay<T, R>(this, (sink) {
+    var accumulator = initial;
+    sink.add(initial);
+    return (
+      onData: (element) {
+        final previous = accumulator;
+        emitCatching(sink, () => accumulator = operation(previous, element));
+      },
+      onDone: closing(sink),
+      onCancel: ignoringCancel,
+    );
+  });
+
+  /// Emits [initial] and then every element folded into the value emitted
+  /// before it with [operation], Kotlin's `scan`, the same as
+  /// [runningFold].
+  ///
+  /// Returns a stream that is a broadcast stream exactly when this one is.
+  Stream<R> scan<R>(
+    R initial,
+    R Function(R accumulator, T element) operation,
+  ) => runningFold(initial, operation);
 }

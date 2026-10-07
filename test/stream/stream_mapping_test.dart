@@ -9,12 +9,30 @@
 
 import 'dart:async';
 
-import 'package:essentia/src/stream/stream_mapping.dart';
+import 'package:essentia/essentia.dart';
+import 'package:essentia/testing.dart';
 import 'package:test/test.dart';
 
 import 'probe_stream.dart';
 
-/// Checks `mapNotNull`, `indexed`, `mapLatest` and `flatMapMerge`.
+/// The numbers 1 and 2, the second one 100 milliseconds after the first,
+/// so that the work for the first one ends in time.
+///
+/// Returns the stream.
+Stream<int> _spaced() =>
+    Stream<int>.fromIterable(<int>[1, 2])
+        .onEach((value) => delay(Duration(milliseconds: value == 1 ? 0 : 100)));
+
+/// The numbers 1 and 2, the second one 100 milliseconds after the first,
+/// so that slow work for the first one is superseded.
+///
+/// Returns the stream.
+Stream<int> _spacedLong() =>
+    Stream<int>.fromIterable(<int>[1, 2])
+        .onEach((value) => delay(Duration(milliseconds: value == 1 ? 0 : 100)));
+
+/// Checks `mapNotNull`, `indexed`, `mapLatest`, `flatMapMerge`,
+/// `flatMapLatest`, `flatMapConcat`, `transformLatest` and `onEach`.
 void main() {
   group('mapNotNull', () {
     test('maps and keeps only the present results', () async {
@@ -310,6 +328,296 @@ void main() {
           .isBroadcast;
 
       expect(broadcast, isTrue);
+    });
+  });
+
+  group('cancelling the superseded work', () {
+    test(
+      'cancels the delay of a superseded mapLatest transform',
+      () => runTest((it) async {
+        final log = <String>[];
+        final Stream<int> numbers = Stream<int>.fromIterable(<int>[1, 2])
+            .onEach((_) => delay(const Duration(milliseconds: 100)));
+
+        final List<String> results = await numbers.mapLatest((value) async {
+          try {
+            await delay(const Duration(milliseconds: 150));
+          } on CancellationException {
+            log.add('cancelled $value');
+            rethrow;
+          }
+          return 'mapped $value';
+        }).toList();
+
+        expect(results, <String>['mapped 2']);
+        expect(log, <String>['cancelled 1']);
+        expect(it.currentTime, const Duration(milliseconds: 350));
+      }),
+    );
+
+    test(
+      'cancels the work of the current inner stream with the job',
+      () => runTest((it) async {
+        final log = <String>[];
+        final Job job = it.launch(
+          (_) => Stream<int>.value(1).flatMapLatest((value) async* {
+            try {
+              await awaitCancellation();
+            } finally {
+              log.add('inner ended');
+            }
+          }).collect(),
+        );
+        it.runCurrent();
+
+        await job.cancelAndJoin();
+
+        expect(log, <String>['inner ended']);
+        expect(job.isCancelled, isTrue);
+      }),
+    );
+  });
+
+  group('flatMapLatest', () {
+    test(
+      'emits the events of the inner streams that end in time',
+      () => runTest((it) async {
+        final List<int> values = await _spaced()
+            .flatMapLatest(
+              (value) => Stream<int>.fromIterable(<int>[value, 10]),
+            )
+            .toList();
+
+        expect(values, <int>[1, 10, 2, 10]);
+      }),
+    );
+
+    test('keeps a broadcast source broadcast', () {
+      final probe = ProbeStream<int>.broadcast();
+
+      expect(probe.stream.flatMapLatest(Stream<int>.value).isBroadcast, isTrue);
+    });
+  });
+
+  group('flatMapConcat', () {
+    test('emits the inner streams one after the other', () async {
+      final numbers = Stream<int>.fromIterable(<int>[1, 2]);
+
+      final List<int> values = await numbers
+          .flatMapConcat((value) => Stream<int>.fromIterable(<int>[value, 10]))
+          .toList();
+
+      expect(values, <int>[1, 10, 2, 10]);
+    });
+  });
+
+  group('transformLatest', () {
+    test(
+      'emits what the run of every element emits',
+      () => runTest((it) async {
+        final List<String> values = await _spaced().transformLatest<String>((
+          collector,
+          value,
+        ) async {
+          await collector.emit('a$value');
+          await collector.emit('b$value');
+        }).toList();
+
+        expect(values, <String>['a1', 'b1', 'a2', 'b2']);
+      }),
+    );
+
+    test(
+      'cancels the run of the previous element',
+      () => runTest((it) async {
+        final log = <String>[];
+        final Stream<int> numbers = Stream<int>.fromIterable(<int>[1, 2])
+            .onEach((_) => delay(const Duration(milliseconds: 100)));
+
+        final List<String> values = await numbers.transformLatest<String>((
+          collector,
+          value,
+        ) async {
+          await collector.emit('start $value');
+          try {
+            await delay(const Duration(milliseconds: 150));
+          } on CancellationException {
+            log.add('cancelled $value');
+            rethrow;
+          }
+          await collector.emit('end $value');
+        }).toList();
+
+        expect(values, <String>['start 1', 'start 2', 'end 2']);
+        expect(log, <String>['cancelled 1']);
+      }),
+    );
+
+    test(
+      'passes an error of a run on and keeps going',
+      () => runTest((it) async {
+        final Stream<int> values = _spaced().transformLatest<int>((
+          collector,
+          value,
+        ) async {
+          if (value == 1) {
+            throw const FormatException();
+          }
+          await collector.emit(value);
+        });
+
+        await expectLater(
+          values,
+          emitsInOrder(<Object>[emitsError(isFormatException), 2, emitsDone]),
+        );
+      }),
+    );
+
+    test('passes a cancellation a run throws by itself on', () async {
+      final Stream<int> values = Stream<int>.value(1).transformLatest<int>(
+        (it, value) => throw const CancellationException('own'),
+      );
+
+      await expectLater(
+        values,
+        emitsInOrder(<Object>[
+          emitsError(isA<CancellationException>()),
+          emitsDone,
+        ]),
+      );
+    });
+
+    test('waits in emit while the listener is paused', () async {
+      final log = <String>[];
+      final StreamSubscription<String> subscription = Stream<int>.value(1)
+          .transformLatest<String>((it, value) async {
+            await it.emit('first');
+            log.add('emitted first');
+            await it.emit('second');
+            log.add('emitted second');
+          })
+          .listen(log.add);
+      addTearDown(subscription.cancel);
+      subscription.pause();
+      await settle();
+      final whilePaused = List<String>.of(log);
+
+      subscription.resume();
+      await settle();
+
+      expect(whilePaused, isEmpty);
+      expect(log, <String>[
+        'first',
+        'emitted first',
+        'second',
+        'emitted second',
+      ]);
+    });
+
+    test('fails an emit once the listener cancelled', () async {
+      final failure = Completer<Object>();
+      final StreamSubscription<int> subscription = Stream<int>.value(1)
+          .transformLatest<int>((it, value) async {
+            await settle();
+            try {
+              await it.emit(value);
+            } on Object catch (error) {
+              failure.complete(error);
+            }
+          })
+          .listen(null);
+      await Future<void>.value();
+
+      await subscription.cancel();
+
+      expect(await failure.future, isA<CancellationException>());
+    });
+  });
+
+  group('transformLatest emit', () {
+    test(
+      'waits while a slow listener processes an element',
+      () => runTest((it) async {
+        final log = <String>[];
+        final Stream<String> values = Stream<int>.value(1)
+            .transformLatest<String>((collector, value) async {
+              await collector.emit('first');
+              log.add('emitted first');
+              await collector.emit('second');
+              log.add('emitted second');
+            });
+
+        await values.collect((value) async {
+          log.add('got $value');
+          await delay(const Duration(milliseconds: 100));
+          log.add('done $value');
+        });
+
+        expect(log, <String>[
+          'got first',
+          'emitted first',
+          'done first',
+          'got second',
+          'done second',
+          'emitted second',
+        ]);
+      }),
+    );
+
+    test(
+      'refuses to emit from a superseded run',
+      () => runTest((it) async {
+        final log = <String>[];
+
+        final List<String> values = await _spacedLong().transformLatest<String>(
+          (collector, value) async {
+            try {
+              await delay(const Duration(milliseconds: 150));
+            } on CancellationException {
+              try {
+                await collector.emit('late $value');
+              } on CancellationException {
+                log.add('refused $value');
+              }
+              rethrow;
+            }
+            await collector.emit('end $value');
+          },
+        ).toList();
+
+        expect(values, <String>['end 2']);
+        expect(log, <String>['refused 1']);
+      }),
+    );
+  });
+
+  group('onEach', () {
+    test('runs the action before every element is emitted', () async {
+      final log = <String>[];
+
+      await Stream<int>.fromIterable(<int>[1, 2])
+          .onEach((value) => log.add('saw $value'))
+          .onEach((value) => log.add('awaited $value'))
+          .forEach((value) => log.add('got $value'));
+
+      expect(log, <String>[
+        'saw 1',
+        'awaited 1',
+        'got 1',
+        'saw 2',
+        'awaited 2',
+        'got 2',
+      ]);
+    });
+
+    test('turns an error of the action into an error event', () async {
+      final Stream<int> stream = Stream<int>.fromIterable(<int>[1, 2])
+          .onEach((value) => value == 1 ? throw const FormatException() : null);
+
+      await expectLater(
+        stream,
+        emitsInOrder(<Object>[emitsError(isFormatException), 2, emitsDone]),
+      );
     });
   });
 }

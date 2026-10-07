@@ -4,6 +4,102 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 2.0.0
+
+Kotlin's `kotlinx-coroutines-core`, ported: structured concurrency on Dart's futures and zones,
+channels, `select`, hot flows on Dart's streams, a dispatcher on worker isolates, and a virtual
+event loop for tests. Arc's coroutine contracts hold 1:1 where Dart can express them; the README
+lists every difference.
+
+### Added
+
+- `CoroutineContext`, `CoroutineContextKey`, `CoroutineContextElement`,
+  `AbstractCoroutineContextElement` and `currentCoroutineContext()`: the context travels in one
+  `Zone` value. `CoroutineName`, `CoroutineExceptionHandler` and `handleCoroutineException`.
+- Kotlin's `Job` contract: new, active, completing, cancelling, cancelled and completed; children;
+  a parent completes only after its children; a failing child cancels its parent and siblings.
+  `CompletableJob`, `SupervisorJob`, `NonCancellable`, `invokeOnCompletion`, `join`,
+  `cancelAndJoin`, `cancelChildren`, `joinAll`, `JobCancellationException`,
+  `CompletionHandlerException` and `suppressedExceptionsOf`.
+- `CoroutineScope`, `launch`, `async` with every `CoroutineStart`, `Deferred` - a `Future`, so
+  `await deferred` is Kotlin's `deferred.await()` -, `CompletableDeferred`, `awaitAll`,
+  `asDeferred`, `coroutineScope`, `supervisorScope`, `withContext`, `withTimeout`,
+  `withTimeoutOrNull`, `TimeoutCancellationException`, `mainScope()` and `GlobalScope`.
+- `suspendCancellableCoroutine` and `CancellableContinuation`, the building block of every
+  cancellable wait; `delay`, `yieldNow` (Kotlin's `yield`), `awaitCancellation`, `ensureActive`
+  and `isCurrentCancellation`.
+- `CoroutineDispatcher` and `Dispatchers.main`, `Dispatchers.unconfined` and
+  `Dispatchers.isolate`, a pool of worker isolates with `limitedParallelism`, on the web the event
+  loop; `IsolateBodyNotSendableError`.
+- `package:essentia/testing.dart`: `runTest`, `TestScope` with `backgroundScope`,
+  `StandardTestDispatcher`, `UnconfinedTestDispatcher` and `UncompletedCoroutinesError`.
+- `Channel`, `SendChannel`, `ReceiveChannel`, `ChannelResult`, `BufferOverflow`,
+  `ClosedSendChannelException`, `ClosedReceiveChannelException`, `produce`, `ProducerScope`,
+  `awaitClose`, `receiveAsStream`, `consumeAsStream`, `consumeEach`, `consume` and `produceIn`.
+- `select`, `selectUnbiased`, `SelectBuilder` and `SelectClause` with `onAwait`, `onJoin`,
+  `onReceive`, `onReceiveCatching`, `onSend`, `onTimeout` and `onFuture`.
+- `SharedFlow`, `MutableSharedFlow`, `StateFlow`, `MutableStateFlow`, `FlowCollector`,
+  `SharingStarted`, `SharingCommand`, `shareIn`, `stateIn` and `awaitStateIn`.
+- The `Flow` operators on `Stream`: `collect`, `launchIn`, `cancellable`, `buffer`, `conflate`,
+  `debounce`, `sample`, `combine`, `flatMapLatest`, `flatMapConcat`, `transformLatest`, `onEach`,
+  `runningFold`, `scan`, `retry`, `retryWhen`, `catchError`, `firstOrNull` and `singleOrNull`.
+- `PrincipalElement`, the principal as an element of the coroutine context.
+- `Semaphore.resize`, a mutable `Semaphore.fair` and unfair hand over, and semaphores of zero
+  permits.
+
+### Changed
+
+- `TestScheduler` is a virtual event loop: code run inside it - in `runTest` or
+  `TestScheduler.run` - has virtual microtasks, `Timer`s and `Future.delayed`, every microtask
+  runs before the next timer, and the advance methods run synchronously there. Called from
+  outside, they behave as before. `Scheduler.system` reads the virtual time inside it.
+- `Scheduler` is an element of the coroutine context; `Scheduler.current` is the one of the
+  current context. `Semaphore.tryAcquireWithin` waits on it unless given one.
+- The current principal and the envelope being handled travel in the coroutine context.
+- The event bus runs on coroutines: every lane is a channel, and the lanes, subscribers and group
+  workers of a topic are coroutines under a supervisor of the topic. Waiting for room to publish is
+  cancellable.
+- `mapLatest`, `collectLatest` and the other operators that switch to the latest element run each
+  element in a job of its own, cancelled before the next one starts.
+- `flatMapMerge` refuses a concurrency below one with a `RangeError` of its own.
+
+### Removed
+
+- The internal `Mailbox`; the event bus uses `Channel`.
+- `runInJob`, `currentJob`, `Job.invokeOnCancellation`, `Job.whenCancelled` and
+  `Job.cancellationException`. Migrate as follows:
+
+  | 1.x | 2.0 |
+  |---|---|
+  | `runInJob(job, body)` | `withContext(job, (it) => body())` or `CoroutineScope(job).launch(...)` |
+  | `currentJob()` | `currentCoroutineContext().get(Job.key)` |
+  | `job.invokeOnCancellation(handler)` | `job.invokeOnCompletion(handler, onCancelling: true)`, or `suspendCancellableCoroutine` with `invokeOnCancellation` for a wait |
+  | `job.whenCancelled` | `invokeOnCompletion(onCancelling: true, ...)` completing a `Completer` |
+  | `job.cancellationException` | `job.isCancelled` and `job.getCancellationException()` |
+  | `job.isCompleted` (finished without being cancelled) | `job.isCompleted && !job.isCancelled`; `isCompleted` is now true once a job is final, cancelled or not |
+  | `Job()` with `complete()` | `CompletableJob()`; a parent now waits for its children |
+  | `Semaphore(0)` refused | allowed: it admits nobody until resized |
+
+## 1.3.0
+
+### Added
+
+- `TimeSource`, `TimeMark` and `TestTimeSource`, Kotlin's `TimeSource.WithComparableMarks`,
+  `ComparableTimeMark` and `TestTimeSource`, with `TimeSource.monotonic` on a `Stopwatch`.
+- `Clock` with `Clock.system`, Kotlin's `kotlin.time.Clock`.
+- `Scheduler` with `Scheduler.system`: a component's time source, clock and timers in one place,
+  with `delay`, Kotlin's cancellable `delay`.
+- `TestScheduler`, Kotlin's `TestCoroutineScheduler`: virtual time moved on with `advanceTimeBy`,
+  `runCurrent` and `advanceUntilIdle`, which is its own time source and clock.
+- `Job`, `CancellationException`, `runInJob`, `currentJob` and `ensureActive`: Kotlin's cooperative
+  cancellation, carried through a `Zone`.
+- `Semaphore` and `Mutex`, Kotlin's `kotlinx.coroutines.sync` primitives: fair, cancellable, with
+  `tryAcquireWithin` for a bounded wait.
+
+### Changed
+
+- `flatMapMerge` bounds its inner streams with the public `Semaphore`.
+
 ## 1.2.0
 
 ### Added

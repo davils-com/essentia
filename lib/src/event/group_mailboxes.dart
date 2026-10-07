@@ -7,10 +7,15 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'package:essentia/src/coroutines/coroutine_scope.dart';
+import 'package:essentia/src/coroutines/coroutine_scope_builders.dart';
+import 'package:essentia/src/coroutines/coroutine_start.dart';
+import 'package:essentia/src/coroutines/job.dart';
+import 'package:essentia/src/coroutines/join_all.dart';
 import 'package:essentia/src/event/drop_reason.dart';
+import 'package:essentia/src/event/envelope_lane.dart';
 import 'package:essentia/src/event/event.dart';
 import 'package:essentia/src/event/event_envelope.dart';
-import 'package:essentia/src/event/mailbox.dart';
 import 'package:meta/meta.dart';
 
 /// The mailboxes and workers of one consumer group, one of each per
@@ -18,17 +23,30 @@ import 'package:meta/meta.dart';
 @internal
 final class GroupMailboxes {
   /// Creates one mailbox of [capacity] and one worker running [_handle] for
-  /// each of [partitions], reporting discarded envelopes to [_onDiscarded].
-  GroupMailboxes(int partitions, int capacity, this._onDiscarded, this._handle)
-    : _mailboxes = List<Mailbox<EventEnvelope<Event>>>.generate(
+  /// each of [partitions], reporting discarded envelopes to [_onDiscarded];
+  /// the workers are coroutines of [work].
+  GroupMailboxes(
+    int partitions,
+    int capacity,
+    this._onDiscarded,
+    this._handle,
+    CoroutineScope work,
+  ) : _mailboxes = List<EnvelopeLane>.generate(
         partitions,
-        (_) => Mailbox<EventEnvelope<Event>>(capacity),
+        (_) => EnvelopeLane(capacity),
       ) {
-    _workers.addAll(_mailboxes.map(_work));
+    _workers.addAll(
+      _mailboxes.map(
+        (mailbox) => work.launch(
+          (it) => _work(mailbox),
+          start: CoroutineStart.undispatched,
+        ),
+      ),
+    );
   }
 
   /// One mailbox per partition.
-  final List<Mailbox<EventEnvelope<Event>>> _mailboxes;
+  final List<EnvelopeLane> _mailboxes;
 
   /// Where a discarded envelope is reported.
   final void Function(EventEnvelope<Event> envelope, DropReason reason)
@@ -46,9 +64,10 @@ final class GroupMailboxes {
   /// Whether buffered envelopes are discarded instead of handled.
   var _disposed = false;
 
-  /// One task per partition, each completing once its mailbox is closed and
-  /// empty; filled by the constructor and never changed afterwards.
-  final _workers = <Future<void>>[];
+  /// One worker coroutine per partition, each completing once its mailbox
+  /// is closed and empty; filled by the constructor and never changed
+  /// afterwards.
+  final _workers = <Job>[];
 
   /// How many workers the group holds, one per partition.
   int get workerCount => _workers.length;
@@ -69,7 +88,7 @@ final class GroupMailboxes {
 
   /// Stops taking envelopes; what is buffered is still handled.
   void close() {
-    for (final Mailbox<EventEnvelope<Event>> mailbox in _mailboxes) {
+    for (final EnvelopeLane mailbox in _mailboxes) {
       mailbox.close();
     }
   }
@@ -77,18 +96,18 @@ final class GroupMailboxes {
   /// Stops every worker after the envelope it is handling.
   void cancel() {
     _cancelled = true;
-    for (final Mailbox<EventEnvelope<Event>> mailbox in _mailboxes) {
+    for (final EnvelopeLane mailbox in _mailboxes) {
       mailbox.cancel();
     }
   }
 
   /// Completes once every worker has finished.
-  Future<void> join() => Future.wait(_workers);
+  Future<void> join() => _workers.joinAll();
 
   /// Discards everything buffered, reporting each envelope.
   void disposeBuffered() {
     _disposed = true;
-    for (final Mailbox<EventEnvelope<Event>> mailbox in _mailboxes) {
+    for (final EnvelopeLane mailbox in _mailboxes) {
       while (true) {
         final EventEnvelope<Event>? pending = mailbox.tryReceive();
         if (pending == null) {
@@ -100,7 +119,7 @@ final class GroupMailboxes {
   }
 
   /// Handles what arrives in [mailbox] until it is closed and empty.
-  Future<void> _work(Mailbox<EventEnvelope<Event>> mailbox) async {
+  Future<void> _work(EnvelopeLane mailbox) async {
     _running++;
     try {
       while (true) {

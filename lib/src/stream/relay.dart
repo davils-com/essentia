@@ -10,6 +10,7 @@
 import 'dart:async';
 
 import 'package:essentia/src/stream/relay_handlers.dart';
+import 'package:essentia/src/stream/subscription_cancel.dart';
 import 'package:meta/meta.dart';
 
 /// Relays [source] through the handlers that [handlersOf] creates for every
@@ -38,7 +39,7 @@ Stream<R> relay<T, R>(
     ..onResume = subscription.resume
     ..onCancel = () {
       handlers.onCancel();
-      return subscription.cancel();
+      return keepInZone(subscription.cancel());
     };
 }, isBroadcast: source.isBroadcast);
 

@@ -9,6 +9,9 @@
 
 import 'dart:async';
 
+import 'package:essentia/src/stream/combine_latest.dart';
+import 'package:essentia/src/stream/subscription_cancel.dart';
+
 /// Kotlin's combining `Flow` operators for streams.
 extension StreamCombination<T> on Stream<T> {
   /// Pairs every element of this stream with the element of [other] at the
@@ -79,7 +82,29 @@ extension StreamCombination<T> on Stream<T> {
         mine.resume();
         theirs.resume();
       }
-      ..onCancel = () =>
-          <Future<void>>[mine.cancel(), theirs.cancel()].wait.then((_) {});
+      ..onCancel = () => <Future<void>>[
+        keepInZone(mine.cancel()),
+        keepInZone(theirs.cancel()),
+      ].wait.then((_) {});
   });
+
+  /// Combines the latest element of this stream with the latest element of
+  /// [other] through [transform], Kotlin's `combine`.
+  ///
+  /// Once both streams emitted, the result emits whenever either of them
+  /// emits, with the latest element of each. The result ends once both
+  /// ended. Errors of both streams and of [transform] are passed on without
+  /// ending the result. Pause, resume and cancel reach both streams.
+  ///
+  /// ```dart
+  /// final Stream<int> sum = a.counter.combine(b.counter, (a, b) => a + b);
+  /// ```
+  ///
+  /// Returns a single subscription stream; every listener gets its own
+  /// subscriptions of both streams.
+  Stream<R> combine<S, R>(Stream<S> other, R Function(T a, S b) transform) =>
+      combineLatest<Object?, R>(<Stream<Object?>>[
+        this,
+        other,
+      ], (values) => transform(values[0] as T, values[1] as S));
 }

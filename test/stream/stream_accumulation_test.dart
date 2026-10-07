@@ -17,7 +17,7 @@ import 'probe_stream.dart';
 /// Returns the sum.
 int _sum(int total, int value) => total + value;
 
-/// Checks `runningReduce`.
+/// Checks `runningReduce`, `runningFold` and `scan`.
 void main() {
   test('reduces step by step starting with the first element', () async {
     final stream = Stream<int>.fromIterable(<int>[1, 2, 3]);
@@ -100,5 +100,55 @@ void main() {
       <int>[1, 3],
       <int>[1, 3],
     ]);
+  });
+
+  group('runningFold', () {
+    test('emits the initial value and every folded value', () async {
+      final stream = Stream<int>.fromIterable(<int>[1, 2, 3]);
+
+      expect(await stream.runningFold(0, _sum).toList(), <int>[0, 1, 3, 6]);
+      expect(await stream.scan(10, _sum).toList(), <int>[10, 11, 13, 16]);
+    });
+
+    test('emits the initial value of an empty stream', () async {
+      expect(
+        await const Stream<int>.empty().runningFold('x', (a, b) => a).toList(),
+        <String>['x'],
+      );
+    });
+
+    test('turns an error of the operation into an error event', () async {
+      final Stream<int> folded = Stream<int>.fromIterable(<int>[1, 2, 3])
+          .runningFold(0, (total, value) {
+            if (value == 2) {
+              throw const FormatException();
+            }
+            return total + value;
+          });
+
+      await expectLater(
+        folded,
+        emitsInOrder(<Object>[
+          0,
+          1,
+          emitsError(isFormatException),
+          4,
+          emitsDone,
+        ]),
+      );
+    });
+
+    test('keeps a running value per listener', () async {
+      final probe = ProbeStream<int>.broadcast();
+      final Stream<int> folded = probe.stream.runningFold(0, _sum);
+      final Future<List<int>> first = folded.toList();
+      final Future<List<int>> second = folded.toList();
+      await settle();
+
+      await probe.emitAll(<int>[1, 2]);
+
+      expect(await first, <int>[0, 1, 3]);
+      expect(await second, <int>[0, 1, 3]);
+    });
   });
 }

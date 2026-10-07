@@ -12,6 +12,12 @@ import 'dart:collection';
 import 'dart:math';
 
 import 'package:essentia/essentia.dart' show EventEnvelope;
+import 'package:essentia/src/coroutines/completable_job.dart';
+import 'package:essentia/src/coroutines/coroutine_context.dart';
+import 'package:essentia/src/coroutines/coroutine_context_zone.dart';
+import 'package:essentia/src/coroutines/coroutine_name.dart';
+import 'package:essentia/src/coroutines/coroutine_scope.dart';
+import 'package:essentia/src/coroutines/supervisor_job.dart';
 import 'package:essentia/src/event/bus_state.dart';
 import 'package:essentia/src/event/consumer_group.dart';
 import 'package:essentia/src/event/drop_reason.dart';
@@ -32,6 +38,7 @@ import 'package:essentia/src/identity/uuid.dart';
 import 'package:essentia/src/lifecycle/disposable.dart';
 import 'package:essentia/src/principal/principal.dart';
 import 'package:essentia/src/principal/principal_context.dart';
+import 'package:essentia/src/principal/principal_element.dart';
 import 'package:meta/meta.dart';
 
 /// One named stream of events of type [T] on an `EventBus`.
@@ -66,7 +73,9 @@ import 'package:meta/meta.dart';
 final class EventTopic<T extends Event> implements Disposable {
   /// Starts the topic [_data] describes.
   @internal
-  EventTopic(this._data) {
+  EventTopic(this._data)
+    : _supervisor = SupervisorJob(),
+      _name = CoroutineName('topic ${_data.name}') {
     _partitions.addAll(
       List<TopicPartition>.generate(
         _data.partitions,
@@ -75,9 +84,28 @@ final class EventTopic<T extends Event> implements Disposable {
           _data.overflow,
           _report,
           (envelope) => _deliver(index, envelope),
+          _work,
         ),
       ),
     );
+  }
+
+  /// The supervisor of the coroutines of the topic: the lanes, the
+  /// subscribers and the workers of the groups.
+  final CompletableJob _supervisor;
+
+  /// The name of the coroutines of the topic.
+  final CoroutineName _name;
+
+  /// The scope the coroutines of the topic run in: under its supervisor,
+  /// as the principal of the code that starts them, the way a task
+  /// started in a zone kept the principal of that zone.
+  CoroutineScope get _work {
+    final PrincipalElement? caller = currentCoroutineContext().get(
+      PrincipalElement.key,
+    );
+    final CoroutineContext context = _supervisor + _name;
+    return CoroutineScope(caller == null ? context : context + caller);
   }
 
   /// What this topic was declared to be.
@@ -461,6 +489,7 @@ final class EventTopic<T extends Event> implements Disposable {
       _data.bufferCapacity,
       _report,
       (envelope) => _consume(envelope as EventEnvelope<T>, name, handle, on),
+      _work,
     );
     _groups = List<GroupMailboxes>.unmodifiable(<GroupMailboxes>[
       ..._groups,
@@ -520,6 +549,7 @@ final class EventTopic<T extends Event> implements Disposable {
         ..cancel();
     }
     _stopConsumers();
+    _supervisor.complete();
   }
 
   /// Stops the topic after delivering everything it is still holding.
@@ -543,6 +573,7 @@ final class EventTopic<T extends Event> implements Disposable {
     await _awaitSettled();
     _lifecycle = BusState.closed;
     _stopConsumers();
+    _supervisor.complete();
   }
 
   /// Completes once every partition is delivered and every group has
@@ -767,7 +798,7 @@ final class EventTopic<T extends Event> implements Disposable {
       ..._subscribers,
       subscriber,
     ]);
-    subscriber.start(_replayCache);
+    subscriber.start(_replayCache, _work);
     return EventSubscription(subscriber);
   }
 

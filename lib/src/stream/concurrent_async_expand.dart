@@ -9,6 +9,7 @@
 
 import 'dart:async';
 
+import 'package:essentia/src/stream/subscription_cancel.dart';
 import 'package:meta/meta.dart';
 
 /// Maps every element of [source] to an inner stream with [convert] and
@@ -78,7 +79,8 @@ Stream<S> concurrentAsyncExpand<T, S>(
         return null;
       }
       return <Future<void>>[
-        for (final subscription in subscriptions) subscription.cancel(),
+        for (final subscription in subscriptions)
+          keepInZone(subscription.cancel()),
       ].wait.then((_) {});
     };
   };

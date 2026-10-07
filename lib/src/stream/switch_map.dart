@@ -9,6 +9,13 @@
 
 import 'dart:async';
 
+import 'package:essentia/src/coroutines/cancellation_exception.dart';
+import 'package:essentia/src/coroutines/coroutine_context.dart';
+import 'package:essentia/src/coroutines/coroutine_context_zone.dart';
+import 'package:essentia/src/coroutines/job.dart';
+import 'package:essentia/src/lifecycle/disposable.dart';
+import 'package:essentia/src/stream/cancellation_watch.dart';
+import 'package:essentia/src/stream/subscription_cancel.dart';
 import 'package:meta/meta.dart';
 
 /// Maps every element of [source] to an inner stream with [convert] and
@@ -19,8 +26,19 @@ import 'package:meta/meta.dart';
 /// cancelled, and the new inner stream is listened to once that cancel
 /// completed; [source] is paused meanwhile. Errors of [source], of
 /// [convert], of the inner streams and of cancelling an inner stream are
-/// passed on without ending the result. The result ends once [source] and
-/// the current inner stream have ended.
+/// passed on without ending the result, except a cancellation of
+/// cancelling an inner stream, which is how its superseded work ends. The
+/// result ends once [source] and the current inner stream have ended.
+///
+/// Every element gets a job of its own: [convert] runs and the inner stream
+/// is listened to in a zone carrying that job, laid over the context of the
+/// listener. The job is cancelled right before the inner stream is
+/// replaced or the result is cancelled, so cancellable waits of the
+/// superseded work - a `delay` in an `async*` generator, a `Deferred` it
+/// awaits - end at once with a `CancellationException` instead of holding
+/// up the cancel, as Kotlin cancels the block of `transformLatest`. The job
+/// of the current inner stream is cancelled as well when the job the result
+/// was listened in is cancelled.
 ///
 /// Pause and resume reach [source] and the current inner stream, and
 /// cancelling the result cancels both.
@@ -38,19 +56,23 @@ Stream<S> switchMap<T, S>(
       ? StreamController<S>.broadcast(sync: true)
       : StreamController<S>(sync: true);
   controller.onListen = () {
+    final CoroutineContext context = currentCoroutineContext();
     StreamSubscription<S>? innerSubscription;
+    Job? innerJob;
     var outerDone = false;
 
-    void listenToInner(Stream<S> inner) {
-      innerSubscription = inner.listen(
-        controller.add,
-        onError: controller.addError,
-        onDone: () {
-          innerSubscription = null;
-          if (outerDone) {
-            unawaited(controller.close());
-          }
-        },
+    void listenToInner(Zone zone, Stream<S> inner) {
+      innerSubscription = zone.run(
+        () => inner.listen(
+          controller.add,
+          onError: controller.addError,
+          onDone: () {
+            innerSubscription = null;
+            if (outerDone) {
+              unawaited(controller.close());
+            }
+          },
+        ),
       );
       if (controller.isPaused) {
         innerSubscription?.pause();
@@ -70,38 +92,49 @@ Stream<S> switchMap<T, S>(
 
     Future<void> replace(
       StreamSubscription<S> previous,
+      Zone zone,
       Stream<S> inner,
     ) async {
       outer.pause();
       try {
-        await previous.cancel();
+        await keepInZone(previous.cancel());
       } on Object catch (error, stackTrace) {
-        controller.addError(error, stackTrace);
+        if (error is! CancellationException) {
+          controller.addError(error, stackTrace);
+        }
       }
       if (!broadcast && !controller.hasListener) {
-        inner.listen(null).cancel().ignore();
+        zone.run(() => inner.listen(null)).cancel().ignore();
         return;
       }
       outer.resume();
-      listenToInner(inner);
+      listenToInner(zone, inner);
     }
 
     outer.onData((element) {
+      final job = Job();
+      final Zone zone = forkCoroutineZone(context + job);
       final Stream<S> inner;
       try {
-        inner = convert(element);
+        inner = zone.run(() => convert(element));
       } on Object catch (error, stackTrace) {
+        job.cancel();
         controller.addError(error, stackTrace);
         return;
       }
+      innerJob?.cancel();
+      innerJob = job;
       final previous = innerSubscription;
       if (previous == null) {
-        listenToInner(inner);
+        listenToInner(zone, inner);
         return;
       }
       innerSubscription = null;
-      unawaited(replace(previous, inner));
+      unawaited(replace(previous, zone, inner));
     });
+    final Disposable? watch = watchCancellation(
+      (cause) => innerJob?.cancel(cause),
+    );
     if (!broadcast) {
       controller
         ..onPause = () {
@@ -114,14 +147,13 @@ Stream<S> switchMap<T, S>(
         };
     }
     controller.onCancel = () {
-      final cancels = <Future<void>>[
-        if (!outerDone) outer.cancel(),
-        ?innerSubscription?.cancel(),
-      ];
-      if (cancels.isEmpty) {
-        return null;
-      }
-      return cancels.wait.then((_) {});
+      watch?.dispose();
+      innerJob?.cancel();
+      final Future<void>? innerCancel = innerSubscription?.cancel();
+      return <Future<void>>[
+        if (!outerDone) keepInZone(outer.cancel()),
+        if (innerCancel != null) keepInZone(innerCancel),
+      ].wait.then((_) {});
     };
   };
   return controller.stream;

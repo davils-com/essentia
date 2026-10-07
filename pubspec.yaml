@@ -3,9 +3,11 @@ description: >-
   The Davils application runtime core for Dart, ported from Arc: validation
   that reports every problem at once, validating configuration builders,
   program parameters, an in-process event bus, layering contracts, RFC 9562
-  identifiers, platform detection, a Result type and Kotlin's standard
-  library extensions on Dart's own classes.
-version: 1.2.0
+  identifiers, platform detection, time sources, Kotlin's coroutines -
+  structured concurrency, channels, select, hot flows and a virtual event
+  loop for tests -, fair locks, a Result type and Kotlin's standard library
+  extensions on Dart's own classes.
+version: 2.0.0
 publish_to: none
 
 environment:
