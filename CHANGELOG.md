@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 1.2.0
+
+### Added
+
+- `Lazy`, `lazy` and `lazyOf`, Kotlin's `lazy { }` for a field that cannot be `late`: the
+  initializer runs once on the first read, is retried after it throws, and a read from inside it
+  is refused with a `StateError`.
+
 ## 1.1.0
 
 ### Added

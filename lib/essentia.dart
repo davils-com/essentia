@@ -12,9 +12,10 @@
 /// Validation that reports every problem at once, validating configuration
 /// builders, an in-process event bus, layering contracts, RFC 9562
 /// identifiers, semantic versions, principals, platform detection, a
-/// `Result` type, Kotlin's standard library extensions on Dart's own classes
-/// and program parameters. It runs on every Dart platform, the web and
-/// WebAssembly included; `file()` is offered where `dart:io` is.
+/// `Result` type, Kotlin's `lazy`, Kotlin's standard library extensions on
+/// Dart's own classes and program parameters. It runs on every Dart
+/// platform, the web and WebAssembly included; `file()` is offered where
+/// `dart:io` is.
 library;
 
 export 'src/architecture/data_source.dart';
@@ -109,6 +110,8 @@ export 'src/event/topic_not_declared_error.dart';
 export 'src/event/topic_type_mismatch_error.dart';
 export 'src/identity/uuid.dart';
 export 'src/identity/uuid_version.dart';
+export 'src/lazy/lazy.dart';
+export 'src/lazy/lazy_dsl.dart';
 export 'src/lifecycle/disposable.dart';
 export 'src/lifecycle/disposable_async.dart';
 export 'src/number/int_arithmetic.dart';

@@ -11,7 +11,7 @@ Its only runtime dependency is `package:meta`.
 
 Everything is exported from `package:essentia/essentia.dart`: validation, the builder DSL, program
 parameters, the event bus, identifiers, semantic versions, principals, layering contracts, platform
-detection, scope functions, `Result` and the Kotlin stdlib extensions.
+detection, scope functions, `Result`, `lazy` and the Kotlin stdlib extensions.
 
 It runs on every Dart platform: the VM and native executables, Flutter, the web and WebAssembly.
 The test suite runs on all of them. Where a platform has no `dart:io`, the program parameters read
@@ -45,6 +45,18 @@ final EventBus bus = eventBus((it) {
 
 `apply`, `let`, `takeIf` and `takeUnless` are available on every value through `ScopeFunctions`,
 so `LoggingBuilder().apply(block).build()` reads exactly as it does in Kotlin.
+
+Kotlin's `by lazy { }` is a property delegate, which Dart does not have, and Essentia uses no
+`late`. A field holds a `Lazy` instead and reads its `value`:
+
+```dart
+final Lazy<RegExp> word = lazy(() => RegExp(r'^[a-z]+$'));
+
+bool isWord(String text) => word.value.hasMatch(text);
+```
+
+The initializer runs once, on the first read, and is retried when it throws; `lazyOf(value)` wraps
+a value that is already known.
 
 ## Validation and configuration DSLs
 
@@ -257,6 +269,9 @@ Kept deliberately small, and only where Dart has no equivalent:
   environment variables is refused by the constructor.
 - Dart has no overloading, so where Arc offers two forms there is one with an optional argument:
   `contains(version, [policy])`, `nextPreRelease([label])`, `principal(id, [block])`.
+- `lazy` has no `LazyThreadSafetyMode`: an isolate runs one thing at a time, so every `Lazy` keeps
+  the `SYNCHRONIZED` contract. A read of the value from inside its own initializer throws a
+  `StateError` instead of recursing.
 - `long()` is not needed (Dart's `int` is 64-bit), `default` and `enum` are reserved words
   (`defaultsTo`, `enumeration`), and errors that are programming mistakes extend `ArgumentError` or
   `StateError` (`TopicNotDeclaredError`, `ParametersNotLoadedError`).

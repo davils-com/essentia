@@ -13,9 +13,20 @@ import 'package:test/test.dart';
 import 'support/topics.dart';
 import 'support/user_event.dart';
 
-/// Runs the version, principal, text and time examples of the README, so
-/// that they stay true.
+/// Runs the lazy, version, principal, text and time examples of the README,
+/// so that they stay true.
 void main() {
+  test('the lazy example', () {
+    final Lazy<RegExp> word = lazy(() => RegExp(r'^[a-z]+$'));
+    bool isWord(String text) => word.value.hasMatch(text);
+
+    expect(word.isInitialized, isFalse);
+    expect(isWord('essentia'), isTrue);
+    expect(isWord('Essentia 1'), isFalse);
+    expect(word.isInitialized, isTrue);
+    expect(lazyOf(3).value, 3);
+  });
+
   test('the semantic version example', () {
     final version = SemanticVersion.parse('1.4.0-rc.1');
     final range = SemanticVersionRange.parse('^1.2 || >=2.0.0 <2.1.0');

@@ -531,6 +531,11 @@ final class KeySegment extends PathSegment {
   String toString();
 }
 
+abstract interface class Lazy<T> {
+  abstract bool get isInitialized;
+  abstract T get value;
+}
+
 extension ListAccess<T> on List<T> {
   IntRange get indices;
   int get lastIndex;
@@ -1399,6 +1404,10 @@ Principal? currentPrincipal();
 EventBus eventBus(void Function(EventBusBuilder) block);
 
 FlagBuilder flag(List<String> names);
+
+Lazy<T> lazy<T>(T Function() initializer);
+
+Lazy<T> lazyOf<T>(T value);
 
 int Function(T, T) naturalOrder<T extends Comparable<Object>>();
 
