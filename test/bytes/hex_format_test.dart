@@ -8,6 +8,7 @@
  */
 
 import 'package:essentia/src/bytes/hex_format.dart';
+import 'package:essentia/src/bytes/hex_format_dsl.dart';
 import 'package:test/test.dart';
 
 /// Covers the hexadecimal format and its builder.

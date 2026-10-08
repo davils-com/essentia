@@ -11,7 +11,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:essentia/src/bytes/byte_list_content.dart';
-import 'package:essentia/src/bytes/hex_conversions.dart';
+import 'package:essentia/src/bytes/byte_list_hex.dart';
 import 'package:essentia/src/bytes/hex_format.dart';
 import 'package:meta/meta.dart';
 
@@ -118,6 +118,10 @@ final class ByteString implements Comparable<ByteString> {
   @useResult
   String decodeToString() => utf8.decode(_bytes, allowMalformed: true);
 
+  /// Compares the bytes read unsigned, then the sizes.
+  ///
+  /// Returns a negative number, zero or a positive number as this byte
+  /// string sorts before, with or after [other].
   @override
   int compareTo(ByteString other) {
     final int shorter = size < other.size ? size : other.size;
@@ -130,42 +134,16 @@ final class ByteString implements Comparable<ByteString> {
     return size - other.size;
   }
 
+  /// Two byte strings are equal when their bytes are.
   @override
   bool operator ==(Object other) =>
       other is ByteString && other._bytes.contentEquals(_bytes);
 
+  /// A hash code of the bytes.
   @override
   int get hashCode => _bytes.contentHashCode();
 
   /// Kotlin's rendering, `ByteString(size=3 hex=010203)`.
   @override
   String toString() => 'ByteString(size=$size hex=${toHexString()})';
-}
-
-/// Kotlin's `ByteArray.toByteString` on any list of bytes.
-extension ByteListToByteString on List<int> {
-  /// Copies the bytes into a [ByteString], Kotlin's `toByteString`.
-  ///
-  /// Returns the byte string.
-  @useResult
-  ByteString toByteString() => ByteString(this);
-}
-
-/// Kotlin's `String.encodeToByteString` and `String.hexToByteString`.
-extension StringToByteString on String {
-  /// Encodes the text as UTF-8, Kotlin's `encodeToByteString`.
-  ///
-  /// Returns the byte string.
-  @useResult
-  ByteString encodeToByteString() =>
-      ByteString._(Uint8List.fromList(utf8.encode(this)));
-
-  /// Reads the bytes [format] wrote, Kotlin's `hexToByteString`.
-  ///
-  /// Returns the byte string.
-  ///
-  /// Throws a [FormatException] when the text is not in [format].
-  @useResult
-  ByteString hexToByteString([HexFormat format = HexFormat.defaultFormat]) =>
-      ByteString._(hexToByteArray(format));
 }

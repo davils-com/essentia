@@ -41,6 +41,40 @@ enum BusState {
   running, draining, closed;
 }
 
+extension ByteListContent on List<int> {
+  bool contentEquals(List<int>? other);
+  int contentHashCode();
+}
+
+extension ByteListHex on List<int> {
+  String toHexString([HexFormat format = HexFormat.defaultFormat]);
+}
+
+extension ByteListToByteString on List<int> {
+  ByteString toByteString();
+}
+
+final class ByteString implements Comparable<ByteString> {
+  static final ByteString empty;
+  ByteString(List<int> bytes);
+  Uint8List get bytes;
+  int get hashCode;
+  bool get isEmpty;
+  bool get isNotEmpty;
+  int get size;
+  bool operator ==(Object other);
+  int operator [](int index);
+  int compareTo(ByteString other);
+  String decodeToString();
+  bool endsWith(ByteString suffix);
+  int indexOf(int byte, [int start = 0]);
+  bool startsWith(ByteString prefix);
+  ByteString substring(int start, [int? end]);
+  Uint8List toByteArray([int start = 0, int? end]);
+  String toHexString([HexFormat format = HexFormat.defaultFormat]);
+  String toString();
+}
+
 abstract interface class CancellableContinuation<T> {
   abstract bool get isActive;
   abstract bool get isCancelled;
@@ -603,6 +637,32 @@ final class Grouping<T, K> {
   Map<K, int> eachCount();
   Map<K, R> fold<R>(R initial, R Function(R, T) combine);
   Map<K, T> reduce(T Function(K, T, T) combine);
+}
+
+final class HexFormat {
+  static const HexFormat defaultFormat = HexFormat();
+  static const HexFormat upperCaseFormat = HexFormat(upperCase: true);
+  final String bytePrefix;
+  final String byteSeparator;
+  final String byteSuffix;
+  final bool upperCase;
+  const HexFormat({bool upperCase = false, String byteSeparator = '', String bytePrefix = '', String byteSuffix = ''});
+  int get hashCode;
+  bool get isDigitsOnly;
+  bool operator ==(Object other);
+  String toString();
+}
+
+final class HexFormatBuilder implements Builder<HexFormat> {
+  String bytePrefix;
+  String byteSeparator;
+  String byteSuffix;
+  bool upperCase;
+  HexFormat build();
+}
+
+extension HexParsing on String {
+  Uint8List hexToByteArray([HexFormat format = HexFormat.defaultFormat]);
 }
 
 final class IndexSegment extends PathSegment {
@@ -1632,6 +1692,11 @@ extension StringSlicing on String {
   List<String> windowed(int size, {int step = 1, WindowRemainder remainder = WindowRemainder.drop});
 }
 
+extension StringToByteString on String {
+  ByteString encodeToByteString();
+  ByteString hexToByteString([HexFormat format = HexFormat.defaultFormat]);
+}
+
 extension StringWords on String {
   String toCamelCase();
   String toKebabCase();
@@ -1962,6 +2027,8 @@ EventBus eventBus(void Function(EventBusBuilder) block);
 FlagBuilder flag(List<String> names);
 
 void handleCoroutineException(CoroutineContext context, Object error, StackTrace stackTrace, {Zone? zone});
+
+HexFormat hexFormat(void Function(HexFormatBuilder) block);
 
 bool isCurrentCancellation(Object error);
 

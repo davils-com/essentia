@@ -7,8 +7,6 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-import 'package:essentia/src/dsl/builder.dart';
-import 'package:essentia/src/scope/scope_functions.dart';
 import 'package:meta/meta.dart';
 
 /// How bytes are written as hexadecimal digits and read back, Kotlin's
@@ -56,6 +54,7 @@ final class HexFormat {
   bool get isDigitsOnly =>
       byteSeparator.isEmpty && bytePrefix.isEmpty && byteSuffix.isEmpty;
 
+  /// Two formats are equal when every piece is.
   @override
   bool operator ==(Object other) =>
       other is HexFormat &&
@@ -64,42 +63,14 @@ final class HexFormat {
       other.bytePrefix == bytePrefix &&
       other.byteSuffix == byteSuffix;
 
+  /// A hash code of every piece.
   @override
   int get hashCode =>
       Object.hash(upperCase, byteSeparator, bytePrefix, byteSuffix);
 
+  /// Names every piece.
   @override
   String toString() =>
       'HexFormat(upperCase: $upperCase, byteSeparator: "$byteSeparator", '
       'bytePrefix: "$bytePrefix", byteSuffix: "$byteSuffix")';
 }
-
-/// The builder behind [hexFormat], Kotlin's `HexFormat.Builder`.
-final class HexFormatBuilder implements Builder<HexFormat> {
-  /// Whether the digits `a` to `f` are written in upper case.
-  var upperCase = false;
-
-  /// What is written between two bytes.
-  var byteSeparator = '';
-
-  /// What is written before the two digits of every byte.
-  var bytePrefix = '';
-
-  /// What is written after the two digits of every byte.
-  var byteSuffix = '';
-
-  @override
-  HexFormat build() => HexFormat(
-    upperCase: upperCase,
-    byteSeparator: byteSeparator,
-    bytePrefix: bytePrefix,
-    byteSuffix: byteSuffix,
-  );
-}
-
-/// Builds a [HexFormat] from a configuration block, Kotlin's
-/// `HexFormat { }`.
-///
-/// Returns the format.
-HexFormat hexFormat(void Function(HexFormatBuilder it) block) =>
-    HexFormatBuilder().apply(block).build();

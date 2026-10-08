@@ -9,8 +9,10 @@
 
 import 'dart:typed_data';
 
+import 'package:essentia/src/bytes/byte_list_to_byte_string.dart';
 import 'package:essentia/src/bytes/byte_string.dart';
 import 'package:essentia/src/bytes/hex_format.dart';
+import 'package:essentia/src/bytes/string_to_byte_string.dart';
 import 'package:test/test.dart';
 
 /// Covers the immutable byte string.

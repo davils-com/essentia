@@ -9,8 +9,10 @@
 
 import 'dart:typed_data';
 
-import 'package:essentia/src/bytes/hex_conversions.dart';
+import 'package:essentia/src/bytes/byte_list_hex.dart';
 import 'package:essentia/src/bytes/hex_format.dart';
+import 'package:essentia/src/bytes/hex_format_dsl.dart';
+import 'package:essentia/src/bytes/hex_parsing.dart';
 import 'package:test/test.dart';
 
 /// Covers writing bytes as hexadecimal digits and reading them back.
