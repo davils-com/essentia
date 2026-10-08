@@ -13,8 +13,9 @@
 /// builders, an in-process event bus, layering contracts, RFC 9562
 /// identifiers, semantic versions, principals, platform detection, time
 /// sources, schedulers with virtual time, jobs and locks, a `Result` type,
-/// Kotlin's `lazy`, Kotlin's standard library extensions on Dart's own
-/// classes and program parameters. It runs on every Dart platform, the web
+/// Kotlin's `lazy`, byte strings and hexadecimal formats, Kotlin's
+/// standard library extensions on Dart's own classes and program
+/// parameters. It runs on every Dart platform, the web
 /// and WebAssembly included; `file()` is offered where `dart:io` is.
 library;
 
@@ -49,6 +50,10 @@ export 'src/arguments/unknown_argument_policy.dart';
 export 'src/arguments/value_origin.dart';
 export 'src/arguments/value_source.dart';
 export 'src/arguments/version_parameter_converters.dart';
+export 'src/bytes/byte_list_content.dart';
+export 'src/bytes/byte_string.dart';
+export 'src/bytes/hex_conversions.dart';
+export 'src/bytes/hex_format.dart';
 export 'src/channels/buffer_overflow.dart';
 export 'src/channels/channel.dart';
 export 'src/channels/channel_closed.dart';

@@ -4,6 +4,19 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 2.1.0
+
+### Added
+
+- `ByteString`, Kotlin's `kotlinx.io.bytestring.ByteString`: an immutable sequence of bytes that
+  copies what it is made from, compares and sorts by its bytes and renders as
+  `ByteString(size=3 hex=010203)`; `toByteString`, `encodeToByteString` and `hexToByteString`.
+- `HexFormat`, `HexFormatBuilder` and `hexFormat`, Kotlin's `HexFormat` with case, byte
+  separator, byte prefix and byte suffix; `toHexString` and `hexToByteArray` on lists of bytes and
+  text, whose failures never quote the text.
+- `contentEquals` and `contentHashCode` on lists of bytes, Kotlin's `ByteArray.contentEquals` and
+  `contentHashCode`.
+
 ## 2.0.0
 
 Kotlin's `kotlinx-coroutines-core`, ported: structured concurrency on Dart's futures and zones,

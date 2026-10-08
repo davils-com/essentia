@@ -50,4 +50,12 @@ void main() {
 
     expect(result.valueOrNull, 42);
   });
+
+  test('byte members resolve beside the list members', () {
+    final ByteString bytes = 'ab'.hexToByteString();
+
+    expect(<int>[0xab].toHexString(), 'ab');
+    expect(<int>[0xab].contentEquals(bytes.toByteArray()), isTrue);
+    expect(<int>[0xab].toByteString(), bytes);
+  });
 }

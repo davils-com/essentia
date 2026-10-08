@@ -17,7 +17,7 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 
 | Path | Purpose |
 |---|---|
-| `lib/essentia.dart` | The web-safe public API: validation, DSL, program parameters, events, coroutines, channels, select, flows, identity, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
+| `lib/essentia.dart` | The web-safe public API: validation, DSL, program parameters, events, coroutines, channels, select, flows, identity, bytes, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
 | `lib/testing.dart` | Testing on virtual time: `runTest`, `TestScope`, `TestScheduler` and the test dispatchers |
 | `lib/src/` | Everything else; one directory per area, mirroring Arc's packages |
 | `api/essentia.api` | The recorded public API; `dart run inspectra api check` compares against it |
