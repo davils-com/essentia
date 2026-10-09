@@ -247,6 +247,7 @@ export 'src/time/duration_arithmetic.dart';
 export 'src/time/duration_components.dart';
 export 'src/time/duration_parsing.dart';
 export 'src/time/duration_units.dart';
+export 'src/time/local_date.dart';
 export 'src/time/monotonic_time_source.dart';
 export 'src/time/system_clock.dart';
 export 'src/time/test_time_source.dart';

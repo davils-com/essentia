@@ -8,6 +8,10 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Added
 
+- `LocalDate`, Kotlin's `kotlinx.datetime.LocalDate`: a date without a time of day or a time zone,
+  with day, month and year arithmetic that never meets daylight saving time, the day of the week
+  and of the year, ISO week numbers, the start of a week, `daysUntil` and `monthsUntil`, ISO 8601
+  parsing and printing, and `LocalDate.today` from a `Clock`.
 - `ByteString`, Kotlin's `kotlinx.io.bytestring.ByteString`: an immutable sequence of bytes that
   copies what it is made from, compares and sorts by its bytes and renders as
   `ByteString(size=3 hex=010203)`; `toByteString`, `encodeToByteString` and `hexToByteString`.

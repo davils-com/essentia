@@ -892,6 +892,40 @@ extension ListSlicing<T> on List<T> {
   List<T> takeLastWhile(bool Function(T) predicate);
 }
 
+final class LocalDate implements Comparable<LocalDate> {
+  final int day;
+  final int month;
+  final int year;
+  factory LocalDate(int year, int month, int day);
+  factory LocalDate.fromDateTime(DateTime dateTime);
+  factory LocalDate.fromEpochDays(int days);
+  factory LocalDate.parse(String text);
+  factory LocalDate.today({Clock clock = Clock.system, bool local = true});
+  int get dayOfWeek;
+  int get dayOfYear;
+  int get epochDays;
+  LocalDate get firstDayOfMonth;
+  int get hashCode;
+  bool get isLeapYear;
+  int get isoWeekNumber;
+  LocalDate get lastDayOfMonth;
+  int get lengthOfMonth;
+  int get lengthOfYear;
+  bool operator ==(Object other);
+  int compareTo(LocalDate other);
+  int daysUntil(LocalDate other);
+  bool isAfter(LocalDate other);
+  bool isBefore(LocalDate other);
+  static bool isLeap(int year);
+  int monthsUntil(LocalDate other);
+  LocalDate plusDays(int days);
+  LocalDate plusMonths(int months);
+  LocalDate plusYears(int years);
+  LocalDate startOfWeek(int firstDayOfWeek);
+  DateTime toDateTime({bool utc = false});
+  String toString();
+}
+
 final class MalformedArgument extends ParameterViolation {
   final String reason;
   final String token;
