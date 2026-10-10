@@ -67,13 +67,13 @@ void main() {
     'reads the virtual time and clock inside a test',
     () => runTest((it) async {
       final TimeMark start = Scheduler.system.timeSource.markNow();
-      final DateTime before = Scheduler.system.clock.now();
+      final Instant before = Scheduler.system.clock.now();
 
       await delay(90.seconds);
 
       expect(start.elapsedNow(), 90.seconds);
       expect(Scheduler.system.clock.now().difference(before), 90.seconds);
-      expect(before, DateTime.utc(1970));
+      expect(before, Instant.epoch);
     }),
   );
 

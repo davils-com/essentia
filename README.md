@@ -306,6 +306,47 @@ final Job watching = counter.launchIn(scope);
   `sample`, `combine`, `flatMapLatest`, `flatMapConcat`, `transformLatest`, `runningFold`,
   `retry`, `retryWhen`, `catchError`, `cancellable`. On `runTest` their time is virtual.
 
+## Dates, times and time zones
+
+Kotlin's `kotlinx-datetime`: `LocalDate`, `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`,
+`YearMonth`, `DayOfWeek` and `Month`, periods and units, and `TimeZone` with every zone of the IANA
+time zone database built in, so a zone reads the same on the VM, in Flutter and on the web:
+
+```dart
+final berlin = TimeZone.of('Europe/Berlin');
+final Instant start = LocalDateTime.of(2026, 3, 28, 9, 0).toInstant(berlin);
+
+start.plus(1, DateTimeUnit.day, timeZone: berlin); // 2026-03-29T07:00:00Z, 23 hours later
+start + const Duration(days: 1);                    // 2026-03-29T08:00:00Z, exact time
+berlin.offsetInfo(LocalDateTime.of(2026, 3, 29, 2, 30)); // a gap: the clocks skip it
+Clock.system.todayIn(berlin);
+```
+
+A local time the clocks skip moves forward by the length of the gap, and one they pass twice takes
+the earlier offset, as Kotlin and RFC 5545 do; `ZoneResolution` chooses otherwise. Every count is
+exact on the web, where integers are doubles. `tool/generate_tzdata.dart` compiles the database in
+`third_party/tzdata` into compact data that is decoded per zone on first use.
+
+## Recurrence and iCalendar
+
+`package:essentia/icalendar.dart` holds RFC 5545: recurrence rules with every `BY` part, sets of
+rules, extra dates and exceptions, and the iCalendar format:
+
+```dart
+final standup = RecurrenceSet(
+  ZonedAnchor(LocalDateTime.of(2026, 10, 5, 9, 30), berlin),
+  rules: <RecurrenceRule>[RecurrenceRule.parse('FREQ=WEEKLY;BYDAY=MO,WE')],
+);
+standup.occurrencesBetween(LocalDateTime.of(2026, 10, 1, 0, 0), LocalDateTime.of(2026, 11, 1, 0, 0));
+
+final IcsCalendar calendar = const IcsCodec().decode(text).calendar;
+```
+
+Repetitions are computed on the clock of the anchor and lazily, the anchor counts towards a
+`COUNT`, and `truncatedBefore`, `splitAt` and `movedTo` edit "this and following" and whole series.
+The codec keeps every property and component it does not read, describes each zone it writes in a
+`VTIMEZONE`, and reads a zone named the Windows way through the file's own description.
+
 ## Kotlin's standard library on Dart's classes
 
 The extensions Kotlin has and Dart does not, under the names Kotlin gives them. Every one says in
@@ -341,6 +382,28 @@ are what `rangeTo`, `until` and `downTo` hand back.
 
 Kept deliberately small, and only where Dart has no equivalent:
 
+- `Clock.now()` returns an `Instant` as Kotlin's does; `toDateTime()` gives Dart's `DateTime`.
+  Instants cover a million years either way instead of a billion, so every count stays exact on the
+  web, and `toEpochMilliseconds` is clamped to 2^53 - 1. `Instant - Instant` is `difference`, as on
+  `DateTime`, and the unit and period arithmetic takes the zone as a named argument.
+- `LocalDate.today`, `epochDays`, `isoWeekNumber`, `isoWeekYear`, `startOfWeek`, `plusDays`,
+  `plusMonths` and `plusYears` are conveniences beyond Kotlin's API. `TimeZone.offsetInfo`,
+  `ZoneRules` and `ZoneResolution` make public what Kotlin keeps internal, because a calendar has to
+  show the gaps and overlaps of daylight saving time.
+- Where a system does not tell its zone by name, as Android, iOS and Windows do not to a program,
+  `TimeZone.currentSystemDefault` is the current fixed offset; an application there hands its zone
+  in.
+- `Clock.now()` returns an `Instant` as Kotlin's does; `toDateTime()` gives Dart's `DateTime`.
+  Instants cover a million years either way instead of a billion, so every count stays exact on the
+  web, and `toEpochMilliseconds` is clamped to 2^53 - 1. `Instant - Instant` is `difference`, as on
+  `DateTime`, and the unit and period arithmetic takes the zone as a named argument.
+- `LocalDate.today`, `epochDays`, `isoWeekNumber`, `isoWeekYear`, `startOfWeek`, `plusDays`,
+  `plusMonths` and `plusYears` are conveniences beyond Kotlin's API. `TimeZone.offsetInfo`,
+  `ZoneRules` and `ZoneResolution` make public what Kotlin keeps internal, because a calendar has to
+  show the gaps and overlaps of daylight saving time.
+- Where a zone does not tell its name, as Android, iOS and Windows do not to a program,
+  `TimeZone.currentSystemDefault` is the current fixed offset; an application there hands its zone
+  in.
 - A topic runs its lanes and consumers as coroutines under a supervisor of its own and does not
   take a `CoroutineScope`; a consumer runs as the principal that attached it.
 - `select` clauses are calls on the builder, `it.onReceive(channel, ...)`, since Dart has no

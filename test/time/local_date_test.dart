@@ -38,8 +38,8 @@ void main() {
   test('knows its weekday, its day of the year and its month', () {
     final date = LocalDate(2026, 10, 8);
 
-    expect(date.dayOfWeek, DateTime.thursday);
-    expect(LocalDate(1969, 12, 28).dayOfWeek, DateTime.sunday);
+    expect(date.dayOfWeek, DayOfWeek.thursday);
+    expect(LocalDate(1969, 12, 28).dayOfWeek, DayOfWeek.sunday);
     expect(date.dayOfYear, 281);
     expect(date.lengthOfMonth, 31);
     expect(LocalDate(2026, 2, 3).lengthOfMonth, 28);
@@ -67,11 +67,11 @@ void main() {
     expect(LocalDate(1, 1, 15).plusMonths(-13), LocalDate(-1, 12, 15));
     expect(LocalDate(2024, 2, 29).plusYears(1), LocalDate(2025, 2, 28));
     expect(
-      LocalDate(2026, 10, 8).startOfWeek(DateTime.monday),
+      LocalDate(2026, 10, 8).startOfWeek(DayOfWeek.monday),
       LocalDate(2026, 10, 5),
     );
     expect(
-      LocalDate(2026, 10, 8).startOfWeek(DateTime.sunday),
+      LocalDate(2026, 10, 8).startOfWeek(DayOfWeek.sunday),
       LocalDate(2026, 10, 4),
     );
   });
@@ -106,9 +106,16 @@ void main() {
   });
 
   test('reads today from a clock', () {
-    final clock = _FixedClock(DateTime.utc(2026, 10, 8, 12));
+    final clock = _FixedClock(Instant.parse('2026-10-08T23:30:00Z'));
 
-    expect(LocalDate.today(clock: clock, local: false), LocalDate(2026, 10, 8));
+    expect(
+      LocalDate.today(clock: clock, timeZone: TimeZone.utc),
+      LocalDate(2026, 10, 8),
+    );
+    expect(
+      LocalDate.today(clock: clock, timeZone: TimeZone.of('+02:00')),
+      LocalDate(2026, 10, 9),
+    );
     expect(LocalDate.today(clock: clock).year, 2026);
     expect(LocalDate.today().year, greaterThan(2000));
   });
@@ -122,5 +129,55 @@ void main() {
     expect(LocalDate.parse('-0044-03-15'), LocalDate(-44, 3, 15));
     expect(() => LocalDate.parse('2026-02-30'), throwsFormatException);
     expect(() => LocalDate.parse('08.10.2026'), throwsFormatException);
+  });
+
+  test('builds from a month and knows its month and ISO week year', () {
+    expect(LocalDate.of(2026, Month.october, 9), LocalDate(2026, 10, 9));
+    expect(LocalDate(2026, 10, 9).month, Month.october);
+    expect(LocalDate(2026, 10, 9).monthNumber, 10);
+    expect(LocalDate(2027, 1, 1).isoWeekNumber, 53);
+    expect(LocalDate(2027, 1, 1).isoWeekYear, 2026);
+    expect(LocalDate(2024, 12, 30).isoWeekYear, 2025);
+    expect(LocalDate(2026, 6, 1).isoWeekYear, 2026);
+  });
+
+  test('adds units and periods as Kotlin does', () {
+    final date = LocalDate(2024, 1, 31);
+
+    expect(date.plus(2, DateTimeUnit.week), LocalDate(2024, 2, 14));
+    expect(date.plus(1, DateTimeUnit.month), LocalDate(2024, 2, 29));
+    expect(date.minus(1, DateTimeUnit.quarter), LocalDate(2023, 10, 31));
+    expect(
+      date.plusPeriod(DatePeriod(months: 1, days: 1)),
+      LocalDate(2024, 3, 1),
+    );
+    expect(
+      LocalDate(2024, 3, 1).minusPeriod(DatePeriod(months: 1, days: 1)),
+      LocalDate(2024, 1, 31),
+    );
+  });
+
+  test('measures in units and periods', () {
+    final start = LocalDate(2024, 1, 31);
+    final end = LocalDate(2026, 3, 2);
+
+    expect(start.until(end, DateTimeUnit.day), 761);
+    expect(start.until(end, DateTimeUnit.week), 108);
+    expect(start.until(end, DateTimeUnit.month), 25);
+    expect(start.until(end, DateTimeUnit.year), 2);
+    expect(start.yearsUntil(end), 2);
+    expect(end.yearsUntil(start), -2);
+    expect(start.periodUntil(end), DatePeriod(years: 2, months: 1, days: 2));
+    expect(end.periodUntil(start), DatePeriod(years: -2, months: -1, days: -2));
+  });
+
+  test('joins a time and finds the start of its day in a zone', () {
+    final date = LocalDate(2026, 3, 29);
+
+    expect(date.atTime(LocalTime(9, 30)), LocalDateTime.of(2026, 3, 29, 9, 30));
+    expect(
+      date.atStartOfDayIn(TimeZone.of('Europe/Berlin')),
+      Instant.parse('2026-03-28T23:00:00Z'),
+    );
   });
 }

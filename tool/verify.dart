@@ -15,6 +15,10 @@ const steps = <(String, List<String>)>[
   ('Format', <String>['format', '--output=none', '--set-exit-if-changed', '.']),
   ('Analyze', <String>['analyze', '--fatal-infos']),
   ('Style', <String>['run', 'inspectra', 'style']),
+  (
+    'Generated time zones',
+    <String>['run', 'tool/generate_tzdata.dart', '--check'],
+  ),
   ('Test (VM)', <String>['test']),
   ('Test (web)', <String>['test', '--platform', 'chrome']),
   (

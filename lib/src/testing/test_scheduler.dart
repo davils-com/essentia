@@ -17,6 +17,7 @@ import 'package:essentia/src/coroutines/virtual_time.dart';
 import 'package:essentia/src/testing/background_work.dart';
 import 'package:essentia/src/testing/virtual_timer.dart';
 import 'package:essentia/src/time/clock.dart';
+import 'package:essentia/src/time/instant.dart';
 import 'package:essentia/src/time/time_mark.dart';
 import 'package:essentia/src/time/time_source.dart';
 import 'package:meta/meta.dart';
@@ -54,12 +55,10 @@ final class TestScheduler extends Scheduler
     implements TimeSource, Clock, VirtualTime {
   /// Creates a scheduler at virtual time zero, whose clock starts at
   /// [start], the Unix epoch unless given.
-  TestScheduler({DateTime? start})
-    : start = (start ?? DateTime.fromMillisecondsSinceEpoch(0, isUtc: true))
-          .toUtc();
+  TestScheduler({Instant? start}) : start = start ?? Instant.epoch;
 
   /// The calendar time of virtual time zero.
-  final DateTime start;
+  final Instant start;
 
   /// The microtasks of the virtual event loop, oldest first.
   final _microtasks = Queue<void Function()>();
@@ -132,7 +131,7 @@ final class TestScheduler extends Scheduler
   ///
   /// Returns [start] plus [currentTime].
   @override
-  DateTime now() => start.add(_now);
+  Instant now() => start + _now;
 
   /// Runs [body] on the virtual event loop of this scheduler.
   ///

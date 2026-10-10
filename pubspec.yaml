@@ -4,11 +4,12 @@ description: >-
   that reports every problem at once, validating configuration builders,
   program parameters, an in-process event bus, layering contracts, RFC 9562
   identifiers, platform detection, byte strings and hexadecimal formats,
-  time sources, Kotlin's coroutines - structured concurrency, channels,
+  time sources, dates, times and every IANA time zone, RFC 5545
+  recurrence and iCalendar, Kotlin's coroutines - structured concurrency, channels,
   select, hot flows and a virtual event loop for tests -, fair locks, a
   Result type and Kotlin's standard library extensions on Dart's own
   classes.
-version: 2.1.0
+version: 3.0.0
 publish_to: none
 
 environment:

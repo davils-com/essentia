@@ -15,9 +15,9 @@ final class _FixedClock implements Clock {
   const _FixedClock(this.time);
 
   /// The time the clock reads.
-  final DateTime time;
+  final Instant time;
 
   /// The time.
   @override
-  DateTime now() => time;
+  Instant now() => time;
 }

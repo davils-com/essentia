@@ -12,13 +12,12 @@ import 'package:test/test.dart';
 
 /// Covers the clock of the system.
 void main() {
-  test('reads the current time in UTC', () {
-    final DateTime before = DateTime.now().toUtc();
+  test('reads the current moment', () {
+    final before = Instant.fromDateTime(DateTime.now());
 
-    final DateTime now = Clock.system.now();
+    final Instant now = Clock.system.now();
 
-    final DateTime after = DateTime.now().toUtc();
-    expect(now.isUtc, isTrue);
+    final after = Instant.fromDateTime(DateTime.now());
     expect(now.isBefore(before), isFalse);
     expect(now.isAfter(after), isFalse);
   });

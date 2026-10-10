@@ -11,6 +11,12 @@ This document lists the third-party software Essentia uses or integrates with.
   [BSD 3-Clause License](https://github.com/dart-lang/sdk/blob/main/pkg/meta/LICENSE). It is the only
   package a consumer of Essentia resolves.
 
+## Bundled data
+
+- [The IANA time zone database](https://www.iana.org/time-zones), release 2026e, in
+  `third_party/tzdata/2026e`, compiled into `lib/src/time/internal/tzdata.dart` by
+  `tool/generate_tzdata.dart`. Its data is in the public domain, as its `LICENSE` file says.
+
 ## Development
 
 - [Inspectra](https://pub.dev/packages/inspectra) - the quality gates and supply-chain scans, licensed

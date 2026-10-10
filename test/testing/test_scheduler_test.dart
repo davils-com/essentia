@@ -22,7 +22,7 @@ void main() {
       final scheduler = TestScheduler();
 
       expect(scheduler.currentTime, Duration.zero);
-      expect(scheduler.now(), DateTime.utc(1970));
+      expect(scheduler.now(), Instant.epoch);
       expect(scheduler.pendingTasks, 0);
     });
 
@@ -427,22 +427,24 @@ void main() {
     });
 
     test('is its own clock, starting where it was told', () async {
-      final scheduler = TestScheduler(start: DateTime.utc(2026, 10, 7, 12));
+      final scheduler = TestScheduler(
+        start: Instant.parse('2026-10-07T12:00:00Z'),
+      );
 
       await scheduler.advanceTimeBy(30.minutes);
 
       expect(scheduler.clock, same(scheduler));
-      expect(scheduler.clock.now(), DateTime.utc(2026, 10, 7, 12, 30));
+      expect(scheduler.clock.now(), Instant.parse('2026-10-07T12:30:00Z'));
     });
 
-    test('keeps its clock in UTC whatever start it is given', () {
-      final scheduler = TestScheduler(start: DateTime(2026));
-
-      expect(scheduler.start.isUtc, isTrue);
+    test('starts its clock at the epoch unless told otherwise', () {
+      expect(TestScheduler().start, Instant.epoch);
     });
 
     test('lends its time to the system scheduler inside', () {
-      final scheduler = TestScheduler(start: DateTime.utc(2026));
+      final scheduler = TestScheduler(
+        start: Instant.parse('2026-01-01T00:00Z'),
+      );
 
       final (TimeSource source, Clock clock) = scheduler.run(
         () => (Scheduler.system.timeSource, Scheduler.system.clock),

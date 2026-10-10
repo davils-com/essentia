@@ -4,6 +4,51 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 3.0.0
+
+Kotlin's `kotlinx-datetime` and `kotlin.time.Clock`, ported, with the IANA time zone database built
+in, and RFC 5545: recurrence rules and the iCalendar format in the new library
+`package:essentia/icalendar.dart`.
+
+### Breaking
+
+- `Clock.now()` returns an `Instant` instead of a `DateTime`, as `kotlin.time.Clock` does.
+  `SystemClock` and `TestScheduler` follow; `TestScheduler(start:)` takes an `Instant`.
+- `LocalDate.dayOfWeek` is a `DayOfWeek` and `LocalDate.month` a `Month`; the number of the month is
+  `monthNumber`. `startOfWeek` takes a `DayOfWeek`.
+- `LocalDate.today` takes a `TimeZone` instead of `local`; `clock.todayIn(zone)` is Kotlin's form.
+
+### Migration
+
+- `clock.now()` where a `DateTime` is needed: `clock.now().toDateTime()`; a `DateTime` start of a
+  `TestScheduler`: `Instant.fromDateTime(dateTime)`.
+- `date.month` as a number: `date.monthNumber`; `date.dayOfWeek == DateTime.monday`:
+  `date.dayOfWeek == DayOfWeek.monday`, or `date.dayOfWeek.isoDayNumber` for the number.
+- `LocalDate.today(local: false)`: `LocalDate.today(timeZone: TimeZone.utc)`.
+
+### Added
+
+- `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`, `YearMonth`, `DayOfWeek` and `Month`, with
+  ISO 8601 parsing and printing; `LocalDateRange` and `YearMonthRange`, which iterate.
+- `DateTimeUnit` with `TimeBasedUnit`, `DayBasedUnit` and `MonthBasedUnit`, and `DateTimePeriod`
+  and `DatePeriod`, normalised as Kotlin's; arithmetic, `until` and `periodUntil` on `LocalDate`
+  and on `Instant` in a time zone, where a day can last 23 or 25 hours.
+- `TimeZone`: every zone of the IANA time zone database 2026e, built in and decoded on first use,
+  fixed offsets, `currentSystemDefault` from the environment, `/etc/localtime` or the browser, and
+  zones of own rules. `ZoneRules`, `ZoneTransition`, `RecurringZoneRule`, `ZoneTransitionRule`,
+  `ZoneOffsetInfo` with gaps and overlaps, and `ZoneResolution` for the local times a shift of the
+  clocks skips or repeats. `DateTimeArithmeticException`, `IllegalTimeZoneException`.
+- `ClockDateTime`: `todayIn` and `nowIn` on a `Clock`.
+- `package:essentia/icalendar.dart`: `RecurrenceRule` of RFC 5545 with every `BY` part, checked
+  with violation codes, `recurrenceRule` and its builder; `RecurrenceSet` of rules, extra dates and
+  exceptions, expanded lazily in the zone of its anchor, with windows, `truncatedBefore`, `splitAt`
+  and `movedTo` for editing series.
+- The iCalendar codec `IcsCodec`: content lines, folding and escaping; `IcsCalendar`, `IcsEvent`,
+  `IcsTodo`, `IcsAlarm`, `IcsAttendee`, `IcsOrganizer`, `IcsTimeZone` with conversion to and from
+  zone rules, `IcsZoneResolver`; strict and lenient reads, and a `VTIMEZONE` written for every zone
+  an entry names.
+- `tool/generate_tzdata.dart`, a compiler of the time zone database, checked by `verify.dart`.
+
 ## 2.1.0
 
 ### Added

@@ -8,6 +8,7 @@
  */
 
 import 'package:essentia/src/time/clock.dart';
+import 'package:essentia/src/time/instant.dart';
 import 'package:meta/meta.dart';
 
 /// The clock behind `Clock.system`, which reads `DateTime.now()`.
@@ -20,9 +21,9 @@ final class SystemClock implements Clock {
 
   /// Reads the time of the system.
   ///
-  /// Returns the current time in UTC.
+  /// Returns the moment it is now.
   @override
-  DateTime now() => DateTime.now().toUtc();
+  Instant now() => Instant.fromDateTime(DateTime.now());
 
   /// Names the clock.
   @override

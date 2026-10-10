@@ -8,6 +8,18 @@
  */
 
 import 'package:essentia/src/time/clock.dart';
+import 'package:essentia/src/time/clock_date_time.dart';
+import 'package:essentia/src/time/date_time_period.dart';
+import 'package:essentia/src/time/date_time_unit.dart';
+import 'package:essentia/src/time/day_of_week.dart';
+import 'package:essentia/src/time/instant.dart';
+import 'package:essentia/src/time/internal/iso_text.dart';
+import 'package:essentia/src/time/local_date_range.dart';
+import 'package:essentia/src/time/local_date_time.dart';
+import 'package:essentia/src/time/local_time.dart';
+import 'package:essentia/src/time/month.dart';
+import 'package:essentia/src/time/time_zone.dart';
+import 'package:essentia/src/time/year_month.dart';
 import 'package:meta/meta.dart';
 
 /// A date without a time of day and without a time zone, Kotlin's
@@ -16,24 +28,33 @@ import 'package:meta/meta.dart';
 /// Arithmetic on it counts days, months and years and never meets the
 /// shifts of daylight saving time that `DateTime` days are subject to.
 /// The calendar is the proleptic Gregorian one; months and days count
-/// from 1, and [dayOfWeek] numbers Monday 1 and Sunday 7, as
-/// `DateTime.weekday` does.
+/// from 1.
 @immutable
 final class LocalDate implements Comparable<LocalDate> {
-  /// The date of [day] in [month] of [year].
+  /// The date of [day] in month [monthNumber] of [year].
   ///
   /// Throws an [ArgumentError] for a month outside 1 to 12 or a day the
   /// month does not have.
-  factory LocalDate(int year, int month, int day) {
-    if (month < 1 || month > 12) {
-      throw ArgumentError.value(month, 'month', 'Must be from 1 to 12');
+  factory LocalDate(int year, int monthNumber, int day) {
+    if (monthNumber < 1 || monthNumber > 12) {
+      throw ArgumentError.value(
+        monthNumber,
+        'monthNumber',
+        'Must be from 1 to 12',
+      );
     }
-    final int length = _lengthOf(year, month);
+    final int length = _lengthOf(year, monthNumber);
     if (day < 1 || day > length) {
       throw ArgumentError.value(day, 'day', 'Must be from 1 to $length');
     }
-    return LocalDate._(year, month, day);
+    return LocalDate._(year, monthNumber, day);
   }
+
+  /// The date of [day] in [month] of [year].
+  ///
+  /// Throws an [ArgumentError] for a day the month does not have.
+  factory LocalDate.of(int year, Month month, int day) =>
+      LocalDate(year, month.number, day);
 
   /// The date [days] days after 1970-01-01, before it when negative.
   factory LocalDate.fromEpochDays(int days) {
@@ -59,15 +80,15 @@ final class LocalDate implements Comparable<LocalDate> {
   factory LocalDate.fromDateTime(DateTime dateTime) =>
       LocalDate._(dateTime.year, dateTime.month, dateTime.day);
 
-  /// The date it is now in the zone of this device, read from [clock];
-  /// in UTC when not [local].
-  factory LocalDate.today({Clock clock = Clock.system, bool local = true}) {
-    final DateTime now = clock.now();
-    return LocalDate.fromDateTime(local ? now.toLocal() : now);
-  }
+  /// The date it is now in [timeZone], the zone of this system unless
+  /// given, read from [clock].
+  ///
+  /// Kotlin reads this as `clock.todayIn(timeZone)`, which works here too.
+  factory LocalDate.today({Clock clock = Clock.system, TimeZone? timeZone}) =>
+      clock.todayIn(timeZone ?? TimeZone.currentSystemDefault());
 
   /// Creates the date of valid parts.
-  const LocalDate._(this.year, this.month, this.day);
+  const LocalDate._(this.year, this.monthNumber, this.day);
 
   /// Reads a date written as ISO 8601 does: `2026-10-08`, with a sign and
   /// more digits for years beyond 9999 or before 0.
@@ -91,8 +112,8 @@ final class LocalDate implements Comparable<LocalDate> {
   /// The year.
   final int year;
 
-  /// The month, from 1 for January to 12 for December.
-  final int month;
+  /// The number of the month, from 1 for January to 12 for December.
+  final int monthNumber;
 
   /// The day of the month, from 1.
   final int day;
@@ -108,20 +129,28 @@ final class LocalDate implements Comparable<LocalDate> {
     int() => 31,
   };
 
+  /// The month.
+  Month get month => Month.of(monthNumber);
+
+  /// The month of the year this date lies in.
+  YearMonth get yearMonth => YearMonth(year, monthNumber);
+
   /// How many days lie between 1970-01-01 and this date, negative before.
   int get epochDays {
-    final int y = month <= 2 ? year - 1 : year;
+    final int y = monthNumber <= 2 ? year - 1 : year;
     final int era = (y >= 0 ? y : y - 399) ~/ 400;
     final int yearOfEra = y - era * 400;
     final int dayOfYear =
-        (153 * (month > 2 ? month - 3 : month + 9) + 2) ~/ 5 + day - 1;
+        (153 * (monthNumber > 2 ? monthNumber - 3 : monthNumber + 9) + 2) ~/ 5 +
+        day -
+        1;
     final int dayOfEra =
         yearOfEra * 365 + yearOfEra ~/ 4 - yearOfEra ~/ 100 + dayOfYear;
     return era * 146097 + dayOfEra - 719468;
   }
 
-  /// The day of the week, from 1 for Monday to 7 for Sunday.
-  int get dayOfWeek => (epochDays + 3) % 7 + 1;
+  /// The day of the week.
+  DayOfWeek get dayOfWeek => DayOfWeek.values[(epochDays + 3) % 7];
 
   /// The day of the year, from 1 for the 1st of January.
   int get dayOfYear => epochDays - LocalDate._(year, 1, 1).epochDays + 1;
@@ -130,23 +159,30 @@ final class LocalDate implements Comparable<LocalDate> {
   bool get isLeapYear => isLeap(year);
 
   /// How many days the month of this date has.
-  int get lengthOfMonth => _lengthOf(year, month);
+  int get lengthOfMonth => _lengthOf(year, monthNumber);
 
   /// How many days the year of this date has.
   int get lengthOfYear => isLeapYear ? 366 : 365;
 
   /// The first day of the month of this date.
-  LocalDate get firstDayOfMonth => LocalDate._(year, month, 1);
+  LocalDate get firstDayOfMonth => LocalDate._(year, monthNumber, 1);
 
   /// The last day of the month of this date.
-  LocalDate get lastDayOfMonth => LocalDate._(year, month, lengthOfMonth);
+  LocalDate get lastDayOfMonth => LocalDate._(year, monthNumber, lengthOfMonth);
 
   /// The number of the week of this date as ISO 8601 counts: weeks start
   /// on Monday and the first week holds the year's first Thursday.
+  ///
+  /// Early January can lie in the last week of the year before, and late
+  /// December in the first week of the next; [isoWeekYear] tells which.
   int get isoWeekNumber {
-    final LocalDate thursday = plusDays(4 - dayOfWeek);
+    final LocalDate thursday = plusDays(3 - dayOfWeek.index);
     return (thursday.dayOfYear - 1) ~/ 7 + 1;
   }
+
+  /// The year the ISO 8601 week of this date belongs to, the year of the
+  /// week's Thursday.
+  int get isoWeekYear => plusDays(3 - dayOfWeek.index).year;
 
   /// The date [days] days later, earlier when negative.
   LocalDate plusDays(int days) => LocalDate.fromEpochDays(epochDays + days);
@@ -154,7 +190,7 @@ final class LocalDate implements Comparable<LocalDate> {
   /// The date [months] months later, earlier when negative, on the same
   /// day or on the last day of a shorter month.
   LocalDate plusMonths(int months) {
-    final int index = year * 12 + (month - 1) + months;
+    final int index = year * 12 + (monthNumber - 1) + months;
     final int targetYear = index >= 0 ? index ~/ 12 : (index - 11) ~/ 12;
     final int targetMonth = index - targetYear * 12 + 1;
     final int length = _lengthOf(targetYear, targetMonth);
@@ -165,10 +201,30 @@ final class LocalDate implements Comparable<LocalDate> {
   /// February becomes the 28th in a year without it.
   LocalDate plusYears(int years) => plusMonths(years * 12);
 
+  /// The date [value] times [unit] later, earlier when negative, Kotlin's
+  /// `plus(value, unit)`.
+  LocalDate plus(int value, DateBasedUnit unit) => switch (unit) {
+    DayBasedUnit(:final int days) => plusDays(value * days),
+    MonthBasedUnit(:final int months) => plusMonths(value * months),
+  };
+
+  /// The date [value] times [unit] earlier, later when negative, Kotlin's
+  /// `minus(value, unit)`.
+  LocalDate minus(int value, DateBasedUnit unit) => plus(-value, unit);
+
+  /// The date [period] later: first its months, then its days, Kotlin's
+  /// `plus(period)`.
+  LocalDate plusPeriod(DatePeriod period) =>
+      plusMonths(period.totalMonths).plusDays(period.days);
+
+  /// The date [period] earlier, Kotlin's `minus(period)`.
+  LocalDate minusPeriod(DatePeriod period) =>
+      plusMonths(-period.totalMonths).plusDays(-period.days);
+
   /// The first day of the week of this date, for weeks that start on
-  /// [firstDayOfWeek], numbered from 1 for Monday to 7 for Sunday.
-  LocalDate startOfWeek(int firstDayOfWeek) =>
-      plusDays(-((dayOfWeek - firstDayOfWeek + 7) % 7));
+  /// [firstDayOfWeek].
+  LocalDate startOfWeek(DayOfWeek firstDayOfWeek) =>
+      plusDays(-firstDayOfWeek.daysUntil(dayOfWeek));
 
   /// How many days lie from this date to [other], negative when [other]
   /// is earlier.
@@ -177,7 +233,8 @@ final class LocalDate implements Comparable<LocalDate> {
   /// How many whole months lie from this date to [other], negative when
   /// [other] is earlier.
   int monthsUntil(LocalDate other) {
-    final int whole = (other.year - year) * 12 + other.month - month;
+    final int whole =
+        (other.year - year) * 12 + other.monthNumber - monthNumber;
     if (whole > 0 && other.day < day) {
       return whole - 1;
     }
@@ -187,10 +244,48 @@ final class LocalDate implements Comparable<LocalDate> {
     return whole;
   }
 
+  /// How many whole years lie from this date to [other], negative when
+  /// [other] is earlier.
+  int yearsUntil(LocalDate other) => monthsUntil(other) ~/ 12;
+
+  /// How many whole [unit]s lie from this date to [other], negative when
+  /// [other] is earlier, Kotlin's `until`.
+  int until(LocalDate other, DateBasedUnit unit) => switch (unit) {
+    DayBasedUnit(:final int days) => daysUntil(other) ~/ days,
+    MonthBasedUnit(:final int months) => monthsUntil(other) ~/ months,
+  };
+
+  /// The period from this date to [other], whole months first and the
+  /// remaining days after, Kotlin's `periodUntil`.
+  DatePeriod periodUntil(LocalDate other) {
+    final int months = monthsUntil(other);
+    return DatePeriod(
+      months: months,
+      days: plusMonths(months).daysUntil(other),
+    );
+  }
+
+  /// This date at [time], Kotlin's `atTime`.
+  LocalDateTime atTime(LocalTime time) => LocalDateTime(this, time);
+
+  /// The first moment of this date in [timeZone], which is midnight unless
+  /// a shift of the clocks skips it, Kotlin's `atStartOfDayIn`.
+  Instant atStartOfDayIn(TimeZone timeZone) => timeZone.startOfDay(this);
+
+  /// The dates from this one up to and including [end], Kotlin's
+  /// `rangeTo` and `..`.
+  LocalDateRange rangeTo(LocalDate end) => LocalDateRange(this, end);
+
+  /// The dates from this one up to but excluding [end], Kotlin's
+  /// `rangeUntil` and `..<`.
+  LocalDateRange rangeUntil(LocalDate end) =>
+      LocalDateRange(this, end.plusDays(-1));
+
   /// The start of this date as a `DateTime`, in the zone of this device or
   /// in UTC.
-  DateTime toDateTime({bool utc = false}) =>
-      utc ? DateTime.utc(year, month, day) : DateTime(year, month, day);
+  DateTime toDateTime({bool utc = false}) => utc
+      ? DateTime.utc(year, monthNumber, day)
+      : DateTime(year, monthNumber, day);
 
   /// Whether this date comes before [other].
   bool isBefore(LocalDate other) => compareTo(other) < 0;
@@ -207,20 +302,15 @@ final class LocalDate implements Comparable<LocalDate> {
   bool operator ==(Object other) =>
       other is LocalDate &&
       other.year == year &&
-      other.month == month &&
+      other.monthNumber == monthNumber &&
       other.day == day;
 
   /// A hash of the date.
   @override
-  int get hashCode => Object.hash(year, month, day);
+  int get hashCode => Object.hash(year, monthNumber, day);
 
   /// The date as ISO 8601 writes it, such as `2026-10-08`.
   @override
-  String toString() {
-    final String digits = year.abs().toString().padLeft(4, '0');
-    final sign = year < 0 ? '-' : (year > 9999 ? '+' : '');
-    final String monthText = month.toString().padLeft(2, '0');
-    final String dayText = day.toString().padLeft(2, '0');
-    return '$sign$digits-$monthText-$dayText';
-  }
+  String toString() =>
+      '${isoYear(year)}-${twoDigits(monthNumber)}-${twoDigits(day)}';
 }

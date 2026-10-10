@@ -8,14 +8,15 @@
  */
 
 import 'package:essentia/essentia.dart';
+import 'package:essentia/icalendar.dart';
 import 'package:essentia/testing.dart';
 import 'package:test/test.dart';
 
 import 'support/topics.dart';
 import 'support/user_event.dart';
 
-/// Runs the lazy, version, principal, scheduling, text and time examples of
-/// the README, so that they stay true.
+/// Runs the lazy, version, principal, scheduling, text, time, time zone and
+/// recurrence examples of the README, so that they stay true.
 void main() {
   test('the lazy example', () {
     final Lazy<RegExp> word = lazy(() => RegExp(r'^[a-z]+$'));
@@ -159,5 +160,47 @@ void main() {
     expect('--prot'.closestIn(<String>['--port', '--host']), '--port');
     expect('PT1H30M'.toIsoDuration(), const Duration(hours: 1, minutes: 30));
     expect(Platform.parse('linux-x86_64').isLinux, isTrue);
+  });
+
+  test('the date, time and zone example', () {
+    final TimeZone berlin = TimeZone.of('Europe/Berlin');
+    final Instant start = LocalDateTime.of(2026, 3, 28, 9, 0).toInstant(berlin);
+
+    expect(
+      start.plus(1, DateTimeUnit.day, timeZone: berlin),
+      Instant.parse('2026-03-29T07:00:00Z'),
+    );
+    expect(
+      start + const Duration(days: 1),
+      Instant.parse('2026-03-29T08:00:00Z'),
+    );
+    expect(
+      berlin.offsetInfo(LocalDateTime.of(2026, 3, 29, 2, 30)),
+      isA<GapOffsetInfo>(),
+    );
+    expect(Clock.system.todayIn(berlin).year, greaterThan(2025));
+  });
+
+  test('the recurrence and iCalendar example', () {
+    final TimeZone berlin = TimeZone.of('Europe/Berlin');
+    final standup = RecurrenceSet(
+      ZonedAnchor(LocalDateTime.of(2026, 10, 5, 9, 30), berlin),
+      rules: <RecurrenceRule>[RecurrenceRule.parse('FREQ=WEEKLY;BYDAY=MO,WE')],
+    );
+
+    expect(
+      standup.occurrencesBetween(
+        LocalDateTime.of(2026, 10, 1, 0, 0),
+        LocalDateTime.of(2026, 11, 1, 0, 0),
+      ),
+      hasLength(8),
+    );
+    expect(
+      const IcsCodec()
+          .decode('BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR\r\n')
+          .calendar
+          .events,
+      isEmpty,
+    );
   });
 }

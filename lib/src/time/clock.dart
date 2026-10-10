@@ -7,6 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'package:essentia/src/time/instant.dart';
 import 'package:essentia/src/time/system_clock.dart';
 import 'package:essentia/src/time/time_source.dart';
 
@@ -18,13 +19,14 @@ import 'package:essentia/src/time/time_source.dart';
 /// something took.
 ///
 /// Code that reads the time takes a clock instead of calling
-/// `DateTime.now()`, so a test can hand it a fixed one.
+/// `DateTime.now()`, so a test can hand it a fixed one. `todayIn` and
+/// `nowIn` read the date and time a clock in a time zone shows.
 abstract interface class Clock {
   /// The clock of the system the program runs on, Kotlin's `Clock.System`.
   static const Clock system = SystemClock();
 
   /// Reads the current calendar time.
   ///
-  /// Returns the time in UTC.
-  DateTime now();
+  /// Returns the moment it is now.
+  Instant now();
 }
