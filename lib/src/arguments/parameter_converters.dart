@@ -11,9 +11,9 @@ import 'package:essentia/src/arguments/application_mode.dart';
 import 'package:essentia/src/arguments/boolean_parser.dart';
 import 'package:essentia/src/arguments/conversion_exception.dart';
 import 'package:essentia/src/arguments/converter.dart';
-import 'package:essentia/src/arguments/duration_parser.dart';
 import 'package:essentia/src/arguments/host_system.dart';
 import 'package:essentia/src/arguments/parameter_builder.dart';
+import 'package:essentia/src/time/duration_text.dart';
 
 /// The conversions a parameter declared as text can be given.
 ///
@@ -170,7 +170,7 @@ extension ParameterConverters on ParameterBuilder<String> {
   ParameterBuilder<Duration> duration() => convert<Duration>(
     'duration',
     (raw) =>
-        parseDuration(raw) ??
+        raw.toDurationOrNull() ??
         (throw const ConversionException(
           'is not a valid duration, expected something like 30s, 5m or PT1H',
         )),

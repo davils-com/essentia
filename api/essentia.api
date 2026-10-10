@@ -54,6 +54,34 @@ extension ByteListToByteString on List<int> {
   ByteString toByteString();
 }
 
+final class ByteSize implements Comparable<ByteSize> {
+  static const int maxBytes = 9007199254740991;
+  static const ByteSize zero = ByteSize(0);
+  final int bytes;
+  const ByteSize(int bytes);
+  int get hashCode;
+  bool operator <(ByteSize other);
+  bool operator <=(ByteSize other);
+  bool operator ==(Object other);
+  bool operator >(ByteSize other);
+  bool operator >=(ByteSize other);
+  int compareTo(ByteSize other);
+  static ByteSize parse(String text);
+  String toString();
+  static ByteSize? tryParse(String text);
+}
+
+extension ByteSizeUnits on int {
+  ByteSize get gibibytes;
+  ByteSize get gigabytes;
+  ByteSize get kibibytes;
+  ByteSize get kilobytes;
+  ByteSize get mebibytes;
+  ByteSize get megabytes;
+  ByteSize get tebibytes;
+  ByteSize get terabytes;
+}
+
 final class ByteString implements Comparable<ByteString> {
   static final ByteString empty;
   ByteString(List<int> bytes);
@@ -487,6 +515,11 @@ typedef DurationComponents = ({int days, int hours, int microseconds, int minute
 extension DurationParsing on String {
   Duration toIsoDuration();
   Duration? toIsoDurationOrNull();
+}
+
+extension DurationText on String {
+  Duration toDuration();
+  Duration? toDurationOrNull();
 }
 
 extension DurationUnits on int {
@@ -1575,6 +1608,10 @@ abstract interface class ProducerScope<E> implements CoroutineScope, SendChannel
   abstract SendChannel<E> get channel;
 }
 
+extension ReadableDuration on Duration {
+  String toReadableString();
+}
+
 abstract interface class ReceiveChannel<E> {
   abstract bool get isClosedForReceive;
   abstract bool get isEmpty;
@@ -2144,6 +2181,12 @@ final class TopicTypeMismatchError extends ArgumentError {
   final Type declared;
   final Type requested;
   final String topicName;
+}
+
+extension UnicodeNormalization on String {
+  bool get isNfc;
+  String toNfc();
+  String toNfd();
 }
 
 final class UnknownArgument extends ParameterViolation {

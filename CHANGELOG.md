@@ -4,6 +4,21 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 3.1.0
+
+### Added
+
+- `String.toDuration` and `toDurationOrNull`, Kotlin's `Duration.parse`: the readable form
+  (`30s`, `1h 30m`, `-(1m 30s)`) and ISO-8601. Program parameters read durations through them.
+- `Duration.toReadableString`, Kotlin's `Duration.toString()`, which `toDuration` reads back.
+- `ByteSize`, an amount of bytes written as `512KiB`, `10MB` or `1.5GiB`, with `parse`,
+  `tryParse`, ordering, and the units `kibibytes` to `tebibytes` and `kilobytes` to `terabytes` on
+  `int`. A size is at most 2^53 - 1 bytes, exact on every platform.
+- `String.toNfc`, `toNfd` and `isNfc`, the Unicode normalization forms NFC and NFD, Kotlin's
+  `Normalizer.normalize` and JavaScript's `String.prototype.normalize`: canonical decomposition,
+  ordering and composition with Hangul syllables, on the character data of Unicode 16.0.0, the same
+  on every platform. Text that already is normalized comes back as the same instance.
+
 ## 3.0.0
 
 Kotlin's `kotlinx-datetime` and `kotlin.time.Clock`, ported, with the IANA time zone database built
