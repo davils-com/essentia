@@ -21,7 +21,7 @@ import 'package:meta/meta.dart';
 Future<void> handling(
   EventEnvelope<Event> envelope,
   Future<void> Function() body,
-) => overlayContext(HandledEnvelopeElement(envelope), body);
+) => runWithContext(HandledEnvelopeElement(envelope), body);
 
 /// The envelope whose handling the current code runs in.
 ///

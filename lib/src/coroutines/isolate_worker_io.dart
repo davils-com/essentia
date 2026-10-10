@@ -17,6 +17,7 @@ import 'package:essentia/src/coroutines/coroutine_name.dart';
 import 'package:essentia/src/coroutines/coroutine_scope.dart';
 import 'package:essentia/src/coroutines/coroutine_scope_builders.dart';
 import 'package:essentia/src/coroutines/isolate_body_not_sendable_error.dart';
+import 'package:essentia/src/coroutines/isolate_transferable.dart';
 import 'package:essentia/src/coroutines/job.dart';
 import 'package:essentia/src/lifecycle/disposable.dart';
 import 'package:essentia/src/principal/principal_element.dart';
@@ -45,8 +46,9 @@ const _unsendableResult = 3;
 /// body at a time.
 ///
 /// The isolate is spawned for the first body and then kept. A body is sent
-/// with the sendable elements of its context - its name and principal -
-/// and runs there as a coroutine of its own; cancelling the job of the
+/// with the elements of its context that cross - its name, its principal
+/// and every [IsolateTransferable] - as far as they are sendable, and runs
+/// there as a coroutine of its own; cancelling the job of the
 /// caller cancels it there, and an isolate that does not stop within
 /// [killGrace] is killed. An isolate that dies fails the body it ran with
 /// a [RemoteError] and is not used again.
@@ -124,7 +126,7 @@ final class IsolateWorkerIo {
     _forget();
   }
 
-  /// Sends [block] with [elements], or without them when they cannot be
+  /// Sends [block] with [elements], leaving out the elements that cannot be
   /// sent.
   ///
   /// Throws an [IsolateBodyNotSendableError] if [block] cannot be sent.
@@ -138,7 +140,7 @@ final class IsolateWorkerIo {
       return;
     } on Object {
       try {
-        commands.send((_run, block, const <CoroutineContextElement>[]));
+        commands.send((_run, block, _sendable(elements)));
       } on Object catch (error) {
         throw IsolateBodyNotSendableError.body(error);
       }
@@ -243,16 +245,54 @@ final class IsolateWorkerIo {
     _connection = null;
   }
 
-  /// The elements of [context] that cross to the isolate: its name and
-  /// principal.
+  /// The elements of [context] that cross to the isolate: its name, its
+  /// principal and every [IsolateTransferable], in the order of the
+  /// context.
   ///
   /// Returns them.
   static List<CoroutineContextElement> _sendableElements(
     CoroutineContext context,
-  ) => <CoroutineContextElement>[
-    ?context.get(CoroutineName.key),
-    ?context.get(PrincipalElement.key),
-  ];
+  ) => context.fold<List<CoroutineContextElement>>(
+    <CoroutineContextElement>[],
+    (elements, element) {
+      if (element is CoroutineName ||
+          element is PrincipalElement ||
+          element is IsolateTransferable) {
+        elements.add(element);
+      }
+      return elements;
+    },
+  );
+
+  /// The elements of [elements] that a `SendPort` accepts, each tried on its
+  /// own through a port that is closed again at once.
+  ///
+  /// Returns them, in their order.
+  static List<CoroutineContextElement> _sendable(
+    List<CoroutineContextElement> elements,
+  ) {
+    final probe = RawReceivePort(null, 'Dispatchers.isolate probe');
+    try {
+      return <CoroutineContextElement>[
+        for (final element in elements)
+          if (_accepts(probe.sendPort, element)) element,
+      ];
+    } finally {
+      probe.close();
+    }
+  }
+
+  /// Whether [port] accepts [element].
+  ///
+  /// Returns `true` when sending it did not throw.
+  static bool _accepts(SendPort port, CoroutineContextElement element) {
+    try {
+      port.send(element);
+      return true;
+    } on Object {
+      return false;
+    }
+  }
 }
 
 /// The entry point of a worker isolate: says hello with its own port, then

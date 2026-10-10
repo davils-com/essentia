@@ -9,7 +9,7 @@ description: >-
   select, hot flows and a virtual event loop for tests -, fair locks, a
   Result type and Kotlin's standard library extensions on Dart's own
   classes.
-version: 3.1.0
+version: 3.2.0
 publish_to: none
 
 environment:

@@ -113,11 +113,17 @@ abstract interface class CancellableContinuation<T> {
   abstract void resumeWithException(Object error, [StackTrace? stackTrace]);
 }
 
-base class CancellationException implements Exception {
+base class CancellationException implements Exception, Causal {
   final Object? cause;
   final String? message;
   const CancellationException([String? message, Object? cause]);
+  StackTrace? get causeStackTrace;
   String toString();
+}
+
+abstract interface class Causal {
+  abstract Object? get cause;
+  abstract StackTrace? get causeStackTrace;
 }
 
 abstract interface class Channel<E> implements SendChannel<E>, ReceiveChannel<E> {
@@ -129,9 +135,10 @@ abstract interface class Channel<E> implements SendChannel<E>, ReceiveChannel<E>
   factory Channel<E>({int capacity = rendezvous, BufferOverflow onBufferOverflow = BufferOverflow.suspend, void Function(E)? onUndeliveredElement});
 }
 
-final class ChannelClosed<T> extends ChannelFailure<T> {
+final class ChannelClosed<T> extends ChannelFailure<T> implements Causal {
   final Object? cause;
   const ChannelClosed<T>(Object? cause);
+  StackTrace? get causeStackTrace;
   int get hashCode;
   bool get isClosed;
   bool operator ==(Object other);
@@ -254,10 +261,11 @@ abstract interface class CompletableJob implements Job {
 
 typedef CompletionHandler = void Function(Object?);
 
-final class CompletionHandlerException implements Exception {
+final class CompletionHandlerException implements Exception, Causal {
   final Object cause;
   final StackTrace stackTrace;
   const CompletionHandlerException(Object cause, StackTrace stackTrace);
+  StackTrace get causeStackTrace;
   String toString();
 }
 
@@ -269,19 +277,21 @@ final class ConsumerGroup {
   Future<void> drain();
 }
 
-final class ConversionException implements Exception {
+final class ConversionException implements Exception, Causal {
   final Object? cause;
   final String message;
   const ConversionException(String message, [Object? cause]);
+  StackTrace? get causeStackTrace;
   String toString();
 }
 
-final class ConversionFailure extends ParameterViolation {
+final class ConversionFailure extends ParameterViolation implements Causal {
   final Object? cause;
   final ValueOrigin origin;
   final ParameterInfo parameter;
   final String reason;
   final String value;
+  StackTrace? get causeStackTrace;
   ViolationCode get code;
   String get message;
   ViolationPath get path;
@@ -358,6 +368,13 @@ enum CoroutineStart {
   defaultStart, lazy, atomic, undispatched;
 }
 
+final class Crc32 {
+  Crc32();
+  int get value;
+  void add(List<int> bytes);
+  static int of(List<int> bytes);
+}
+
 abstract interface class DataSource {}
 
 abstract interface class DataTransferObject<D extends DomainModel> {
@@ -373,6 +390,17 @@ sealed class DateBasedUnit extends DateTimeUnit {
   abstract DateBasedUnit times(int scalar);
 }
 
+final class DateFormatBuilder implements Builder<DateTimeFormat<LocalDate>> {
+  DateFormatBuilder();
+  DateTimeFormat<LocalDate> build();
+  void char(String character);
+  void chars(String text);
+  void date(DateTimeFormat<LocalDate> format);
+  void day();
+  void monthNumber();
+  void year();
+}
+
 final class DatePeriod extends DateTimePeriod {
   factory DatePeriod({int years = 0, int months = 0, int days = 0});
   factory DatePeriod.parse(String text);
@@ -383,6 +411,35 @@ final class DateTimeArithmeticException implements Exception {
   final String message;
   const DateTimeArithmeticException(String message);
   String toString();
+}
+
+abstract interface class DateTimeFormat<T> {
+  abstract String format(T value);
+  abstract void formatTo(StringSink out, T value);
+}
+
+final class DateTimeFormatBuilder implements Builder<DateTimeFormat<LocalDateTime>> {
+  DateTimeFormatBuilder();
+  DateTimeFormat<LocalDateTime> build();
+  void char(String character);
+  void chars(String text);
+  void date(DateTimeFormat<LocalDate> format);
+  void day();
+  void hour();
+  void minute();
+  void monthNumber();
+  void second();
+  void secondFraction(int fixedLength);
+  void time(DateTimeFormat<LocalTime> format);
+  void year();
+}
+
+abstract final class DateTimeFormats {
+  static const DateTimeFormat<LocalDate> isoDate = CompiledLocalDateFormat(<FormatDirective>[YearDirective(), LiteralDirective('-'), MonthNumberDirective(), LiteralDirective('-'), DayDirective()]);
+  static const DateTimeFormat<LocalDateTime> dateTime = CompiledLocalDateTimeFormat(<FormatDirective>[DateDirective(isoDate), LiteralDirective(' '), TimeDirective(time)]);
+  static const DateTimeFormat<LocalDateTime> isoInstantUtc = CompiledLocalDateTimeFormat(<FormatDirective>[DateDirective(isoDate), LiteralDirective('T'), TimeDirective(time), LiteralDirective('Z')]);
+  static const DateTimeFormat<LocalDateTime> isoLocal = CompiledLocalDateTimeFormat(<FormatDirective>[DateDirective(isoDate), LiteralDirective('T'), TimeDirective(time)]);
+  static const DateTimeFormat<LocalTime> time = CompiledLocalTimeFormat(<FormatDirective>[HourDirective(), LiteralDirective(':'), MinuteDirective(), LiteralDirective(':'), SecondDirective(), LiteralDirective('.'), SecondFractionDirective(3)]);
 }
 
 sealed class DateTimePeriod {
@@ -843,6 +900,10 @@ final class Instant implements Comparable<Instant> {
   int yearsUntil(Instant other, TimeZone timeZone);
 }
 
+extension InstantFormatting on Instant {
+  String format(DateTimeFormat<LocalDateTime> format, [TimeZone zone = TimeZone.utc]);
+}
+
 extension IntArithmetic on int {
   int floorDiv(int divisor);
   int mod(int divisor);
@@ -880,11 +941,14 @@ extension IntRangeBuilding on int {
   IntRange until(int end);
 }
 
-final class IsolateBodyNotSendableError extends ArgumentError {
+final class IsolateBodyNotSendableError extends ArgumentError implements Causal {
   final Object? cause;
   final bool inResult;
+  StackTrace? get causeStackTrace;
   String toString();
 }
+
+abstract interface class IsolateTransferable implements CoroutineContextElement {}
 
 extension IterableAccumulation<T> on Iterable<T> {
   T? reduceIndexedOrNull(T Function(int, T, T) combine);
@@ -1867,10 +1931,11 @@ abstract interface class SharingStarted {
   static SharingStarted whileSubscribed({Duration stopTimeout = Duration.zero, Duration? replayExpiration});
 }
 
-final class SourceUnavailable extends ParameterViolation {
+final class SourceUnavailable extends ParameterViolation implements Causal {
   final Object cause;
   final ParameterInfo parameter;
   final String sourceName;
+  StackTrace? get causeStackTrace;
   ViolationCode get code;
   String get message;
   ViolationPath get path;
@@ -2102,6 +2167,18 @@ final class TimeBasedUnit extends DateTimeUnit {
   bool operator ==(Object other);
   TimeBasedUnit times(int scalar);
   String toString();
+}
+
+final class TimeFormatBuilder implements Builder<DateTimeFormat<LocalTime>> {
+  TimeFormatBuilder();
+  DateTimeFormat<LocalTime> build();
+  void char(String character);
+  void chars(String text);
+  void hour();
+  void minute();
+  void second();
+  void secondFraction(int fixedLength);
+  void time(DateTimeFormat<LocalTime> format);
 }
 
 final class TimeMark implements Comparable<TimeMark> {
@@ -2513,6 +2590,14 @@ EventBus eventBus(void Function(EventBusBuilder) block);
 
 FlagBuilder flag(List<String> names);
 
+Future<Uint8List> gunzip(List<int> bytes);
+
+Future<Uint8List> gzip(List<int> bytes, {int level = 6});
+
+StreamTransformer<List<int>, Uint8List> gzipDecoder();
+
+StreamTransformer<List<int>, Uint8List> gzipEncoder({int level = 6});
+
 void handleCoroutineException(CoroutineContext context, Object error, StackTrace stackTrace, {Zone? zone});
 
 HexFormat hexFormat(void Function(HexFormatBuilder) block);
@@ -2522,6 +2607,14 @@ bool isCurrentCancellation(Object error);
 Lazy<T> lazy<T>(T Function() initializer);
 
 Lazy<T> lazyOf<T>(T value);
+
+DateTimeFormat<LocalDate> localDateFormat(void Function(DateFormatBuilder) block);
+
+DateTimeFormat<LocalDateTime> localDateTimeFormat(void Function(DateTimeFormatBuilder) block);
+
+DateTimeFormat<LocalDateTime> localDateTimePattern(String pattern);
+
+DateTimeFormat<LocalTime> localTimeFormat(void Function(TimeFormatBuilder) block);
 
 CoroutineScope mainScope();
 
@@ -2544,6 +2637,8 @@ R runAsPrincipal<R>(Principal principal, R Function() body);
 Result<T> runCatching<T>(T Function() block);
 
 Future<Result<T>> runCatchingAsync<T>(Future<T> Function() block);
+
+R runWithContext<R>(CoroutineContext added, R Function() body);
 
 Future<R> select<R>(void Function(SelectBuilder<R>) block);
 

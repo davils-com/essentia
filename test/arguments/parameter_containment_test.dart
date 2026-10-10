@@ -79,6 +79,9 @@ void main() {
 
       expect(violation.reason, 'is not a valid integer');
       expect(violation.cause, isA<ConversionException>());
+      final Causal causal = violation;
+      expect(causal.cause, same(violation.cause));
+      expect(causal.causeStackTrace, isNull);
     });
   });
 
@@ -111,6 +114,9 @@ void main() {
       expect(violation.sourceName, 'vault');
       expect(violation.message, 'could not be read, because the source failed');
       expect('${violation.cause}', contains('connection refused'));
+      final Causal causal = violation;
+      expect(causal.cause, same(violation.cause));
+      expect(causal.causeStackTrace, isNull);
       expect(failure.toString(), isNot(contains('connection refused')));
     });
 

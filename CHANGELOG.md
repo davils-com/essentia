@@ -4,6 +4,28 @@ All notable changes to this project are documented in this file. The format foll
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## 3.2.0
+
+### Added
+
+- `runWithContext`, which runs a body with elements laid over the current coroutine context without
+  starting a coroutine, synchronous or asynchronous; `runAsPrincipal` is built on it.
+- `IsolateTransferable`, the marker of a context element that crosses to the worker isolate of
+  `Dispatchers.isolate`. An element that cannot be sent is now left out on its own instead of
+  taking the name and the principal with it.
+- `Causal`, the `cause` and `causeStackTrace` of a failure that wraps another, implemented by
+  `CancellationException` and `JobCancellationException`, `CompletionHandlerException`,
+  `ConversionException`, the parameter violations `ConversionFailure` and `SourceUnavailable`,
+  `ChannelClosed` and `IsolateBodyNotSendableError`.
+- Formats of dates and times, Kotlin's `DateTimeFormat`: `localDateTimeFormat`, `localDateFormat`
+  and `localTimeFormat` with their builders `DateTimeFormatBuilder`, `DateFormatBuilder` and
+  `TimeFormatBuilder`, `localDateTimePattern` for `yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`, `S` to
+  `SSSSSSSSS` and quoted text, the fixed-width `DateTimeFormats` `isoDate`, `time`, `dateTime`,
+  `isoLocal` and `isoInstantUtc`, and `Instant.format` in a time zone, UTC by default.
+- gzip: `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder`, on the zlib of `dart:io` and on the
+  `CompressionStream` of the browser; decoding checks the header, the CRC-32 and the length.
+- `Crc32`, the CRC-32 of gzip, zip and PNG, the same on every platform.
+
 ## 3.1.0
 
 ### Added

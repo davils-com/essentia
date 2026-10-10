@@ -10,6 +10,7 @@
 import 'package:essentia/src/arguments/parameter_info.dart';
 import 'package:essentia/src/arguments/parameter_violation_codes.dart';
 import 'package:essentia/src/arguments/value_origin.dart';
+import 'package:essentia/src/lang/causal.dart';
 import 'package:essentia/src/validation/severity.dart';
 import 'package:essentia/src/validation/violation.dart';
 import 'package:essentia/src/validation/violation_code.dart';
@@ -211,7 +212,7 @@ final class StrayValue extends ParameterViolation {
 }
 
 /// A value was present but its converter rejected it.
-final class ConversionFailure extends ParameterViolation {
+final class ConversionFailure extends ParameterViolation implements Causal {
   /// Creates the violation for [value] of [parameter] from [origin],
   /// rejected for [reason], with what the converter threw as [cause].
   @internal
@@ -240,7 +241,12 @@ final class ConversionFailure extends ParameterViolation {
   /// A converter's own exception is not written for this report and may
   /// quote the value it rejected, which is why only [reason] reaches
   /// [message]. `null` when the violation was created without one.
+  @override
   final Object? cause;
+
+  /// Where [cause] was thrown, which is not recorded: `null`.
+  @override
+  StackTrace? get causeStackTrace => null;
 
   /// Where the value came from.
   @override
@@ -322,7 +328,7 @@ final class ValidationFailure extends ParameterViolation {
 /// nothing about the arguments has to be wrong for it to happen. The
 /// exception itself is kept in [cause] and not rendered: a transport
 /// error's message is not written for this report.
-final class SourceUnavailable extends ParameterViolation {
+final class SourceUnavailable extends ParameterViolation implements Causal {
   /// Creates the violation for [parameter], which the source [sourceName]
   /// failed to read with [cause].
   @internal
@@ -335,7 +341,12 @@ final class SourceUnavailable extends ParameterViolation {
   final String sourceName;
 
   /// What the source threw, kept for diagnosis and never rendered.
+  @override
   final Object cause;
+
+  /// Where [cause] was thrown, which is not recorded: `null`.
+  @override
+  StackTrace? get causeStackTrace => null;
 
   /// The parameter's primary name and the source: `--token (from vault)`.
   @override

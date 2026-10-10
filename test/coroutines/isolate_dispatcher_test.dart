@@ -17,6 +17,9 @@ import 'package:essentia/essentia.dart';
 import 'package:essentia/src/coroutines/isolate_worker_io.dart';
 import 'package:test/test.dart';
 
+import 'local_element.dart';
+import 'port_element.dart';
+import 'tenant_element.dart';
 import 'unsendable.dart';
 
 /// Covers `Dispatchers.isolate`: bodies on worker isolates, what crosses
@@ -51,6 +54,73 @@ void main() {
 
     expect(name, 'hashing');
     expect(id, 'alice');
+  });
+
+  test('carries every element marked isolate transferable', () async {
+    final String? tenant = await withContext(
+      Dispatchers.isolate + const TenantElement('acme'),
+      (it) => currentCoroutineContext().get(TenantElement.key)?.tenant,
+    );
+
+    expect(tenant, 'acme');
+  });
+
+  test('leaves an element behind that is not marked', () async {
+    final (bool local, String? tenant) = await withContext(
+      Dispatchers.isolate + const LocalElement() + const TenantElement('acme'),
+      (it) => (
+        currentCoroutineContext().get(LocalElement.key) != null,
+        currentCoroutineContext().get(TenantElement.key)?.tenant,
+      ),
+    );
+
+    expect(local, isFalse);
+    expect(tenant, 'acme');
+  });
+
+  test('drops only the elements that cannot be sent', () async {
+    final port = ReceivePort();
+    addTearDown(port.close);
+    final Principal alice = principal('alice');
+
+    final (
+      String? name,
+      String? id,
+      String? tenant,
+      bool hasPort,
+    ) = await runAsPrincipal(
+      alice,
+      () => withContext(
+        Dispatchers.isolate +
+            const CoroutineName('mixed') +
+            PortElement(port) +
+            const TenantElement('acme'),
+        (it) => (
+          currentCoroutineContext().get(CoroutineName.key)?.name,
+          currentPrincipal()?.id,
+          currentCoroutineContext().get(TenantElement.key)?.tenant,
+          currentCoroutineContext().get(PortElement.key) != null,
+        ),
+      ),
+    );
+
+    expect(name, 'mixed');
+    expect(id, 'alice');
+    expect(tenant, 'acme');
+    expect(hasPort, isFalse);
+  });
+
+  test('still refuses a body that cannot be sent with its elements', () async {
+    final port = ReceivePort();
+    addTearDown(port.close);
+
+    await expectLater(
+      withContext(
+        Dispatchers.isolate + PortElement(port),
+        (it) => port.sendPort.hashCode,
+      ),
+      throwsA(isA<IsolateBodyNotSendableError>()),
+    );
   });
 
   test('runs async bodies started with launch and async', () async {

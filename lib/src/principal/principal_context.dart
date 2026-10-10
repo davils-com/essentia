@@ -41,7 +41,7 @@ import 'package:essentia/src/principal/principal_missing_exception.dart';
 ///
 /// Returns what [body] returns.
 R runAsPrincipal<R>(Principal principal, R Function() body) =>
-    overlayContext(PrincipalElement(principal), body);
+    runWithContext(PrincipalElement(principal), body);
 
 /// The principal the current code is working for.
 ///

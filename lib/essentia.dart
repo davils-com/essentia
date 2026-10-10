@@ -13,7 +13,8 @@
 /// builders, an in-process event bus, layering contracts, RFC 9562
 /// identifiers, semantic versions, principals, platform detection, time
 /// sources, schedulers with virtual time, jobs and locks, a `Result` type,
-/// Kotlin's `lazy`, byte strings and hexadecimal formats, Kotlin's
+/// Kotlin's `lazy`, byte strings and hexadecimal formats, gzip and
+/// CRC-32, formats of dates and times, Kotlin's
 /// standard library extensions on Dart's own classes and program
 /// parameters. It runs on every Dart platform, the web
 /// and WebAssembly included; `file()` is offered where `dart:io` is.
@@ -54,6 +55,8 @@ export 'src/bytes/byte_list_content.dart';
 export 'src/bytes/byte_list_hex.dart';
 export 'src/bytes/byte_list_to_byte_string.dart';
 export 'src/bytes/byte_string.dart';
+export 'src/bytes/compression/gzip.dart';
+export 'src/bytes/crc32.dart';
 export 'src/bytes/hex_format.dart';
 export 'src/bytes/hex_format_builder.dart';
 export 'src/bytes/hex_format_dsl.dart';
@@ -118,7 +121,7 @@ export 'src/coroutines/coroutine_context_access.dart';
 export 'src/coroutines/coroutine_context_element.dart';
 export 'src/coroutines/coroutine_context_key.dart';
 export 'src/coroutines/coroutine_context_zone.dart'
-    show currentCoroutineContext;
+    show currentCoroutineContext, runWithContext;
 export 'src/coroutines/coroutine_dispatcher.dart';
 export 'src/coroutines/coroutine_exception_handler.dart';
 export 'src/coroutines/coroutine_name.dart';
@@ -132,6 +135,7 @@ export 'src/coroutines/future_as_deferred.dart';
 export 'src/coroutines/future_timeout.dart';
 export 'src/coroutines/global_scope.dart';
 export 'src/coroutines/isolate_body_not_sendable_error.dart';
+export 'src/coroutines/isolate_transferable.dart';
 export 'src/coroutines/job.dart';
 export 'src/coroutines/job_cancellation_exception.dart';
 export 'src/coroutines/job_operations.dart';
@@ -182,6 +186,7 @@ export 'src/flow/state_flow.dart';
 export 'src/flow/stream_sharing.dart';
 export 'src/identity/uuid.dart';
 export 'src/identity/uuid_version.dart';
+export 'src/lang/causal.dart';
 export 'src/lazy/lazy.dart';
 export 'src/lazy/lazy_dsl.dart';
 export 'src/lifecycle/disposable.dart';
@@ -256,6 +261,14 @@ export 'src/time/duration_components.dart';
 export 'src/time/duration_parsing.dart';
 export 'src/time/duration_text.dart';
 export 'src/time/duration_units.dart';
+export 'src/time/format/date_format_builder.dart';
+export 'src/time/format/date_time_format.dart';
+export 'src/time/format/date_time_format_builder.dart';
+export 'src/time/format/date_time_format_dsl.dart';
+export 'src/time/format/date_time_formats.dart';
+export 'src/time/format/date_time_pattern.dart';
+export 'src/time/format/instant_formatting.dart';
+export 'src/time/format/time_format_builder.dart';
 export 'src/time/illegal_time_zone_exception.dart';
 export 'src/time/instant.dart';
 export 'src/time/local_date.dart';

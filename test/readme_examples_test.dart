@@ -179,6 +179,19 @@ void main() {
       isA<GapOffsetInfo>(),
     );
     expect(Clock.system.todayIn(berlin).year, greaterThan(2025));
+    expect(
+      start.format(DateTimeFormats.isoInstantUtc),
+      '2026-03-28T08:00:00.000Z',
+    );
+    expect(
+      start.format(DateTimeFormats.dateTime, berlin),
+      '2026-03-28 09:00:00.000',
+    );
+    expect(
+      localDateTimePattern("dd.MM.yyyy 'at' HH:mm")
+          .format(LocalDateTime.of(2026, 3, 28, 9, 0)),
+      '28.03.2026 at 09:00',
+    );
   });
 
   test('the recurrence and iCalendar example', () {

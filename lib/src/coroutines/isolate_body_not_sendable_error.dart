@@ -7,6 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
+import 'package:essentia/src/lang/causal.dart';
 import 'package:meta/meta.dart';
 
 /// A body handed to `Dispatchers.isolate` could not cross the border
@@ -16,7 +17,8 @@ import 'package:meta/meta.dart';
 /// It is a programming mistake, so it is an `Error`. Write the body as a
 /// closure that captures only sendable values, and return a sendable
 /// result; the restrictions are those of `SendPort.send`.
-final class IsolateBodyNotSendableError extends ArgumentError {
+final class IsolateBodyNotSendableError extends ArgumentError
+    implements Causal {
   /// Creates the error of a body that could not be sent because of
   /// [cause].
   @internal
@@ -30,7 +32,12 @@ final class IsolateBodyNotSendableError extends ArgumentError {
   final bool inResult;
 
   /// What `SendPort.send` threw for the body, if it was the body.
+  @override
   final Object? cause;
+
+  /// Where [cause] was thrown, which is not recorded: `null`.
+  @override
+  StackTrace? get causeStackTrace => null;
 
   /// Renders the error without quoting a value of the body.
   @override

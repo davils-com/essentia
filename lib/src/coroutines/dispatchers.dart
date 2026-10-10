@@ -28,10 +28,12 @@ abstract final class Dispatchers {
   /// The body, everything it captures and its result must be sendable
   /// through a `SendPort`; otherwise it fails with an
   /// `IsolateBodyNotSendableError`. Of its context only the
-  /// `CoroutineName` and the `PrincipalElement` cross to the isolate; the
-  /// body runs there in a coroutine of its own, whose children are not
-  /// children of the caller. Cancelling the caller cancels the body on the
-  /// isolate, and kills the isolate if the body ignores it for a second.
+  /// `CoroutineName`, the `PrincipalElement` and the elements marked
+  /// `IsolateTransferable` cross to the isolate, each one only if it is
+  /// sendable; the body runs there in a coroutine of its own, whose
+  /// children are not children of the caller. Cancelling the caller
+  /// cancels the body on the isolate, and kills the isolate if the body
+  /// ignores it for a second.
   /// Idle workers are kept and do not keep the program alive.
   ///
   /// On the web there are no isolates to run on: bodies run on the event

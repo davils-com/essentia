@@ -255,7 +255,10 @@ await polling.cancelAndJoin();
   end with a `CancellationException`, and `suspendCancellableCoroutine` makes any wait of one's own
   cancellable.
 - **Dispatched.** `Dispatchers.main` is the event loop; `Dispatchers.isolate` runs a body on a pool
-  of worker isolates, one per processor, and on the event loop on the web.
+  of worker isolates, one per processor, and on the event loop on the web. An element of the context
+  marked `IsolateTransferable` crosses to the isolate with the body, as far as it is sendable.
+- **Contextual.** `runWithContext(element, body)` lays elements over the current context for a body,
+  synchronous or asynchronous, without starting a coroutine; `runAsPrincipal` is built on it.
 - **Tested on virtual time.** `runTest` from `package:essentia/testing.dart` runs a test body on the
   virtual event loop of a `TestScheduler`: delays, timers and timeouts take no real time, and the
   test fails with every failure of the coroutines it started.
@@ -322,6 +325,16 @@ berlin.offsetInfo(LocalDateTime.of(2026, 3, 29, 2, 30)); // a gap: the clocks sk
 Clock.system.todayIn(berlin);
 ```
 
+`localDateTimeFormat`, `localDateFormat`, `localTimeFormat` and `localDateTimePattern` build
+formats that write every field at its full width, Kotlin's `LocalDateTime.Format { }`;
+`DateTimeFormats` holds the common ones:
+
+```dart
+start.format(DateTimeFormats.isoInstantUtc);       // 2026-03-28T08:00:00.000Z
+start.format(DateTimeFormats.dateTime, berlin);    // 2026-03-28 09:00:00.000
+localDateTimePattern("dd.MM.yyyy 'at' HH:mm").format(LocalDateTime.of(2026, 3, 28, 9, 0));
+```
+
 A local time the clocks skip moves forward by the length of the gap, and one they pass twice takes
 the earlier offset, as Kotlin and RFC 5545 do; `ZoneResolution` chooses otherwise. Every count is
 exact on the web, where integers are doubles. `tool/generate_tzdata.dart` compiles the database in
@@ -377,6 +390,11 @@ are what `rangeTo`, `until` and `downTo` hand back.
 - **Platform detection.** `Platform`, `OperatingSystem` and `Architecture`, with
   `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
   `Platform.parse('linux-x86_64')` for an identifier read from a path or a manifest.
+- **gzip.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder` on the zlib of `dart:io` and on the
+  `CompressionStream` of the browser; decoding checks the CRC-32 and the length of the member.
+  `Crc32` is the check itself, the same on every platform.
+- **Causes.** `Causal`, implemented by every failure of Essentia that wraps another, gives the
+  `cause` and, where it is known, its `causeStackTrace`.
 
 ## Differences to Arc
 
@@ -459,8 +477,8 @@ Kept deliberately small, and only where Dart has no equivalent:
   `Job`; create a `CompletableJob()` to call `complete`.
 - There are no threads: `Dispatchers.main` is Kotlin's `Main`, `Default` and `IO` on the event loop,
   and `Dispatchers.isolate` plays `Default` on worker isolates. A body sent there must be sendable;
-  only its `CoroutineName` and `PrincipalElement` cross, and its children are not children of the
-  caller. A body that ignores its cancellation for a second has its isolate killed.
+  only its `CoroutineName`, its `PrincipalElement` and the elements marked `IsolateTransferable`
+  cross, and its children are not children of the caller. A body that ignores its cancellation for a second has its isolate killed.
 - `Scheduler` bundles what Kotlin spreads over a dispatcher's `Delay`, a `TimeSource` and a
   `Clock`, and is an element of the coroutine context. `TestScheduler` plays
   `TestCoroutineScheduler` and is also the virtual event loop: inside it `Timer`, `Future.delayed`

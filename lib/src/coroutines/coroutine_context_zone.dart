@@ -41,9 +41,24 @@ CoroutineContext contextOfZone(Zone zone) {
 /// Runs [body] with [added] laid over the current context, without
 /// starting a coroutine.
 ///
+/// The elements of [added] replace the ones of `currentCoroutineContext()`
+/// stored under the same keys, for [body] only: they travel in a forked
+/// `Zone`, so they reach every `await`, `Future`, `Timer`, microtask and
+/// stream listener started inside [body], and every coroutine launched
+/// there inherits them. Outside [body] the context is what it was.
+///
+/// ```dart
+/// final String? name = runWithContext(
+///   const CoroutineName('import'),
+///   () => currentCoroutineContext().get(CoroutineName.key)?.name,
+/// ); // 'import'
+/// ```
+///
+/// [body] may be synchronous or return a `Future`; an asynchronous body's
+/// future is returned unchanged, so awaiting the result awaits the body.
+///
 /// Returns what [body] returns.
-@internal
-R overlayContext<R>(CoroutineContext added, R Function() body) => runZoned(
+R runWithContext<R>(CoroutineContext added, R Function() body) => runZoned(
   body,
   zoneValues: <Object?, Object?>{
     _contextKey: currentCoroutineContext() + added,

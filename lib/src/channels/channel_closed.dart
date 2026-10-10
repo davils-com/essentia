@@ -8,16 +8,22 @@
  */
 
 import 'package:essentia/src/channels/channel_result.dart';
+import 'package:essentia/src/lang/causal.dart';
 
 /// A channel operation that failed because the channel is closed, with the
 /// [cause] it was closed with.
-final class ChannelClosed<T> extends ChannelFailure<T> {
+final class ChannelClosed<T> extends ChannelFailure<T> implements Causal {
   /// Creates the result of a channel closed for [cause], `null` for a
   /// normal close.
   const ChannelClosed(this.cause);
 
   /// Why the channel was closed, `null` for a normal close.
+  @override
   final Object? cause;
+
+  /// Where [cause] was thrown, which is not recorded: `null`.
+  @override
+  StackTrace? get causeStackTrace => null;
 
   /// See [ChannelFailure.isClosed].
   @override
