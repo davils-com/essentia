@@ -37,6 +37,13 @@ enum OperatingSystem {
   /// links against glibc.
   android('android', isUnix: true),
 
+  /// iOS and iPadOS, which are a Darwin kernel and are not a Mac.
+  ///
+  /// It is its own constant rather than [macos] for the reason [android]
+  /// is not [linux]: a binary built for iOS links against a different SDK
+  /// and is published into a directory of its own.
+  ios('ios', isUnix: true),
+
   /// A browser or another JavaScript host, where the program is a
   /// WebAssembly module.
   web('web', isUnix: false);
@@ -73,10 +80,15 @@ enum OperatingSystem {
     if (normalized.isEmpty) {
       return null;
     }
-    for (final system in <OperatingSystem>[android, linux, windows, web]) {
+    for (final system in <OperatingSystem>[android, ios, linux, windows, web]) {
       if (normalized.startsWith(system.identifier)) {
         return system;
       }
+    }
+    final bool isIos =
+        normalized.startsWith('ipados') || normalized.startsWith('iphone');
+    if (isIos) {
+      return ios;
     }
     final bool isMac =
         normalized.startsWith('mac') || normalized.startsWith('darwin');

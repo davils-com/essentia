@@ -56,8 +56,9 @@ void main() {
     );
   });
 
-  test('a desktop VM is never reported as Android or the web', () {
+  test('a desktop VM is never reported as Android, iOS or the web', () {
     expect(Platform.current()?.isAndroid, isFalse);
+    expect(Platform.current()?.isIos, isFalse);
     expect(Platform.current()?.isWeb, isFalse);
     expect(Platform.current()?.architecture, isNot(Architecture.wasm));
   }, testOn: 'linux || mac-os || windows');

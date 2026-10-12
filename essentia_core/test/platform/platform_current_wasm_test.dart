@@ -35,5 +35,6 @@ void main() {
     expect(current?.isMacos, isFalse);
     expect(current?.isWindows, isFalse);
     expect(current?.isAndroid, isFalse);
+    expect(current?.isIos, isFalse);
   });
 }

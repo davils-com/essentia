@@ -19,6 +19,10 @@ const _operatingSystems = <String, OperatingSystem>{
   'Mac OS X': OperatingSystem.macos,
   'macOS': OperatingSystem.macos,
   'Darwin': OperatingSystem.macos,
+  'iOS': OperatingSystem.ios,
+  'ios': OperatingSystem.ios,
+  'iPadOS': OperatingSystem.ios,
+  'iPhone OS': OperatingSystem.ios,
 };
 
 /// Spellings a toolchain emits, and the architecture each one means.
@@ -173,6 +177,7 @@ void main() {
       expect(OperatingSystem.macos.isUnix, isTrue);
       expect(OperatingSystem.windows.isUnix, isFalse);
       expect(OperatingSystem.android.isUnix, isTrue);
+      expect(OperatingSystem.ios.isUnix, isTrue);
       expect(OperatingSystem.web.isUnix, isFalse);
     });
   });
@@ -185,6 +190,24 @@ void main() {
       expect(android?.isAndroid, isTrue);
       expect(android?.isLinux, isFalse);
       expect(android?.identifier, 'android-aarch64');
+    });
+
+    test('iOS resolves to itself rather than to macOS', () {
+      final Platform? ios = Platform.of('iOS', 'arm64');
+
+      expect(ios, isNotNull);
+      expect(ios?.isIos, isTrue);
+      expect(ios?.isMacos, isFalse);
+      expect(ios?.isUnix, isTrue);
+      expect(ios?.identifier, 'ios-aarch64');
+    });
+
+    test('the simulator on an Intel Mac is iOS on x86_64', () {
+      expect(Platform.of('ios', 'x64')?.identifier, 'ios-x86_64');
+    });
+
+    test('a runtime reporting Darwin still resolves to macOS', () {
+      expect(Platform.of('Darwin', 'arm64')?.isIos, isFalse);
     });
 
     test('a runtime reporting Linux still resolves to Linux', () {

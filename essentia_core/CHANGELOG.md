@@ -17,6 +17,10 @@ Split out of `essentia` 3.3.0, whose history is in the [workspace changelog](../
 - The `Duration` extensions - `toDuration`, `toIsoDuration`, `toIsoString`, `toReadableString`,
   `5.seconds`, `toComponents` and `duration / duration` - which lived with the time API before.
 
+- `OperatingSystem.ios` and `Platform.isIos`: iOS and iPadOS resolve to their own system, `ios`,
+  rather than to nothing, and are Unix but not macOS. `Platform.entries` grows to eighteen
+  machines.
+
 ### Changed
 
 - `ValidatingBuilder.evaluate` is `@protected` instead of `@internal`, so that a builder of

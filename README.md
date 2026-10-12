@@ -391,8 +391,8 @@ are what `rangeTo`, `until` and `downTo` hand back.
   and `UseCase`.
 - **Identifiers.** `UuidV4` reveals nothing; `UuidV7` sorts by when it was minted and is minted
   monotonically.
-- **Platform detection.** `Platform`, `OperatingSystem` and `Architecture`, with
-  `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
+- **Platform detection.** `Platform`, `OperatingSystem` (Linux, macOS, Windows, Android, iOS and the
+  web) and `Architecture`, with `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
   `Platform.parse('linux-x86_64')` for an identifier read from a path or a manifest.
 - **gzip.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder` on the zlib of `dart:io` and on the
   `CompressionStream` of the browser; decoding checks the CRC-32 and the length of the member.

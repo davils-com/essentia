@@ -662,7 +662,7 @@ abstract interface class OpenEndRange<T extends Comparable<Object>> {
 }
 
 enum OperatingSystem {
-  linux, macos, windows, android, web;
+  linux, macos, windows, android, ios, web;
   final String identifier;
   final bool isUnix;
   static OperatingSystem? resolve(String osName);
@@ -767,6 +767,7 @@ final class Platform {
   int get hashCode;
   String get identifier;
   bool get isAndroid;
+  bool get isIos;
   bool get isLinux;
   bool get isMacos;
   bool get isUnix;

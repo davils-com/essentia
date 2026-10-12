@@ -52,7 +52,7 @@ final class Platform {
   const Platform._(this.operatingSystem, this.architecture);
 
   /// Every machine this table can name: every operating system crossed with
-  /// every architecture, fifteen entries.
+  /// every architecture, eighteen entries.
   ///
   /// It answers *which machines exist as far as Essentia is concerned*. It
   /// is a **cross product**, so it holds pairs nobody builds for,
@@ -163,6 +163,12 @@ final class Platform {
   /// Note that this is not covered by [isLinux], deliberately; see
   /// [OperatingSystem.android].
   bool get isAndroid => operatingSystem == OperatingSystem.android;
+
+  /// Whether this machine runs iOS or iPadOS.
+  ///
+  /// Note that this is not covered by [isMacos], deliberately; see
+  /// [OperatingSystem.ios].
+  bool get isIos => operatingSystem == OperatingSystem.ios;
 
   /// Whether this program is running in a browser or another JavaScript
   /// host.
