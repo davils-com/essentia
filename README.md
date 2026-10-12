@@ -9,11 +9,18 @@ Dart's own classes.
 
 Its only runtime dependency is `package:meta`.
 
-Everything is exported from `package:essentia/essentia.dart`: validation, the builder DSL, program
-parameters, the event bus, identifiers, semantic versions, principals, time sources, coroutines,
-channels, `select`, hot flows, locks, layering contracts, platform detection, scope functions,
-`Result`, `lazy` and the Kotlin stdlib extensions. Testing on virtual time comes from
-`package:essentia/testing.dart`.
+Essentia is a workspace of three packages; the workspace root holds no library of its own:
+
+| Package | Import | What it holds |
+|---|---|---|
+| `essentia_core` | `package:essentia_core/essentia_core.dart` | Validation, the builder DSL, program parameters, identifiers, semantic versions, principals, layering contracts, platform detection, bytes, gzip and CRC-32, decimals, ranges, scope functions, `Result`, `lazy`, `Duration` and the Kotlin stdlib extensions |
+| `essentia_time` | `package:essentia_time/essentia_time.dart`, `package:essentia_time/recurrence.dart` | Time sources, clocks, instants, dates, times, every IANA time zone, date and time formats, RFC 5545 recurrence |
+| `essentia_coroutines` | `package:essentia_coroutines/essentia_coroutines.dart` | Coroutines, channels, `select`, hot flows, stream operators, locks, the event bus and principals in the coroutine context |
+
+Every package keeps its own test support in `lib/testing.dart`: `package:essentia_time/testing.dart`
+holds `TestTimeSource`, `package:essentia_coroutines/testing.dart` testing on virtual time with
+`runTest`. Locales, authorization and iCalendar
+moved to Noria: `noria_locale`, `noria_authorization` and `noria_icalendar`.
 
 It runs on every Dart platform: the VM and native executables, Flutter, the web and WebAssembly.
 The test suite runs on all of them. Where a platform has no `dart:io`, the program parameters read
@@ -259,7 +266,7 @@ await polling.cancelAndJoin();
   marked `IsolateTransferable` crosses to the isolate with the body, as far as it is sendable.
 - **Contextual.** `runWithContext(element, body)` lays elements over the current context for a body,
   synchronous or asynchronous, without starting a coroutine; `runAsPrincipal` is built on it.
-- **Tested on virtual time.** `runTest` from `package:essentia/testing.dart` runs a test body on the
+- **Tested on virtual time.** `runTest` from `package:essentia_coroutines/testing.dart` runs a test body on the
   virtual event loop of a `TestScheduler`: delays, timers and timeouts take no real time, and the
   test fails with every failure of the coroutines it started.
 
@@ -338,12 +345,12 @@ localDateTimePattern("dd.MM.yyyy 'at' HH:mm").format(LocalDateTime.of(2026, 3, 2
 A local time the clocks skip moves forward by the length of the gap, and one they pass twice takes
 the earlier offset, as Kotlin and RFC 5545 do; `ZoneResolution` chooses otherwise. Every count is
 exact on the web, where integers are doubles. `tool/generate_tzdata.dart` compiles the database in
-`third_party/tzdata` into compact data that is decoded per zone on first use.
+`essentia_time/IANA/tzdata` into compact data that is decoded per zone on first use.
 
-## Recurrence and iCalendar
+## Recurrence
 
-`package:essentia/icalendar.dart` holds RFC 5545: recurrence rules with every `BY` part, sets of
-rules, extra dates and exceptions, and the iCalendar format:
+`package:essentia_time/recurrence.dart` holds the recurrence of RFC 5545: rules with every `BY`
+part and sets of rules, extra dates and exceptions:
 
 ```dart
 final standup = RecurrenceSet(
@@ -351,14 +358,11 @@ final standup = RecurrenceSet(
   rules: <RecurrenceRule>[RecurrenceRule.parse('FREQ=WEEKLY;BYDAY=MO,WE')],
 );
 standup.occurrencesBetween(LocalDateTime.of(2026, 10, 1, 0, 0), LocalDateTime.of(2026, 11, 1, 0, 0));
-
-final IcsCalendar calendar = const IcsCodec().decode(text).calendar;
 ```
 
 Repetitions are computed on the clock of the anchor and lazily, the anchor counts towards a
 `COUNT`, and `truncatedBefore`, `splitAt` and `movedTo` edit "this and following" and whole series.
-The codec keeps every property and component it does not read, describes each zone it writes in a
-`VTIMEZONE`, and reads a zone named the Windows way through the file's own description.
+The iCalendar format itself lives in `noria_icalendar`.
 
 ## Kotlin's standard library on Dart's classes
 
@@ -495,24 +499,25 @@ Kept deliberately small, and only where Dart has no equivalent:
 ## Quality gates
 
 Essentia is checked by [Inspectra](https://pub.dev/packages/inspectra) 2.0.0 with every gate it
-ships, each at its strictest setting, configured in the `inspectra:` section of `pubspec.yaml`. A
-`policy` locks the gates, so neither `INSPECTRA_*` variables nor the command line can weaken them,
-no severity may be ignored and there is no baseline. Besides the `strict` style preset, the custom
-rule `no_late` of `tool/style` refuses every `late` variable.
+ships, each at its strictest setting, configured once in `inspectra.base.yaml`, which every package
+extends. A `policy` locks the gates, so neither the packages, `INSPECTRA_*` variables nor the
+command line can weaken them, no severity may be ignored and there is no baseline. Besides the
+`strict` style preset, Inspectra's built-in rule `no_late` refuses every `late` variable.
 
 ```bash
 dart run tool/verify.dart
 ```
 
-runs format, analysis, the strict style rules and the tests; CI then runs
+runs format, analysis, the strict style rules and the tests of every package; CI then runs
 
 ```bash
+dart run inspectra -C <package> check
 dart run inspectra check
 ```
 
-which adds the public API dump in `api/essentia.api`, the dependency policy, the changelog check, the
-secret, license, vulnerability and filesystem scans of Trivy 0.75.0 at every severity and the 97 %
-coverage gate.
+which adds the public API dump in `<package>/api/<package>.api`, the dependency policy, the
+changelog check, the secret, license, vulnerability and filesystem scans of Trivy 0.75.0 at every
+severity and the 97 % coverage gate.
 
 ## Contributing
 

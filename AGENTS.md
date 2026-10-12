@@ -15,18 +15,25 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 
 ## Repository
 
+Essentia is a Dart pub workspace. The root holds no library of its own; each package has its own
+`lib/`, `test/`, `api/<package>.api`, `CHANGELOG.md`, `README.md` and `dart_test.yaml`.
+
 | Path | Purpose |
 |---|---|
-| `lib/essentia.dart` | The web-safe public API: validation, DSL, program parameters, events, coroutines, channels, select, flows, identity, bytes, architecture, platform, scope functions, result, the Kotlin stdlib extensions |
-| `lib/testing.dart` | Testing on virtual time: `runTest`, `TestScope`, `TestScheduler` and the test dispatchers |
-| `lib/src/` | Everything else; one directory per area, mirroring Arc's packages |
-| `api/essentia.api` | The recorded public API; `dart run inspectra api check` compares against it |
-| `test/` | `package:test` tests, one directory per area; `test/support/` holds shared fixtures |
+| `essentia_core/` | Validation, DSL, program parameters, identity, versions, principals, bytes, architecture, platform, scope functions, result, lazy, ranges, decimals, `Duration` and the Kotlin stdlib extensions. Depends on `meta` only |
+| `essentia_time/` | Time sources, clocks, dates, times, time zones, formats (`essentia_time.dart`), RFC 5545 recurrence (`recurrence.dart`), `TestTimeSource` (`testing.dart`). `IANA/tzdata/` is the vendored time zone database, `tool/generate_tzdata.dart` compiles it into `lib/src/internal/tzdata.dart` |
+| `essentia_coroutines/` | Coroutines, channels, select, flows, stream operators, locks, the event bus, principals in the coroutine context (`essentia_coroutines.dart`), testing on virtual time: `runTest`, `TestScope`, `TestScheduler` and the test dispatchers (`testing.dart`). `test/support/` holds the shared fixtures of the event tests |
+| `inspectra.base.yaml` | The gates every package extends. Its `policy` locks them |
+| `pubspec.yaml` | The workspace and the workspace policy with its layers: `core`, `time` on `core`, `coroutines` on both |
 | `CONTRIBUTING.md`, `TESTING.md` | What a change and a test have to clear; this file wins where they disagree |
 | `SECURITY.md`, `CODE_OF_CONDUCT.md`, `THIRDPARTY.md` | Reporting vulnerabilities, the Code of Conduct, the third-party software |
 | `trivy-secret.yaml` | The rules of the Trivy secret scan, Markdown included |
 | `.gitlab/CODEOWNERS` | The paths that need a maintainer's review |
-| `tool/` | `verify.dart`, `license_header.txt`, the header template of the style check, and `style/`, the custom style rules (`no_late`) |
+| `tool/` | `verify.dart` and `license_header.txt`, the header template of the style check |
+
+Every package keeps its test support in its own `lib/testing.dart`; a package without test support
+has none. Locales, authorization and iCalendar live in Noria (`noria_locale`, `noria_authorization`,
+`noria_icalendar`).
 
 ## Verify
 
@@ -34,23 +41,26 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 dart run tool/verify.dart
 ```
 
-Runs `dart format --set-exit-if-changed`, `dart analyze --fatal-infos`, `inspectra style` and
-`dart test` on the VM, in Chrome compiled to JavaScript and in Chrome compiled to WebAssembly.
-Nothing is done until it is green. Then:
+Runs `dart format --set-exit-if-changed`, `dart analyze --fatal-infos`, `inspectra style` of the
+root and of every package, the check that the time zone data is current, and `dart test` of every
+package on the VM, in Chrome compiled to JavaScript and in Chrome compiled to WebAssembly. Nothing
+is done until it is green. Then:
 
 ```bash
+dart run inspectra -C <package> check
 dart run inspectra check
 ```
 
-runs every gate configured in the `inspectra:` section of `pubspec.yaml`, each at its strictest
-setting: format, lint, style, API, the dependency policy, changelog, the Trivy scans and the 97 %
-coverage gate. Its `policy` locks the gates; never weaken one, add a baseline or an ignore. After a
-deliberate API change, record it with `dart run inspectra api dump`.
+runs every gate of `inspectra.base.yaml` in a package, each at its strictest setting: format, lint,
+style, API, the dependency policy, changelog, the Trivy scans and the 97 % coverage gate; at the
+root, the workspace policy and the scans of the files outside the packages. Its `policy` locks the
+gates; never weaken one, add a baseline or an ignore. After a deliberate API change, record it with
+`dart run inspectra -C <package> api dump`.
 
 ## Code rules
 
 Enforced by `dart analyze --fatal-infos` with `package:inspectra/lints/strict.yaml` and by
-`inspectra style` with the `strict` preset and the custom rules of `tool/style`, without exceptions
+`inspectra style` with the `strict` preset and Inspectra's rule `no_late`, without exceptions
 or ignore comments.
 
 - No `else`. Return early. A `switch` over an enum or sealed type is exhaustive and has neither
@@ -64,8 +74,9 @@ or ignore comments.
 - One top level type per file, named after it in snake case. A sealed class and its direct subtypes
   share one file. A file of functions is named after its role.
 - `strict-casts`, `strict-inference` and `strict-raw-types` are on. No `dynamic` calls.
-- Runtime dependencies are limited to `meta`; development dependencies to `analyzer` (for the custom
-  style rules), `build_runner`, `inspectra` and `test`. Adding one needs a maintainer's approval.
+- Runtime dependencies are limited to `meta` and the packages of the workspace below a package's
+  layer; development dependencies to `inspectra` and `test`. Adding one needs a maintainer's
+  approval.
 - Essentia runs on every Dart platform: the VM, Flutter, the web and WebAssembly. Nothing under
   `lib/` imports `dart:io`, `dart:ffi` or another platform library directly; host access goes
   through a conditional import (`host_system.dart`, `current_platform*.dart`), and a test that

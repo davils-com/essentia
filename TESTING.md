@@ -12,14 +12,13 @@ this file is the one that gets fixed.
 
 | Tier | What it proves | Where | Blocks merge |
 |---|---|---|---|
-| Unit tests | The public API behaves as documented | `test/<area>/*_test.dart` | yes |
+| Unit tests | The public API behaves as documented | `<package>/test/<area>/*_test.dart` | yes |
 | Golden reports | The rendered report is character for character what it was | `*_format_test.dart` | yes |
 | Property tests | An invariant holds over generated input, not only the cases someone had | `*_property_test.dart` | yes |
-| README examples | Every example of the README compiles and does what the README says | `test/readme_examples_test.dart` | yes |
-| Platform tests | Each platform reports the machine it runs on | `test/platform/` | yes |
-| Style rules | The custom rules of `tool/style` report what they should and nothing else | `test/tool/` | yes |
-| API compatibility | The published surface did not move by accident | `api/essentia.api` | yes |
-| Coverage ratchet | The suite still reaches what it reached | `coverage:` in `pubspec.yaml` | yes |
+| README examples | Every example of the README compiles and does what the README says | `essentia_coroutines/test/readme_examples_test.dart` | yes |
+| Platform tests | Each platform reports the machine it runs on | `essentia_core/test/platform/` | yes |
+| API compatibility | The published surface did not move by accident | `<package>/api/<package>.api` | yes |
+| Coverage ratchet | The suite still reaches what it reached | `coverage:` in `inspectra.base.yaml` | yes |
 
 ## Every platform
 
@@ -38,7 +37,7 @@ test.
 ## Rules for a test
 
 - `package:test` only. No mocking library: a fake is hand written, lives next to the tests that use
-  it, and goes to `test/support/` once two areas share it.
+  it, and goes to `test/support/` of its package once two areas share it.
 - No real network, no sleeping for a fixed time, no dependence on the wall clock. Asynchronous code
   is awaited or settled, never raced against a delay.
 - No `late`. A fixture is created inside the test that uses it, and what has to be cleaned up is
@@ -51,8 +50,8 @@ test.
 
 ## Coverage
 
-`dart run inspectra check` collects line coverage of `lib/` on the VM and fails below the bound in
-`pubspec.yaml`. The bound is a ratchet: it sits just below what the suite reaches and only moves up.
+`dart run inspectra -C <package> check` collects line coverage of the package's `lib/` on the VM and
+fails below the bound in `inspectra.base.yaml`. The bound is a ratchet: it sits just below what the suite reaches and only moves up.
 Lowering it needs a maintainer and a reason in the commit message, and the configuration `policy`
 keeps it from being lowered on the command line.
 

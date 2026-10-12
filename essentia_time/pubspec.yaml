@@ -1,0 +1,25 @@
+name: essentia_time
+description: >-
+  Time for Essentia, ported from kotlinx-datetime: time sources and clocks,
+  instants, dates, times and periods, every IANA time zone, the formats of
+  dates and times and RFC 5545 recurrence, with a test time source.
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  essentia_core: ^1.0.0
+  meta: ^1.16.0
+
+dev_dependencies:
+  inspectra: ^2.1.0
+  test: ^1.30.0
+
+# The gates of inspectra.base.yaml.
+inspectra:
+  extends: ../inspectra.base.yaml
+  changelog:
+    tag_prefix: essentia_time-v

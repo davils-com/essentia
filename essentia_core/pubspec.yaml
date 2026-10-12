@@ -1,0 +1,28 @@
+name: essentia_core
+description: >-
+  The core of Essentia, the Davils application runtime for Dart, ported
+  from Arc: validation that reports every problem at once, validating
+  configuration builders, program parameters, layering contracts, RFC 9562
+  identifiers, semantic versions, principals, platform detection, byte
+  strings and hexadecimal formats, gzip and CRC-32, decimals, ranges, a
+  Result type and Kotlin's standard library extensions on Dart's own
+  classes.
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  inspectra: ^2.1.0
+  test: ^1.30.0
+
+# The gates of inspectra.base.yaml.
+inspectra:
+  extends: ../inspectra.base.yaml
+  changelog:
+    tag_prefix: essentia_core-v

@@ -1,0 +1,121 @@
+# The quality gates every package of the Essentia workspace is held to.
+#
+# Each package names this file under `extends` in the `inspectra:` section of
+# its pubspec.yaml and adds only what is its own. Relative file options -
+# the license header, the style rules, the Trivy secret rules - resolve
+# against this directory. Every gate Inspectra 2.0.0 ships runs at its
+# strictest setting, and the policy keeps the packages, INSPECTRA_*
+# variables and the command line from weakening any of it.
+# `dart run inspectra -C <package> check` runs them all.
+
+fail_on: unknown
+min_severity: unknown
+policy:
+  locked:
+    - fail_on
+    - min_severity
+    - baseline.enabled
+    - format.enabled
+    - format.fail_on_findings
+    - lint.enabled
+    - lint.fail_on
+    - style.enabled
+    - style.fail_on_findings
+    - style.preset
+    - style.license_header
+    - style.custom_rules
+    - style.rules.no_late
+    - api.enabled
+    - trivy.enabled
+    - trivy.mode
+    - trivy.version
+    - coverage.enabled
+    - coverage.min_line_coverage
+    - changelog.enabled
+    - dependency_policy.enabled
+  forbid_ignore_of: [critical, high, medium, low, unknown]
+# Nothing is accepted for now: every finding is fixed, never recorded.
+baseline:
+  enabled: false
+  fail_on_stale: true
+hook:
+  checks: [audit, typosquat, deps, format, style]
+dependency_policy:
+  enabled: true
+  require_upper_bound: true
+  min_sdk: 3.13.5
+  dev_only: [inspectra, test]
+  require_publish_to: true
+  required_metadata: [description]
+  lockfile_in_sync: true
+  lockfile_checksums: true
+  check_imports: true
+  unused_allow: []
+  constraint_style: caret
+  overrides:
+    require_reason: true
+  lockfile_policy: ignored
+  libyear_scope: all
+format:
+  enabled: true
+  run_on_build: true
+  fail_on_findings: true
+lint:
+  enabled: true
+  run_on_build: true
+  fail_on: info
+# The strict preset, the license header of tool/license_header.txt and
+# the built-in rule no_late of Inspectra, which no preset turns on: no late
+# variables anywhere.
+style:
+  enabled: true
+  run_on_build: true
+  fail_on_findings: true
+  preset: strict
+  license_header: tool/license_header.txt
+  rules:
+    no_late: true
+api:
+  enabled: true
+trivy:
+  enabled: true
+  mode: required
+  version: 0.75.0
+  use_installed: false
+  # The rules of trivy-secret.yaml: every built-in rule, Markdown included,
+  # and hard-coded credentials in Dart.
+  secret:
+    enabled: true
+    run_on_build: true
+    config: trivy-secret.yaml
+    fail_on_findings: true
+    severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
+  # Every license that is not a plain notice fails. LOW is that notice
+  # category - MIT, BSD, Apache-2.0 - which every dependency carries.
+  # package:archive, a development dependency of Inspectra, bundles a
+  # decoder under the permissive bzip2-1.0.6 license (BSD-style), which
+  # Trivy cannot classify.
+  license:
+    enabled: true
+    run_on_build: true
+    fail_on_findings: true
+    severity: [CRITICAL, HIGH, MEDIUM, UNKNOWN]
+    ignored_licenses: [bzip2]
+    include_dev_dependencies: true
+  vulnerability:
+    enabled: true
+    run_on_build: true
+    fail_on_findings: true
+    severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
+    include_dev_dependencies: true
+    ignore_unfixed: false
+  filesystem:
+    enabled: true
+    fail_on_findings: true
+    severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
+    scanners: [vuln, secret, misconfig, license]
+coverage:
+  enabled: true
+  min_line_coverage: 97
+changelog:
+  enabled: true

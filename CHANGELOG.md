@@ -1,8 +1,44 @@
 # Changelog
 
-All notable changes to this project are documented in this file. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project adheres to
-[Semantic Versioning](https://semver.org/).
+Essentia is a workspace of packages, and every package keeps its own changelog:
+[essentia_core](essentia_core/CHANGELOG.md), [essentia_time](essentia_time/CHANGELOG.md) and
+[essentia_coroutines](essentia_coroutines/CHANGELOG.md). The history below is that of the single
+package `essentia` up to 3.3.0, which they were split from.
+
+## 3.3.0
+
+### Added
+
+- `package:essentia/locale.dart`, locales as the Unicode CLDR describes them, outside the main
+  barrel:
+  - `LanguageTag` (BCP 47, Unicode extension keywords, likely subtags, aliases, CLDR parents),
+    `LocaleMatcher` and `LocaleMatch` (CLDR's language matching), `LocaleInfo` and `WeekInfo`
+    (direction, week, hour cycle, measurement system, region), `LocaleComparator` (a simplified,
+    accent- and case-aware ordering with natural numbers);
+  - `CldrRegistry` and `cldr`, `CldrLocale`, `CldrPart` and `cldrEn`: the data of English and the
+    supplemental data of every locale ship with Essentia, every other locale comes from
+    essentia_cldr and is installed explicitly;
+  - `PluralRules`, `PluralOperands`, `PluralCategory`: CLDR's cardinal and ordinal rules of every
+    language, compiled to Dart;
+  - `NumberFormat` with `NumberFormatBuilder` (decimal, percent, money, compact, scientific and
+    engineering notation; rounding modes and increments; grouping strategies; sign display;
+    numbering systems; `formatToParts`), `NumberParser`, `Money` (exact amounts, minor units,
+    cash rounding, allocation), `CurrencyInfo`;
+  - `LocalizedDateFormat` (styles, skeletons, LDML patterns, every pattern field, flexible day
+    periods, hour cycles, week numbers, time zone names), `LocalizedDateParser`,
+    `DateIntervalFormat`, `RelativeTimeFormat`, `DurationFormat`, `ListFormat`, `UnitFormat` with
+    `MeasureUnit`, `DisplayNames` (with `DisplayNames.tryOf` for locales without names data);
+  - ICU message format: `MessagePattern` with its `MessageNode`s and `MessageArgumentKind`s,
+    `MessageFormatter` with `MessageSpan`s for rich text and bidirectional isolation,
+    `MessageSyntaxException`, and `PseudoLocalizer`.
+- `package:essentia/authorization.dart`, authorization on top of `Principal`: `Permission` with
+  wildcards, `PermissionSet`, `RoleModel` with inheritance and `roleModel`, `RoleDefinition`,
+  `Policy` and its kinds (roles, permissions, tenants, facts, attributes, resources, all, any,
+  not, originator), `AuthorizationRequest`, `AuthorizationFacts`, `Authorizer` and `can`,
+  `PolicyAuthorizer` with a permission cache, `PermissionResolver`, `RoleModelResolver`,
+  `ClaimsResolver`, `CompositeResolver`, `AuthorizationDecision` with `DenialReason`s,
+  `AuthorizationViolationCodes` and `AuthorizationObserver`.
+- `DecimalValue`, an exact decimal number with a scale, and `RoundingMode`, in the main barrel.
 
 ## 3.2.0
 

@@ -17,6 +17,7 @@ to clear.
 
 ```bash
 dart run tool/verify.dart
+dart run inspectra -C <package> check
 dart run inspectra check
 ```
 
@@ -24,8 +25,8 @@ A change is ready when all of the following hold:
 
 1. **It is formatted and analyses clean.** `dart analyze --fatal-infos` with the strict preset of
    Inspectra. No `// ignore:` comment; the `no_comments` style rule refuses it anyway.
-2. **The style check passes.** `dart run inspectra style` with the `strict` preset and the custom
-   rules of `tool/style`: no `else`, no comments, a `///` comment on every declaration, one type per
+2. **The style check passes.** `dart run inspectra style` with the `strict` preset and the rule
+   `no_late` of Inspectra: no `else`, no comments, a `///` comment on every declaration, one type per
    file, the license header, no `default` or `_` case, and no `late`.
 3. **It ships with its tests.** `package:test`, one directory per area, hand-written fakes and no
    mocking library. Behaviour changes are not accepted with tests promised as a follow-up. See
@@ -34,12 +35,12 @@ A change is ready when all of the following hold:
    in Chrome compiled to WebAssembly. Nothing under `lib/` imports `dart:io` or another platform
    library directly.
 5. **The API dump is updated** in the same commit when the public surface changed:
-   `dart run inspectra api dump`.
+   `dart run inspectra -C <package> api dump`.
 6. **The changelog says what changed** for anyone who consumes the public API.
 7. **`inspectra check` is green.** Format, lint, style, API, the dependency policy, the changelog,
    the Trivy secret, license, vulnerability and filesystem scans and the coverage gate. Never commit
    a credential, not even in a test fixture.
-8. **Coverage did not go down.** The bound in `pubspec.yaml` only moves up; lowering it needs a
+8. **Coverage did not go down.** The bound in `inspectra.base.yaml` only moves up; lowering it needs a
    maintainer and a reason in the commit message. The `policy` of the configuration locks every
    gate, so neither `--set` nor an `INSPECTRA_*` variable gets a change past it.
 

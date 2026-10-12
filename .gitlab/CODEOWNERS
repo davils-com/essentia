@@ -9,16 +9,18 @@
 
 # The package definition, the dependencies and every quality gate.
 /pubspec.yaml                       @davils/maintainers
+/*/pubspec.yaml                     @davils/maintainers
+/inspectra.base.yaml                @davils/maintainers
 /analysis_options.yaml              @davils/maintainers
-/dart_test.yaml                     @davils/maintainers
+/*/dart_test.yaml                   @davils/maintainers
 /tool/                              @davils/maintainers
 
 /TESTING.md                         @davils/maintainers
 
 # The published API surface. A change here changes what consumers compile against.
 [Published API]
-/api/                               @davils/maintainers
-/lib/essentia.dart                  @davils/maintainers
+/*/api/                             @davils/maintainers
+/*/lib/*.dart                       @davils/maintainers
 
 # Anything that decides what CI trusts or what leaves the build.
 /.gitlab/                           @davils/maintainers
