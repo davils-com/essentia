@@ -16,6 +16,7 @@ environment:
 workspace:
   - essentia_core
   - essentia_coroutines
+  - essentia_io
   - essentia_time
 
 dev_dependencies:
@@ -139,3 +140,6 @@ inspectra:
       - name: coroutines
         packages: [essentia_coroutines]
         may_depend_on: [core, time]
+      - name: io
+        packages: [essentia_io]
+        may_depend_on: [core, time, coroutines]

@@ -1,0 +1,27 @@
+name: essentia_io
+description: >-
+  Byte input and output for Dart on Essentia's coroutines, ported from
+  ktor-io: a segmented buffer, byte channels with back pressure that a
+  writer and a reader share, reading lines and numbers, scanning for a
+  delimiter, writer and reader coroutines, and bridges to Dart's streams.
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  essentia_core: ^1.0.0
+  essentia_coroutines: ^1.0.0
+  meta: ^1.16.0
+
+dev_dependencies:
+  inspectra: ^2.1.0
+  test: ^1.30.0
+
+# The gates of inspectra.base.yaml.
+inspectra:
+  extends: ../inspectra.base.yaml
+  changelog:
+    tag_prefix: essentia_io-v

@@ -16,6 +16,7 @@ const packages = <String>[
   'essentia_core',
   'essentia_time',
   'essentia_coroutines',
+  'essentia_io',
 ];
 
 /// The steps of `dart run tool/verify.dart`, in order.
