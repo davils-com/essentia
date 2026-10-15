@@ -40,6 +40,98 @@ final class Buffer {
   void writeString(String text, {Charset charset = Charsets.utf8});
 }
 
+final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
+  static const int maxSize = 1024 * 1024;
+  final bool autoFlush;
+  ByteChannel({bool autoFlush = false});
+  Exception? get closedCause;
+  bool get hasFreeSpace;
+  bool get isClosedForRead;
+  bool get isClosedForWrite;
+  Buffer get readBuffer;
+  Buffer get writeBuffer;
+  Future<bool> awaitContent([int min = 1]);
+  void cancel([Object? cause]);
+  void close();
+  Future<void> flush();
+  Future<void> flushAndClose();
+  void flushWriteBuffer();
+  String toString();
+}
+
+abstract interface class ByteReadChannel {
+  static final ByteReadChannel empty;
+  factory ByteReadChannel.fromBuffer(Buffer source);
+  factory ByteReadChannel.fromBytes(List<int> content, [int start = 0, int? end]);
+  factory ByteReadChannel.fromStream(Stream<List<int>> stream);
+  factory ByteReadChannel.fromText(String text, {Encoding charset = Charsets.utf8});
+  abstract Exception? get closedCause;
+  abstract bool get isClosedForRead;
+  abstract Buffer get readBuffer;
+  abstract Future<bool> awaitContent([int min = 1]);
+  abstract void cancel([Object? cause]);
+}
+
+extension ByteReadChannelOperations on ByteReadChannel {
+  int get availableForRead;
+  CountedByteReadChannel asCountedReadChannel();
+  Future<int> copyAndClose(ByteWriteChannel channel);
+  Future<int> copyTo(ByteWriteChannel channel, {int? limit});
+  Future<int> discard([int? max]);
+  Future<void> discardExact(int count);
+  Future<bool> exhausted();
+  Future<ByteString?> peek(int count);
+  Future<int> readAvailable(Uint8List destination, [int offset = 0, int? length]);
+  Future<int> readByte();
+  Future<Uint8List> readBytes(int count);
+  Future<double> readDouble({Endian endian = Endian.big});
+  Future<double> readFloat({Endian endian = Endian.big});
+  Future<void> readFully(Uint8List destination, [int start = 0, int? end]);
+  Future<int> readInt({Endian endian = Endian.big});
+  Future<String?> readLine({LineEnding lineEnding = LineEnding.defaultEnding});
+  Future<String?> readLineStrict({int? limit, LineEnding lineEnding = LineEnding.defaultEnding});
+  Future<int> readLineStrictTo(StringSink out, {int? limit, LineEnding lineEnding = LineEnding.defaultEnding});
+  Future<int> readLineTo(StringSink out, {LineEnding lineEnding = LineEnding.defaultEnding});
+  Future<int> readLong({Endian endian = Endian.big});
+  Future<Buffer> readPacket(int count);
+  Future<Buffer> readRemaining([int? max]);
+  Future<int> readShort({Endian endian = Endian.big});
+  Future<int> readUntil(ByteString matchString, ByteWriteChannel writeChannel, {int? limit, bool ignoreMissing = false});
+  void rethrowCloseCauseIfNeeded();
+  Future<bool> skipIfFound(ByteString bytes);
+  Future<Uint8List> toBytes();
+}
+
+extension ByteReadChannelStreams on ByteReadChannel {
+  Stream<Uint8List> toStream();
+}
+
+abstract interface class ByteWriteChannel {
+  abstract bool get autoFlush;
+  abstract Exception? get closedCause;
+  abstract bool get isClosedForWrite;
+  abstract Buffer get writeBuffer;
+  abstract void cancel([Object? cause]);
+  abstract Future<void> flush();
+  abstract Future<void> flushAndClose();
+}
+
+extension ByteWriteChannelOperations on ByteWriteChannel {
+  int get availableForWrite;
+  CountedByteWriteChannel asCountedWriteChannel();
+  Future<void> awaitFreeSpace();
+  Future<void> writeByte(int value);
+  Future<void> writeByteString(ByteString bytes);
+  Future<void> writeDouble(double value, {Endian endian = Endian.big});
+  Future<void> writeFloat(double value, {Endian endian = Endian.big});
+  Future<void> writeFully(List<int> bytes, [int start = 0, int? end]);
+  Future<void> writeInt(int value, {Endian endian = Endian.big});
+  Future<void> writeLong(int value, {Endian endian = Endian.big});
+  Future<void> writePacket(Buffer source);
+  Future<void> writeShort(int value, {Endian endian = Endian.big});
+  Future<void> writeString(String text, {Encoding charset = Charsets.utf8});
+}
+
 base class ClosedByteChannelException extends IoException {
   ClosedByteChannelException([Object? cause, StackTrace? causeStackTrace]);
   String get kind;
@@ -65,6 +157,29 @@ final class ConnectionClosedException extends IoException {
   String get kind;
 }
 
+final class CountedByteReadChannel implements ByteReadChannel {
+  final ByteReadChannel delegate;
+  CountedByteReadChannel(ByteReadChannel delegate);
+  Exception? get closedCause;
+  bool get isClosedForRead;
+  Buffer get readBuffer;
+  int get totalBytesRead;
+  Future<bool> awaitContent([int min = 1]);
+  void cancel([Object? cause]);
+}
+
+final class CountedByteWriteChannel implements ByteWriteChannel {
+  CountedByteWriteChannel(ByteWriteChannel _delegate);
+  bool get autoFlush;
+  Exception? get closedCause;
+  bool get isClosedForWrite;
+  int get totalBytesWritten;
+  Buffer get writeBuffer;
+  void cancel([Object? cause]);
+  Future<void> flush();
+  Future<void> flushAndClose();
+}
+
 final class EofException extends IoException {
   const EofException(String message);
   String get kind;
@@ -77,6 +192,10 @@ base class IoException implements Exception, Causal {
   const IoException(String message, {Object? cause, StackTrace? causeStackTrace});
   String get kind;
   String toString();
+}
+
+enum LineEnding {
+  defaultEnding, lenient;
 }
 
 final class TooLongLineException extends IoException {

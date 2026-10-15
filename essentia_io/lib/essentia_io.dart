@@ -17,6 +17,12 @@
 library;
 
 export 'src/buffer/buffer.dart';
+export 'src/channel/byte_channel.dart';
+export 'src/channel/byte_read_channel.dart';
+export 'src/channel/byte_write_channel.dart';
+export 'src/channel/counted_byte_read_channel.dart';
+export 'src/channel/counted_byte_write_channel.dart';
+export 'src/channel/line_ending.dart';
 export 'src/exception/closed_byte_channel_exception.dart';
 export 'src/exception/closed_read_channel_exception.dart';
 export 'src/exception/closed_write_channel_exception.dart';
@@ -25,3 +31,6 @@ export 'src/exception/connection_closed_exception.dart';
 export 'src/exception/eof_exception.dart';
 export 'src/exception/io_exception.dart';
 export 'src/exception/too_long_line_exception.dart';
+export 'src/operations/byte_read_channel_operations.dart';
+export 'src/operations/byte_write_channel_operations.dart';
+export 'src/stream/byte_read_channel_streams.dart';
