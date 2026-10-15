@@ -3,6 +3,13 @@
 
 library package:essentia_core/essentia_core.dart
 
+final class Adler32 {
+  Adler32();
+  int get value;
+  void add(List<int> bytes);
+  static int of(List<int> bytes);
+}
+
 enum ApplicationMode {
   development, test, staging, production;
   final String value;
@@ -1383,6 +1390,12 @@ int Function(T, T) compareByDescending<T, K extends Comparable<Object>>(K Functi
 
 int compareValues<T extends Comparable<Object>>(T? left, T? right);
 
+Future<Uint8List> deflate(List<int> bytes, {int level = 6, bool raw = false});
+
+StreamTransformer<List<int>, Uint8List> deflateDecoder({bool raw = false});
+
+StreamTransformer<List<int>, Uint8List> deflateEncoder({int level = 6, bool raw = false});
+
 FlagBuilder flag(List<String> names);
 
 Future<Uint8List> gunzip(List<int> bytes);
@@ -1394,6 +1407,8 @@ StreamTransformer<List<int>, Uint8List> gzipDecoder();
 StreamTransformer<List<int>, Uint8List> gzipEncoder({int level = 6});
 
 HexFormat hexFormat(void Function(HexFormatBuilder) block);
+
+Future<Uint8List> inflate(List<int> bytes, {bool raw = false});
 
 Lazy<T> lazy<T>(T Function() initializer);
 
