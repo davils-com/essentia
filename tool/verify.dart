@@ -34,6 +34,11 @@ steps() => <(String, String, List<String>)>[
   for (final String package in packages)
     ('Style $package', package, <String>['run', 'inspectra', 'style']),
   (
+    'Generated Brotli dictionary',
+    'essentia_core',
+    <String>['run', 'tool/brotli/generate_dictionary.dart', '--check'],
+  ),
+  (
     'Generated time zones',
     'essentia_time',
     <String>['run', 'tool/generate_tzdata.dart', '--check'],

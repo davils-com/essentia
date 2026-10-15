@@ -3,3 +3,7 @@
 # Windows command scripts must keep CRLF so cmd.exe parses them correctly.
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# Brotli data is bytes: its dictionary and the test vectors of google/brotli.
+essentia_core/tool/brotli/dictionary.bin -text
+essentia_core/test/fixtures/brotli/** -text
