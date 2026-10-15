@@ -125,6 +125,27 @@ abstract interface class Causal {
   abstract StackTrace? get causeStackTrace;
 }
 
+abstract base class Charset extends Encoding {
+  static const List<Charset> available = <Charset>[Charsets.utf8, Charsets.usAscii, Charsets.iso88591, Charsets.windows1252, Charsets.utf16, Charsets.utf16be, Charsets.utf16le];
+  final List<String> aliases;
+  final String name;
+  const Charset(String name, List<String> aliases);
+  static Charset forName(String name);
+  static bool isSupported(String name);
+  String toString();
+  static Charset? tryForName(String name);
+}
+
+abstract final class Charsets {
+  static const Charset iso88591 = BuiltCharset('ISO-8859-1', <String>['ISO_8859-1:1987', 'ISO_8859-1', 'ISO8859-1', 'ISO8859_1', '8859_1', 'iso-ir-100', 'latin1', 'l1', 'IBM819', 'CP819', '819', 'csISOLatin1'], Latin1Encoder(), Latin1Decoder(allowInvalid: true));
+  static const Charset usAscii = BuiltCharset('US-ASCII', <String>['ASCII', 'ANSI_X3.4-1968', 'ANSI_X3.4-1986', 'iso-ir-6', 'ISO_646.irv:1991', 'ISO646-US', 'us', 'IBM367', 'cp367', 'csASCII', '646'], AsciiEncoder(), AsciiDecoder(allowInvalid: true));
+  static const Charset utf16 = BuiltCharset('UTF-16', <String>['UTF_16', 'utf16', 'unicode', 'UnicodeBig'], EncodingConverter(Utf16Encoding.marked), DecodingConverter(Utf16Decoding.marked));
+  static const Charset utf16be = BuiltCharset('UTF-16BE', <String>['UTF_16BE', 'X-UTF-16BE', 'ISO-10646-UCS-2', 'UnicodeBigUnmarked'], EncodingConverter(Utf16Encoding.bigEndian), DecodingConverter(Utf16Decoding.bigEndian));
+  static const Charset utf16le = BuiltCharset('UTF-16LE', <String>['UTF_16LE', 'X-UTF-16LE', 'UnicodeLittleUnmarked'], EncodingConverter(Utf16Encoding.littleEndian), DecodingConverter(Utf16Decoding.littleEndian));
+  static const Charset utf8 = BuiltCharset('UTF-8', <String>['UTF8', 'unicode-1-1-utf-8'], Utf8Encoder(), Utf8Decoder(allowMalformed: true));
+  static const Charset windows1252 = BuiltCharset('windows-1252', <String>['cp1252', 'x-cp1252', 'ibm-1252', 'ibm1252'], EncodingConverter(Windows1252Encoding.new), DecodingConverter(Windows1252Decoding.new));
+}
+
 abstract interface class ClosedRange<T extends Comparable<Object>> {
   const factory ClosedRange<T>(T start, T endInclusive);
   abstract T get endInclusive;
@@ -1173,6 +1194,12 @@ final class UnknownArgument extends ParameterViolation {
 
 enum UnknownArgumentPolicy {
   reject, collect;
+}
+
+final class UnsupportedCharsetException implements Exception {
+  final String charsetName;
+  const UnsupportedCharsetException(String charsetName);
+  String toString();
 }
 
 abstract interface class UseCase<I, O> {
