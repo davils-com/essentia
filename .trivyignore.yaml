@@ -1,0 +1,8 @@
+# The notices Essentia must reproduce. THIRDPARTY.md carries the MIT notice
+# of google/brotli, whose static dictionary and test vectors essentia_core
+# vendors; Trivy reports any MIT text it finds, so that one file is
+# accepted for MIT alone. Every other license and file still fails.
+licenses:
+  - id: MIT
+    paths:
+      - THIRDPARTY.md
