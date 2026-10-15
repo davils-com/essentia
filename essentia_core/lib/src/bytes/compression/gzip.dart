@@ -10,8 +10,9 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:essentia_core/src/bytes/compression/compression_format.dart';
+import 'package:essentia_core/src/bytes/compression/compression_platform.dart';
 import 'package:essentia_core/src/bytes/compression/gzip_frame_check.dart';
-import 'package:essentia_core/src/bytes/compression/gzip_platform.dart';
 import 'package:essentia_core/src/bytes/crc32.dart';
 
 /// A transformer that compresses a stream of bytes into one gzip member of
@@ -37,7 +38,7 @@ import 'package:essentia_core/src/bytes/crc32.dart';
 StreamTransformer<List<int>, Uint8List> gzipEncoder({int level = 6}) {
   RangeError.checkValueInInterval(level, 0, 9, 'level');
   return StreamTransformer<List<int>, Uint8List>.fromBind(
-    (input) => platformGzip(input, level),
+    (input) => platformCompress(input, CompressionFormat.gzip, level),
   );
 }
 
@@ -94,7 +95,10 @@ Stream<Uint8List> _decompressed(Stream<List<int>> input) async* {
   final frame = GzipFrameCheck();
   final crc = Crc32();
   var length = 0;
-  await for (final Uint8List chunk in platformGunzip(input.map(frame.see))) {
+  await for (final Uint8List chunk in platformDecompress(
+    input.map(frame.see),
+    CompressionFormat.gzip,
+  )) {
     crc.add(chunk);
     length += chunk.length;
     yield chunk;

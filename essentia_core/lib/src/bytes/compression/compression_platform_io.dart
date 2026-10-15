@@ -10,23 +10,33 @@
 import 'dart:io' show ZLibDecoder, ZLibEncoder;
 import 'dart:typed_data';
 
+import 'package:essentia_core/src/bytes/compression/compression_format.dart';
 import 'package:meta/meta.dart';
 
-/// Compresses [input] into one gzip member at compression [level], 0 to 9,
-/// with the zlib of `dart:io`.
+/// Compresses [input] into [format] at compression [level], 0 to 9, with
+/// the zlib of `dart:io`.
 ///
 /// Returns the compressed chunks.
 @internal
-Stream<Uint8List> platformGzip(Stream<List<int>> input, int level) =>
-    ZLibEncoder(gzip: true, level: level).bind(input).map(_bytes);
+Stream<Uint8List> platformCompress(
+  Stream<List<int>> input,
+  CompressionFormat format,
+  int level,
+) => ZLibEncoder(
+  gzip: format == CompressionFormat.gzip,
+  raw: format == CompressionFormat.raw,
+  level: level,
+).bind(input).map(_bytes);
 
-/// Decompresses the gzip of [input] with the zlib of `dart:io`.
+/// Decompresses the [format] of [input] with the zlib of `dart:io`.
 ///
 /// Returns the decompressed chunks, which fail with a [FormatException]
 /// where the data is not valid.
 @internal
-Stream<Uint8List> platformGunzip(Stream<List<int>> input) =>
-    ZLibDecoder().bind(input).map(_bytes);
+Stream<Uint8List> platformDecompress(
+  Stream<List<int>> input,
+  CompressionFormat format,
+) => ZLibDecoder(raw: format == CompressionFormat.raw).bind(input).map(_bytes);
 
 /// [chunk] as a [Uint8List], copied only when it is not one.
 ///

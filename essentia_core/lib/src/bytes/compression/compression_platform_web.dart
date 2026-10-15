@@ -12,27 +12,38 @@ import 'dart:js_interop';
 import 'dart:js_interop_unsafe';
 import 'dart:typed_data';
 
+import 'package:essentia_core/src/bytes/compression/compression_format.dart';
 import 'package:meta/meta.dart';
 
-/// Compresses [input] into one gzip member with the
-/// `CompressionStream('gzip')` of the browser, which picks its own
-/// compression level and ignores [level].
+/// Compresses [input] into [format] with the `CompressionStream` of the
+/// browser, which picks its own compression level and ignores [level].
 ///
 /// Returns the compressed chunks.
 @internal
-Stream<Uint8List> platformGzip(Stream<List<int>> input, int level) =>
-    _pipe('CompressionStream', input, 'The browser could not compress');
+Stream<Uint8List> platformCompress(
+  Stream<List<int>> input,
+  CompressionFormat format,
+  int level,
+) =>
+    _pipe('CompressionStream', format, input, 'The browser could not compress');
 
-/// Decompresses the gzip of [input] with the
-/// `DecompressionStream('gzip')` of the browser.
+/// Decompresses the [format] of [input] with the `DecompressionStream` of
+/// the browser.
 ///
 /// Returns the decompressed chunks, which fail with a [FormatException]
 /// where the data is not valid.
 @internal
-Stream<Uint8List> platformGunzip(Stream<List<int>> input) =>
-    _pipe('DecompressionStream', input, 'The data is not valid gzip');
+Stream<Uint8List> platformDecompress(
+  Stream<List<int>> input,
+  CompressionFormat format,
+) => _pipe(
+  'DecompressionStream',
+  format,
+  input,
+  'The data is not valid ${format.webName}',
+);
 
-/// Pipes [input] through a new `gzip` stream of the browser class
+/// Pipes [input] through a new stream of [format] of the browser class
 /// [constructor], writing and reading at the same time.
 ///
 /// A thin bridge: a listener that pauses stops the reading and with it the
@@ -43,12 +54,13 @@ Stream<Uint8List> platformGunzip(Stream<List<int>> input) =>
 /// Returns the chunks that come out.
 Stream<Uint8List> _pipe(
   String constructor,
+  CompressionFormat format,
   Stream<List<int>> input,
   String failing,
 ) async* {
   final JSObject transform = globalContext
       .getProperty<JSFunction>(constructor.toJS)
-      .callAsConstructor<JSObject>('gzip'.toJS);
+      .callAsConstructor<JSObject>(format.webName.toJS);
   final JSObject writer = transform
       .getProperty<JSObject>('writable'.toJS)
       .callMethod<JSObject>('getWriter'.toJS);
