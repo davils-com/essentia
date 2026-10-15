@@ -1384,6 +1384,8 @@ enum WindowRemainder {
   bool get keepsPartialWindows;
 }
 
+StreamTransformer<List<int>, Uint8List> brotliDecoder();
+
 int Function(T, T) compareBy<T, K extends Comparable<Object>>(K Function(T) keyOf);
 
 int Function(T, T) compareByDescending<T, K extends Comparable<Object>>(K Function(T) keyOf);
@@ -1429,3 +1431,5 @@ int Function(T, T) reverseOrder<T extends Comparable<Object>>();
 Result<T> runCatching<T>(T Function() block);
 
 Future<Result<T>> runCatchingAsync<T>(Future<T> Function() block);
+
+Future<Uint8List> unbrotli(List<int> bytes);

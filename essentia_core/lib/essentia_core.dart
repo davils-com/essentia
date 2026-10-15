@@ -55,6 +55,7 @@ export 'src/bytes/byte_list_content.dart';
 export 'src/bytes/byte_list_hex.dart';
 export 'src/bytes/byte_list_to_byte_string.dart';
 export 'src/bytes/byte_string.dart';
+export 'src/bytes/compression/brotli.dart';
 export 'src/bytes/compression/deflate.dart';
 export 'src/bytes/compression/gzip.dart';
 export 'src/bytes/crc32.dart';
