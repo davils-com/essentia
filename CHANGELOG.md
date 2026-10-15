@@ -1,9 +1,10 @@
 # Changelog
 
 Essentia is a workspace of packages, and every package keeps its own changelog:
-[essentia_core](essentia_core/CHANGELOG.md), [essentia_time](essentia_time/CHANGELOG.md) and
-[essentia_coroutines](essentia_coroutines/CHANGELOG.md). The history below is that of the single
-package `essentia` up to 3.3.0, which they were split from.
+[essentia_core](essentia_core/CHANGELOG.md), [essentia_time](essentia_time/CHANGELOG.md),
+[essentia_coroutines](essentia_coroutines/CHANGELOG.md) and [essentia_io](essentia_io/CHANGELOG.md).
+The history below is that of the single package `essentia` up to 3.3.0, which the first three were
+split from.
 
 ## 3.3.0
 

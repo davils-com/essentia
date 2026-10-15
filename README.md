@@ -9,13 +9,14 @@ Dart's own classes.
 
 Its only runtime dependency is `package:meta`.
 
-Essentia is a workspace of three packages; the workspace root holds no library of its own:
+Essentia is a workspace of four packages; the workspace root holds no library of its own:
 
 | Package | Import | What it holds |
 |---|---|---|
-| `essentia_core` | `package:essentia_core/essentia_core.dart` | Validation, the builder DSL, program parameters, identifiers, semantic versions, principals, layering contracts, platform detection, bytes, gzip and CRC-32, decimals, ranges, scope functions, `Result`, `lazy`, `Duration` and the Kotlin stdlib extensions |
+| `essentia_core` | `package:essentia_core/essentia_core.dart` | Validation, the builder DSL, program parameters, identifiers, semantic versions, principals, layering contracts, platform detection, bytes, gzip, deflate, Brotli decoding, CRC-32 and Adler-32, charsets, typed attributes, a case insensitive map, decimals, ranges, scope functions, `Result`, `lazy`, `Duration` and the Kotlin stdlib extensions |
 | `essentia_time` | `package:essentia_time/essentia_time.dart`, `package:essentia_time/recurrence.dart` | Time sources, clocks, instants, dates, times, every IANA time zone, date and time formats, RFC 5545 recurrence |
 | `essentia_coroutines` | `package:essentia_coroutines/essentia_coroutines.dart` | Coroutines, channels, `select`, hot flows, stream operators, locks, the event bus and principals in the coroutine context |
+| `essentia_io` | `package:essentia_io/essentia_io.dart` | Byte input and output ported from ktor-io: the segmented `Buffer`, byte channels with back pressure, reading lines and numbers, scanning for a delimiter, `writer` and `reader` coroutines, bridges to streams |
 
 Every package keeps its own test support in `lib/testing.dart`: `package:essentia_time/testing.dart`
 holds `TestTimeSource`, `package:essentia_coroutines/testing.dart` testing on virtual time with
@@ -316,6 +317,27 @@ final Job watching = counter.launchIn(scope);
   `sample`, `combine`, `flatMapLatest`, `flatMapConcat`, `transformLatest`, `runningFold`,
   `retry`, `retryWhen`, `catchError`, `cancellable`. On `runTest` their time is virtual.
 
+## Byte channels
+
+```dart
+final WriterJob writing = scope.writer((it) async {
+  await it.channel.writeString('HTTP/1.1 200 OK\r\n');
+  await it.channel.writeInt(42);
+});
+final String? statusLine = await writing.channel.readLineStrict(limit: 8192);
+final int answer = await writing.channel.readInt();
+```
+
+- **Buffers.** `Buffer` is kotlinx-io's buffer: bytes in segments, numbers big- or little-endian,
+  text in any `Charset`, moving the bytes of one buffer into another without copying them.
+- **Channels.** `ByteChannel` is Ktor's: a writer flushes to a reader, and a flush waits once a
+  mebibyte waits for the reader; every wait is cancellable through the job of its coroutine.
+  `ByteReadChannel.fromBytes`, `fromText`, `fromBuffer` and `fromStream`, `toStream`, and the counted
+  channels round it off.
+- **Operations.** Ktor's: `readInt`, `readBytes`, `readRemaining`, `readLine` and `readLineStrict`
+  with LF, CR LF or lenient endings and a limit, `readUntil` a delimiter, `copyTo`, `writeFully`,
+  `writeString` and the others; `writer` and `reader` start the coroutine of one side.
+
 ## Dates, times and time zones
 
 Kotlin's `kotlinx-datetime`: `LocalDate`, `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`,
@@ -394,9 +416,21 @@ are what `rangeTo`, `until` and `downTo` hand back.
 - **Platform detection.** `Platform`, `OperatingSystem` (Linux, macOS, Windows, Android, iOS and the
   web) and `Architecture`, with `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
   `Platform.parse('linux-x86_64')` for an identifier read from a path or a manifest.
-- **gzip.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder` on the zlib of `dart:io` and on the
-  `CompressionStream` of the browser; decoding checks the CRC-32 and the length of the member.
-  `Crc32` is the check itself, the same on every platform.
+- **gzip and deflate.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder`, and `deflate`,
+  `inflate`, `deflateEncoder` and `deflateDecoder` for zlib streams and, with `raw`, deflate data
+  alone, on the zlib of `dart:io` and on the `CompressionStream` of the browser; decoding checks the
+  CRC-32 and the length of a gzip member and the Adler-32 of a zlib stream. `Crc32` and `Adler32`
+  are the checks themselves, the same on every platform. Deflate data alone has no check: on the VM
+  data cut short decodes to what it held.
+- **Brotli.** `unbrotli` and `brotliDecoder` decode a Brotli stream of RFC 7932, HTTP's `br`, as its
+  bytes arrive: a decoder written in Dart with the static dictionary of the RFC, alike on the VM, on
+  the web and in WebAssembly, that refuses damaged, cut short and trailing data. There is no
+  encoder.
+- **Charsets.** `Charset` and `Charsets`: UTF-8, US-ASCII, ISO-8859-1, windows-1252 and UTF-16 with
+  and without a byte order mark, found by their IANA names and aliases, as `Encoding`s of
+  `dart:convert` that decode chunk by chunk and replace what they cannot decode with U+FFFD.
+- **Typed attributes.** `Attributes` holds values of any type, each under its `AttributeKey`, as
+  Ktor's do; `CaseInsensitiveMap` is a map whose keys compare without regard to case.
 - **Causes.** `Causal`, implemented by every failure of Essentia that wraps another, gives the
   `cause` and, where it is known, its `causeStackTrace`.
 

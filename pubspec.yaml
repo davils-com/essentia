@@ -7,7 +7,8 @@ description: >-
   extensions on Dart's own classes -, essentia_time - time sources, dates,
   times, every IANA time zone and RFC 5545 recurrence - and
   essentia_coroutines - Kotlin's coroutines, channels, select, hot flows,
-  fair locks and an in-process event bus -, each with its test support.
+  fair locks and an in-process event bus - and essentia_io - Ktor's byte
+  channels on a segmented buffer -, each with its test support.
 publish_to: none
 
 environment:

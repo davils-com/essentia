@@ -12,7 +12,8 @@
 /// Validation that reports every problem at once, validating configuration
 /// builders, program parameters, layering contracts, RFC 9562 identifiers,
 /// semantic versions, principals, platform detection, a `Result` type,
-/// Kotlin's `lazy`, byte strings and hexadecimal formats, gzip and CRC-32,
+/// Kotlin's `lazy`, byte strings and hexadecimal formats, gzip, deflate,
+/// CRC-32 and Adler-32, charsets, typed attributes, a case insensitive map,
 /// decimals, ranges, Kotlin's `Duration` extensions and Kotlin's standard
 /// library extensions on Dart's own classes. It runs on every Dart
 /// platform, the web and WebAssembly included; `file()` is offered where

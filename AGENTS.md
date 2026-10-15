@@ -20,14 +20,16 @@ Essentia is a Dart pub workspace. The root holds no library of its own; each pac
 
 | Path | Purpose |
 |---|---|
-| `essentia_core/` | Validation, DSL, program parameters, identity, versions, principals, bytes, architecture, platform, scope functions, result, lazy, ranges, decimals, `Duration` and the Kotlin stdlib extensions. Depends on `meta` only |
+| `essentia_core/` | Validation, DSL, program parameters, identity, versions, principals, bytes, architecture, platform, scope functions, result, lazy, ranges, decimals, `Duration` and the Kotlin stdlib extensions. Depends on `meta` only. `tool/brotli/` holds the vendored Brotli dictionary of google/brotli and `generate_dictionary.dart`, which compiles it into `lib/src/bytes/compression/brotli/brotli_dictionary_data.dart`; `test/fixtures/brotli/` holds its test vectors |
 | `essentia_time/` | Time sources, clocks, dates, times, time zones, formats (`essentia_time.dart`), RFC 5545 recurrence (`recurrence.dart`), `TestTimeSource` (`testing.dart`). `IANA/tzdata/` is the vendored time zone database, `tool/generate_tzdata.dart` compiles it into `lib/src/internal/tzdata.dart` |
 | `essentia_coroutines/` | Coroutines, channels, select, flows, stream operators, locks, the event bus, principals in the coroutine context (`essentia_coroutines.dart`), testing on virtual time: `runTest`, `TestScope`, `TestScheduler` and the test dispatchers (`testing.dart`). `test/support/` holds the shared fixtures of the event tests |
+| `essentia_io/` | Byte input and output ported from ktor-io: `Buffer`, `ByteReadChannel`, `ByteWriteChannel`, `ByteChannel`, the channel operations, the `writer` and `reader` coroutines and the bridges to streams |
 | `inspectra.base.yaml` | The gates every package extends. Its `policy` locks them |
-| `pubspec.yaml` | The workspace and the workspace policy with its layers: `core`, `time` on `core`, `coroutines` on both |
+| `pubspec.yaml` | The workspace and the workspace policy with its layers: `core`, `time` on `core`, `coroutines` on both, `io` on all three |
 | `CONTRIBUTING.md`, `TESTING.md` | What a change and a test have to clear; this file wins where they disagree |
 | `SECURITY.md`, `CODE_OF_CONDUCT.md`, `THIRDPARTY.md` | Reporting vulnerabilities, the Code of Conduct, the third-party software |
 | `trivy-secret.yaml` | The rules of the Trivy secret scan, Markdown included |
+| `trivy.yaml`, `.trivyignore.yaml` | Point Trivy at the one accepted notice: the MIT text of google/brotli in `THIRDPARTY.md`, and nothing else |
 | `.gitlab/CODEOWNERS` | The paths that need a maintainer's review |
 | `tool/` | `verify.dart` and `license_header.txt`, the header template of the style check |
 

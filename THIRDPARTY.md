@@ -49,6 +49,9 @@ This document lists the third-party software Essentia uses or integrates with.
 
 - [Arc](https://gitlab.davils.com/davils/libraries/arc) - the Davils application runtime core for
   Kotlin, of which Essentia is the Dart port.
+- [Ktor](https://github.com/ktorio/ktor) - `ktor-io`, whose byte channels, their operations and the
+  `writer` and `reader` coroutines `essentia_io` ports, and `kotlinx-io`, whose buffer it ports.
+  Licensed under the [Apache License 2.0](https://github.com/ktorio/ktor/blob/main/LICENSE).
 
 ## Notices
 
