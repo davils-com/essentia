@@ -108,6 +108,18 @@ final class ByteString implements Comparable<ByteString> {
   String toString();
 }
 
+final class CaseInsensitiveMap<V> extends MapBase<String, V> {
+  CaseInsensitiveMap<V>();
+  CaseInsensitiveMap<V>.of(Map<String, V> other);
+  Iterable<String> get keys;
+  int get length;
+  V? operator [](Object? key);
+  void operator []=(String key, V value);
+  void clear();
+  bool containsKey(Object? key);
+  V? remove(Object? key);
+}
+
 abstract interface class Causal {
   abstract Object? get cause;
   abstract StackTrace? get causeStackTrace;

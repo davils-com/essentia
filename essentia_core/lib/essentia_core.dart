@@ -63,6 +63,7 @@ export 'src/bytes/hex_parsing.dart';
 export 'src/bytes/string_to_byte_string.dart';
 export 'src/collection/attribute_key.dart';
 export 'src/collection/attributes.dart';
+export 'src/collection/case_insensitive_map.dart';
 export 'src/collection/comparable_iterable_ordering.dart';
 export 'src/collection/grouping.dart';
 export 'src/collection/iterable_accumulation.dart';
