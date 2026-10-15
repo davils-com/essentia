@@ -132,6 +132,19 @@ extension ByteWriteChannelOperations on ByteWriteChannel {
   Future<void> writeString(String text, {Encoding charset = Charsets.utf8});
 }
 
+abstract interface class ChannelJob {
+  abstract Job get job;
+}
+
+extension ChannelJobOperations on ChannelJob {
+  bool get isCancelled;
+  bool get isCompleted;
+  void cancel();
+  CancellationException getCancellationException();
+  Disposable invokeOnCompletion(void Function(Object?) handler);
+  Future<void> join();
+}
+
 base class ClosedByteChannelException extends IoException {
   ClosedByteChannelException([Object? cause, StackTrace? causeStackTrace]);
   String get kind;
@@ -155,6 +168,11 @@ final class ConcurrentIoException extends StateError {
 final class ConnectionClosedException extends IoException {
   const ConnectionClosedException([String message = 'Connection was closed']);
   String get kind;
+}
+
+extension CoroutineScopeByteChannels on CoroutineScope {
+  ReaderJob reader(FutureOr<void> Function(ReaderScope) block, {CoroutineContext context = CoroutineContext.empty, bool autoFlush = false, ByteChannel? channel});
+  WriterJob writer(FutureOr<void> Function(WriterScope) block, {CoroutineContext context = CoroutineContext.empty, bool autoFlush = false, ByteChannel? channel});
 }
 
 final class CountedByteReadChannel implements ByteReadChannel {
@@ -198,7 +216,31 @@ enum LineEnding {
   defaultEnding, lenient;
 }
 
+final class ReaderJob implements ChannelJob {
+  final ByteWriteChannel channel;
+  final Job job;
+  ReaderJob(ByteWriteChannel channel, Job job);
+}
+
+final class ReaderScope implements CoroutineScope {
+  final ByteReadChannel channel;
+  final CoroutineContext coroutineContext;
+  ReaderScope(ByteReadChannel channel, CoroutineContext coroutineContext);
+}
+
 final class TooLongLineException extends IoException {
   const TooLongLineException(String message);
   String get kind;
+}
+
+final class WriterJob implements ChannelJob {
+  final ByteReadChannel channel;
+  final Job job;
+  WriterJob(ByteReadChannel channel, Job job);
+}
+
+final class WriterScope implements CoroutineScope {
+  final ByteWriteChannel channel;
+  final CoroutineContext coroutineContext;
+  WriterScope(ByteWriteChannel channel, CoroutineContext coroutineContext);
 }
