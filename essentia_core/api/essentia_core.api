@@ -18,6 +18,30 @@ enum Architecture {
   static Architecture? resolve(String osArch);
 }
 
+final class AttributeKey<T extends Object> {
+  final String name;
+  const AttributeKey<T>(String name);
+  int get hashCode;
+  Type get type;
+  bool operator ==(Object other);
+  bool accepts(Object value);
+  String toString();
+}
+
+final class Attributes {
+  Attributes();
+  List<AttributeKey<Object>> get allKeys;
+  T computeIfAbsent<T extends Object>(AttributeKey<T> key, T Function() create);
+  bool contains(AttributeKey<Object> key);
+  T get<T extends Object>(AttributeKey<T> key);
+  T? getOrNull<T extends Object>(AttributeKey<T> key);
+  void put<T extends Object>(AttributeKey<T> key, T value);
+  void putAll(Attributes other);
+  void remove<T extends Object>(AttributeKey<T> key);
+  T take<T extends Object>(AttributeKey<T> key);
+  T? takeOrNull<T extends Object>(AttributeKey<T> key);
+}
+
 abstract interface class Builder<T> {
   abstract T build();
 }
