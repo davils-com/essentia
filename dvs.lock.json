@@ -1,0 +1,14 @@
+{
+  "lockVersion": 1,
+  "dependencies": {
+    "inspectra": {
+      "url": "git@github.com:davils-com/Inspectra.git",
+      "path": "../inspectra",
+      "ref": {
+        "branch": "develop"
+      },
+      "commit": "4c7091ead1c616bc12bb96a37decd38f2695ff89",
+      "specDigest": "sha256:c3c57c62f86340c755f22b74df7886159b385a2c053724dbff9dcd2868c28ec4"
+    }
+  }
+}
