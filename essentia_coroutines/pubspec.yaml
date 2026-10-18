@@ -11,8 +11,10 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
-  essentia_core: ^1.0.0
-  essentia_time: ^1.0.0
+  essentia_core:
+    path: ../essentia_core
+  essentia_time:
+    path: ../essentia_time
   meta: ^1.16.0
 
 dev_dependencies:

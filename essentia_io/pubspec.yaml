@@ -12,8 +12,10 @@ environment:
   sdk: ^3.13.5
 
 dependencies:
-  essentia_core: ^1.0.0
-  essentia_coroutines: ^1.0.0
+  essentia_core:
+    path: ../essentia_core
+  essentia_coroutines:
+    path: ../essentia_coroutines
   meta: ^1.16.0
 
 dev_dependencies:
