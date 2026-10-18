@@ -68,6 +68,15 @@ bool isWord(String text) => word.value.hasMatch(text);
 The initializer runs once, on the first read, and is retried when it throws; `lazyOf(value)` wraps
 a value that is already known.
 
+Kotlin's `use` is `use` on a `Disposable`, and `useAsync` for a block that returns a future or a
+resource that is a `DisposableAsync`: the resource is disposed whichever way the block ends, and the
+failure of the block wins over a failure of the disposal.
+
+```dart
+final int entries = openArchive(path).use((it) => it.entries.length);
+await openQueue().useAsync((it) => it.send(message));
+```
+
 ## Validation and configuration DSLs
 
 One validation model serves both program arguments and configuration objects. A data class states
@@ -267,6 +276,11 @@ await polling.cancelAndJoin();
   marked `IsolateTransferable` crosses to the isolate with the body, as far as it is sendable.
 - **Contextual.** `runWithContext(element, body)` lays elements over the current context for a body,
   synchronous or asynchronous, without starting a coroutine; `runAsPrincipal` is built on it.
+- **Shut down together.** `ShutdownHooks.process` is where every component adds the work it has to
+  do when the host signals the end of the program: `SIGINT` and `SIGTERM` where `dart:io` is, the
+  page being hidden in a browser. The hooks run one after the other, the last added first, within
+  a timeout on the `Scheduler`, and the program then ends once, with the exit code of the signal;
+  `FakeShutdownHost` raises signals in a test.
 - **Tested on virtual time.** `runTest` from `package:essentia_coroutines/testing.dart` runs a test body on the
   virtual event loop of a `TestScheduler`: delays, timers and timeouts take no real time, and the
   test fails with every failure of the coroutines it started.
@@ -437,6 +451,10 @@ are what `rangeTo`, `until` and `downTo` hand back.
 ## Differences to Arc
 
 Kept deliberately small, and only where Dart has no equivalent:
+
+- `ShutdownHooks` takes the place of the JVM's `Runtime.addShutdownHook`, which Dart does not
+  have. Unlike the JVM's, the hooks run one after the other, the last added first, within a
+  timeout, because a server has to stop before the logging it writes to flushes.
 
 - `Clock.now()` returns an `Instant` as Kotlin's does; `toDateTime()` gives Dart's `DateTime`.
   Instants cover a million years either way instead of a billion, so every count stays exact on the

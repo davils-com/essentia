@@ -308,6 +308,15 @@ abstract interface class DisposableAsync {
   abstract Future<void> dispose();
 }
 
+extension DisposableAsyncUse<T extends DisposableAsync> on T {
+  Future<R> useAsync<R>(FutureOr<R> Function(T) block);
+}
+
+extension DisposableUse<T extends Disposable> on T {
+  R use<R>(R Function(T) block);
+  Future<R> useAsync<R>(FutureOr<R> Function(T) block);
+}
+
 abstract interface class DomainModel {}
 
 extension DurationArithmetic on Duration {

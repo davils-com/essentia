@@ -609,6 +609,31 @@ abstract interface class SharingStarted {
   static SharingStarted whileSubscribed({Duration stopTimeout = Duration.zero, Duration? replayExpiration});
 }
 
+typedef ShutdownHook = FutureOr<void> Function(ShutdownSignal);
+
+final class ShutdownHooks {
+  static const Duration defaultTimeout = Duration(seconds: 25);
+  static final ShutdownHooks process;
+  final Duration timeout;
+  ShutdownHooks({ShutdownHost host = ShutdownHost.system, Duration timeout = defaultTimeout, Scheduler scheduler = Scheduler.system});
+  bool get isShuttingDown;
+  int get length;
+  Disposable add(FutureOr<void> Function(ShutdownSignal) hook);
+  Future<void> shutdown(ShutdownSignal signal);
+}
+
+abstract interface class ShutdownHost {
+  static const ShutdownHost system = SystemShutdownHost();
+  abstract void exit(int code);
+  abstract Stream<ShutdownSignal> watch();
+}
+
+enum ShutdownSignal {
+  interrupt, terminate, pageHide;
+  final int? exitCode;
+  bool get endsProgram;
+}
+
 abstract interface class StateFlow<T> implements SharedFlow<T> {
   abstract T get value;
 }
@@ -798,6 +823,15 @@ Future<R?> withTimeoutOrNull<R>(Duration timeout, FutureOr<R> Function(Coroutine
 Future<void> yieldNow();
 
 library package:essentia_coroutines/testing.dart
+
+final class FakeShutdownHost implements ShutdownHost {
+  FakeShutdownHost();
+  List<int> get exits;
+  bool get isWatched;
+  void exit(int code);
+  void raise(ShutdownSignal signal);
+  Stream<ShutdownSignal> watch();
+}
 
 final class StandardTestDispatcher extends TestDispatcher {
   final String? name;

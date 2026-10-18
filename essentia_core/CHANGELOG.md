@@ -32,6 +32,9 @@ Split out of `essentia` 3.3.0, whose history is in the [workspace changelog](../
 - `OperatingSystem.ios` and `Platform.isIos`: iOS and iPadOS resolve to their own system, `ios`,
   rather than to nothing, and are Unix but not macOS. `Platform.entries` grows to eighteen
   machines.
+- `use` and `useAsync` on a `Disposable` and `useAsync` on a `DisposableAsync`, Kotlin's `use`:
+  a block that works with a resource and leaves it disposed whichever way it ends, the failure of
+  the block winning over a failure of the disposal.
 
 ### Changed
 

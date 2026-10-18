@@ -14,6 +14,7 @@
 /// test fails with every failure of the coroutines it started.
 library;
 
+export 'src/testing/fake_shutdown_host.dart';
 export 'src/testing/run_test.dart';
 export 'src/testing/standard_test_dispatcher.dart';
 export 'src/testing/test_dispatcher.dart';

@@ -120,6 +120,8 @@ export 'src/lazy/lazy.dart';
 export 'src/lazy/lazy_dsl.dart';
 export 'src/lifecycle/disposable.dart';
 export 'src/lifecycle/disposable_async.dart';
+export 'src/lifecycle/disposable_async_use.dart';
+export 'src/lifecycle/disposable_use.dart';
 export 'src/number/byte_size.dart';
 export 'src/number/byte_size_units.dart';
 export 'src/number/decimal_value.dart';
