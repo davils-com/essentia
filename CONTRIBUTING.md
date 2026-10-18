@@ -12,6 +12,10 @@ to clear.
 - Work happens on `develop`; `main` is the release branch.
 - Dart SDK `^3.13.5`, resolved with `dart pub get`. Chrome is needed for the web and WebAssembly
   test runs.
+- Inspectra is a path dependency, checked out next to this repository at `../inspectra` by
+  [dvs](https://gitlab.davils.com/davils/tooling/dvs). Run `dvs deps sync` before `dart pub get`;
+  `dvs.json` declares the branch and `dvs.lock.json` pins the commit. An existing clone at
+  `../inspectra` is used as it is, and `dvs deps update` moves it to the newest `develop`.
 
 ## Making a change
 

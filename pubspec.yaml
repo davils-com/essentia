@@ -21,7 +21,8 @@ workspace:
   - essentia_time
 
 dev_dependencies:
-  inspectra: ^2.1.0
+  inspectra:
+    path: ../inspectra
 
 # The workspace root holds no library of its own. Every package runs the
 # gates of inspectra.base.yaml with `dart run inspectra -C <package>

@@ -15,7 +15,8 @@ dependencies:
   meta: ^1.16.0
 
 dev_dependencies:
-  inspectra: ^2.1.0
+  inspectra:
+    path: ../../inspectra
   test: ^1.30.0
 
 # The gates of inspectra.base.yaml.
