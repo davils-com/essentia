@@ -13,8 +13,7 @@ import 'package:essentia_io/src/channel/internal/close_token.dart';
 import 'package:essentia_io/src/exception/io_exception.dart';
 import 'package:meta/meta.dart';
 
-/// A channel that reads the bytes of a buffer that is complete, Ktor's
-/// `SourceByteReadChannel`.
+/// A channel that reads the bytes of a buffer that is complete.
 @internal
 final class BufferByteReadChannel implements ByteReadChannel {
   /// Creates the channel of the bytes of [_source].

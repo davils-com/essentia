@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 
 import 'ball.dart';
 
-/// Produces the squares of one to five, like `produceSquares` of the guide.
+/// Produces the squares of one to five.
 ///
 /// Returns the channel of squares.
 ReceiveChannel<int> _produceSquares(CoroutineScope scope) =>
@@ -23,7 +23,7 @@ ReceiveChannel<int> _produceSquares(CoroutineScope scope) =>
       }
     });
 
-/// Produces the numbers from [start] on, like `numbersFrom` of the guide.
+/// Produces the numbers from [start] on.
 ///
 /// Returns the channel of numbers.
 ReceiveChannel<int> _numbersFrom(CoroutineScope scope, int start) =>
@@ -33,8 +33,7 @@ ReceiveChannel<int> _numbersFrom(CoroutineScope scope, int start) =>
       }
     });
 
-/// Passes on the numbers of [numbers] that [prime] does not divide, like
-/// `filter` of the guide.
+/// Passes on the numbers of [numbers] that [prime] does not divide.
 ///
 /// Returns the channel of the numbers passed on.
 ReceiveChannel<int> _filter(
@@ -49,8 +48,7 @@ ReceiveChannel<int> _filter(
   }
 });
 
-/// Sends [text] to [channel] every [period], like `sendString` of the
-/// guide.
+/// Sends [text] to [channel] every [period].
 ///
 /// Returns a future that never completes normally.
 Future<void> _sendString(
@@ -64,8 +62,7 @@ Future<void> _sendString(
   }
 }
 
-/// Plays ping-pong as [name] on [table], logging every hit to [log], like
-/// `player` of the guide.
+/// Plays ping-pong as [name] on [table], logging every hit to [log].
 ///
 /// Returns a future that completes once the table is closed.
 Future<void> _player(String name, Channel<Ball> table, List<String> log) async {
@@ -77,8 +74,8 @@ Future<void> _player(String name, Channel<Ball> table, List<String> log) async {
   }
 }
 
-/// Covers the examples of the "Channels" chapter of the kotlinx.coroutines
-/// guide, ported to Dart; each asserts the whole output of its example.
+/// Covers the worked examples of channels; each asserts the whole output of its
+/// example.
 void main() {
   test(
     'channel basics',

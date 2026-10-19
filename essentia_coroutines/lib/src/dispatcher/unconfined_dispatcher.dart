@@ -31,8 +31,7 @@ final class UnconfinedDispatcher extends CoroutineDispatcher {
   void dispatch(CoroutineContext context, Zone zone, void Function() block) =>
       zone.run(block);
 
-  /// A body started at once is not limited by anything, Kotlin's
-  /// `Unconfined.limitedParallelism`.
+  /// A body started at once is not limited by anything.
   ///
   /// Throws an [UnsupportedError].
   @override

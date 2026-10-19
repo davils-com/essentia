@@ -66,7 +66,7 @@ void main() {
     });
   });
 
-  group('kotlin documentation', () {
+  group('event bus', () {
     test(
       'delivers the events of an event bus to every subscriber',
       () => runTest((it) async {

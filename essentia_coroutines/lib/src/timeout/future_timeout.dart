@@ -9,12 +9,12 @@
 
 import 'dart:async';
 
-/// Waits for a future for a limited time, Kotlin's `withTimeoutOrNull`.
+/// Waits for a future for a limited time.
 extension FutureTimeout<T> on Future<T> {
   /// Waits at most [limit] for this future.
   ///
-  /// Unlike Kotlin, the work behind the future is not cancelled when the
-  /// limit passes; it runs to its end and its result is dropped.
+  /// The work behind the future is not cancelled when the limit passes; it runs
+  /// to its end and its result is dropped.
   ///
   /// Returns the value of this future, or `null` when [limit] passes first.
   ///

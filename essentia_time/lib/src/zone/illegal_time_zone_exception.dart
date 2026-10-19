@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A time zone that does not exist or cannot be read, Kotlin's
-/// `kotlinx.datetime.IllegalTimeZoneException`.
+/// A time zone that does not exist or cannot be read.
 final class IllegalTimeZoneException implements Exception {
   /// Creates the exception that tells what went wrong in [message].
   const IllegalTimeZoneException(this.message);

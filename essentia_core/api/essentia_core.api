@@ -3,13 +3,6 @@
 
 library package:essentia_core/essentia_core.dart
 
-final class Adler32 {
-  Adler32();
-  int get value;
-  void add(List<int> bytes);
-  static int of(List<int> bytes);
-}
-
 enum ApplicationMode {
   development, test, staging, production;
   final String value;
@@ -212,13 +205,6 @@ final class ConversionFailure extends ParameterViolation implements Causal {
 }
 
 typedef Converter<out T> = T Function(String);
-
-final class Crc32 {
-  Crc32();
-  int get value;
-  void add(List<int> bytes);
-  static int of(List<int> bytes);
-}
 
 abstract interface class DataSource {}
 
@@ -577,6 +563,27 @@ final class KeySegment extends PathSegment {
 abstract interface class Lazy<T> {
   abstract bool get isInitialized;
   abstract T get value;
+}
+
+final class LinearRegExp {
+  static const int defaultMaxInstructions = 2000;
+  final String pattern;
+  factory LinearRegExp(String pattern, {int maxInstructions = defaultMaxInstructions});
+  int get instructionCount;
+  bool hasMatch(String input);
+  String toString();
+}
+
+final class LinearRegExpException implements Exception {
+  final String detail;
+  final LinearRegExpFailure failure;
+  final int offset;
+  const LinearRegExpException(LinearRegExpFailure failure, int offset, String detail);
+  String toString();
+}
+
+enum LinearRegExpFailure {
+  syntax, unsupported, tooComplex;
 }
 
 extension ListAccess<T> on List<T> {
@@ -1393,33 +1400,15 @@ enum WindowRemainder {
   bool get keepsPartialWindows;
 }
 
-StreamTransformer<List<int>, Uint8List> brotliDecoder();
-
 int Function(T, T) compareBy<T, K extends Comparable<Object>>(K Function(T) keyOf);
 
 int Function(T, T) compareByDescending<T, K extends Comparable<Object>>(K Function(T) keyOf);
 
 int compareValues<T extends Comparable<Object>>(T? left, T? right);
 
-Future<Uint8List> deflate(List<int> bytes, {int level = 6, bool raw = false});
-
-StreamTransformer<List<int>, Uint8List> deflateDecoder({bool raw = false});
-
-StreamTransformer<List<int>, Uint8List> deflateEncoder({int level = 6, bool raw = false});
-
 FlagBuilder flag(List<String> names);
 
-Future<Uint8List> gunzip(List<int> bytes);
-
-Future<Uint8List> gzip(List<int> bytes, {int level = 6});
-
-StreamTransformer<List<int>, Uint8List> gzipDecoder();
-
-StreamTransformer<List<int>, Uint8List> gzipEncoder({int level = 6});
-
 HexFormat hexFormat(void Function(HexFormatBuilder) block);
-
-Future<Uint8List> inflate(List<int> bytes, {bool raw = false});
 
 Lazy<T> lazy<T>(T Function() initializer);
 
@@ -1440,5 +1429,3 @@ int Function(T, T) reverseOrder<T extends Comparable<Object>>();
 Result<T> runCatching<T>(T Function() block);
 
 Future<Result<T>> runCatchingAsync<T>(Future<T> Function() block);
-
-Future<Uint8List> unbrotli(List<int> bytes);

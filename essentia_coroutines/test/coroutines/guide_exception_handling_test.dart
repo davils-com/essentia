@@ -18,7 +18,7 @@ import 'arithmetic_exception.dart';
 import 'assertion_exception.dart';
 import 'io_exception.dart';
 
-/// The handler of the guide, logging what it gets into [log].
+/// The handler of the examples, logging what it gets into [log].
 ///
 /// Returns the handler.
 CoroutineExceptionHandler _handler(List<String> log) =>
@@ -31,7 +31,7 @@ CoroutineExceptionHandler _handler(List<String> log) =>
       );
     });
 
-/// What the first child of the guide prints once it is cancelled.
+/// What the first child of the example prints once it is cancelled.
 const _waiting =
     'Children are cancelled, but exception is not handled until all '
     'children terminate';
@@ -45,9 +45,8 @@ const _aggregated =
     'CoroutineExceptionHandler got IoException with suppressed '
     '[ArithmeticException]';
 
-/// Covers the examples of the kotlinx.coroutines guide "Coroutine
-/// exceptions handling", ported line by line, with the output they print
-/// as a golden log.
+/// Covers the worked examples of coroutine exception handling, with the output
+/// they print as a golden log.
 void main() {
   test(
     'exception propagation',

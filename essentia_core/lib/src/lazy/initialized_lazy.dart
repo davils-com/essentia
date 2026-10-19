@@ -10,8 +10,7 @@
 import 'package:essentia_core/src/lazy/lazy.dart';
 import 'package:meta/meta.dart';
 
-/// The [Lazy] that `lazyOf` creates around a value that is already known,
-/// Kotlin's `InitializedLazyImpl`.
+/// The [Lazy] that `lazyOf` creates around a value that is already known.
 @immutable
 @internal
 final class InitializedLazy<T> implements Lazy<T> {

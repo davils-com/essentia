@@ -10,8 +10,7 @@
 import 'package:essentia_core/essentia_core.dart';
 import 'package:meta/meta.dart';
 
-/// A running `select` as one of its clauses sees it, Kotlin's
-/// `SelectInstance`.
+/// A running `select` as one of its clauses sees it.
 ///
 /// A clause registers with it: it selects at once when it is ready, or
 /// waits and selects later through [trySelect]. Exactly one clause of a

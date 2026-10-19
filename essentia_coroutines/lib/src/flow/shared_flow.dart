@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A hot stream whose values are shared between all of its listeners,
-/// Kotlin's `SharedFlow`.
+/// A hot stream whose values are shared between all of its listeners.
 ///
 /// A shared flow never ends: a listener stays subscribed until it cancels
 /// or the job it listened in is cancelled. A new listener gets the
@@ -24,12 +23,11 @@
 ///
 /// A listener that pauses - `await for` does while its body runs - holds
 /// its place in the shared buffer, so a slow listener slows the emitters
-/// down instead of losing values, as Kotlin's suspending collectors do.
+/// down instead of losing values.
 ///
 /// It is a broadcast stream: [isBroadcast] is `true`.
 abstract interface class SharedFlow<T> implements Stream<T> {
-  /// The values a new listener gets first, oldest first, Kotlin's
-  /// `replayCache`.
+  /// The values a new listener gets first, oldest first.
   ///
   /// The list is a snapshot and cannot be changed.
   List<T> get replayCache;

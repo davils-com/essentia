@@ -12,8 +12,7 @@ part of 'int_progression.dart';
 /// The largest number of elements [Random.nextInt] can choose from.
 const _largestRandomBound = 0x100000000;
 
-/// The integers from [start] up to and including [endInclusive], Kotlin's
-/// `IntRange`.
+/// The integers from [start] up to and including [endInclusive].
 ///
 /// An [IntProgression] with a step of one that is also a [ClosedRange] of
 /// integers, so it can be iterated, indexed and searched without iterating.
@@ -23,7 +22,7 @@ final class IntRange extends IntProgression implements ClosedRange<int> {
   const IntRange(int start, int endInclusive) : super._(start, endInclusive, 1);
 
   /// Picks an element of the range at random from [source], or from a new
-  /// [Random] when none is given, Kotlin's `random`.
+  /// [Random] when none is given.
   ///
   /// Returns the element.
   ///
@@ -38,8 +37,7 @@ final class IntRange extends IntProgression implements ClosedRange<int> {
     return start + (source ?? Random()).nextInt(length);
   }
 
-  /// Picks an element of the range at random like [random], Kotlin's
-  /// `randomOrNull`.
+  /// Picks an element of the range at random like [random].
   ///
   /// Returns the element, or `null` when the range is empty.
   ///
@@ -48,7 +46,7 @@ final class IntRange extends IntProgression implements ClosedRange<int> {
   @useResult
   int? randomOrNull([Random? source]) => isEmpty ? null : random(source);
 
-  /// Describes the range as `start..endInclusive`, like Kotlin.
+  /// Describes the range as `start..endInclusive`.
   ///
   /// Returns the description.
   @override

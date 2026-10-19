@@ -12,10 +12,9 @@ import 'package:essentia_time/src/date/local_date.dart';
 import 'package:essentia_time/src/date/local_date_time.dart';
 import 'package:essentia_time/src/zone/time_zone.dart';
 
-/// Reads the date and the time a clock shows in a time zone, Kotlin's
-/// `todayIn` and `now().toLocalDateTime(zone)`.
+/// Reads the date and the time a clock shows in a time zone.
 extension ClockDateTime on Clock {
-  /// The date it is now in [timeZone], Kotlin's `todayIn`.
+  /// The date it is now in [timeZone].
   LocalDate todayIn(TimeZone timeZone) => timeZone.toLocalDateTime(now()).date;
 
   /// The date and time it is now in [timeZone].

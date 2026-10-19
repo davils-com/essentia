@@ -7,11 +7,11 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Byte input and output for Dart, ported from ktor-io: the segmented
-/// `Buffer`, the byte channels a writer and a reader share with back
-/// pressure, the operations that read and write numbers, bytes and lines
-/// and scan for a delimiter, the `writer` and `reader` coroutines of
-/// `essentia_coroutines`, and the bridges to Dart's streams.
+/// Byte input and output for Dart: the segmented `Buffer`, the byte
+/// channels a writer and a reader share with back pressure, the operations
+/// that read and write numbers, bytes and lines and scan for a delimiter,
+/// the `writer` and `reader` coroutines of `essentia_coroutines`, and the
+/// bridges to Dart's streams.
 ///
 /// It runs on every Dart platform, the web and WebAssembly included.
 library;

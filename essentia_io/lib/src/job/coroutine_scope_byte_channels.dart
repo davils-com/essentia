@@ -16,8 +16,8 @@ import 'package:essentia_io/src/job/reader_scope.dart';
 import 'package:essentia_io/src/job/writer_job.dart';
 import 'package:essentia_io/src/job/writer_scope.dart';
 
-/// Ktor's `writer` and `reader`: coroutines that write or read one side of
-/// a byte channel, whose other side the caller gets.
+/// `writer` and `reader`: coroutines that write or read one side of a
+/// byte channel, whose other side the caller gets.
 extension CoroutineScopeByteChannels on CoroutineScope {
   /// Starts [block] as a child coroutine that writes to a channel, by
   /// default a new [ByteChannel] with [autoFlush], and hands out the side

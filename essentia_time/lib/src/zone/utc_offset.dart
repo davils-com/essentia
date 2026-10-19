@@ -11,8 +11,7 @@ import 'package:essentia_time/src/internal/iso_text.dart';
 import 'package:essentia_time/src/zone/time_zone.dart';
 import 'package:meta/meta.dart';
 
-/// The difference of a local time from UTC, Kotlin's
-/// `kotlinx.datetime.UtcOffset`: `+02:00` in Berlin in summer.
+/// The difference of a local time from UTC: `+02:00` in Berlin in summer.
 ///
 /// It lies from -18:00 to +18:00 and is held as [totalSeconds].
 @immutable

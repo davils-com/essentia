@@ -22,8 +22,7 @@ final class AwaitClause<T> implements SelectClause<T> {
   /// The deferred waited for.
   final Deferred<T> _deferred;
 
-  /// Starts a lazily started deferred, like Kotlin's, and selects once it
-  /// is complete.
+  /// Starts a lazily started deferred and selects once it is complete.
   @override
   void register(SelectInstance select) {
     _deferred.start();

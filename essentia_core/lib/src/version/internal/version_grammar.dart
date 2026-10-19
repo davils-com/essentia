@@ -16,8 +16,8 @@ import 'package:meta/meta.dart';
 /// before it is split.
 const _maxLength = 256;
 
-/// The largest number a version may hold, Kotlin's `Int.MAX_VALUE`, so that
-/// a version reads the same on every platform and in Arc.
+/// The largest number a version may hold, the largest signed 32-bit
+/// integer, so that a version reads the same on every platform.
 @internal
 const maxNumber = 2147483647;
 
@@ -195,8 +195,7 @@ String? _partAfter(String text, String separator) {
   return text.substring(at + 1);
 }
 
-/// The part of [text] before the first [separator], Kotlin's
-/// `substringBefore`.
+/// The part of [text] before the first [separator].
 ///
 /// Returns the part, or all of [text] when it holds no [separator].
 String _partBefore(String text, String separator) {

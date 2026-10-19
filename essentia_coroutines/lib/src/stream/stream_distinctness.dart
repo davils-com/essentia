@@ -7,11 +7,10 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Kotlin's distinctness `Flow` operators for streams.
+/// The distinctness operators for streams.
 extension StreamDistinctness<T> on Stream<T> {
   /// Drops every element whose key, computed by [keyOf], equals the key of
-  /// the element emitted before it, the counterpart of Kotlin's
-  /// `distinctUntilChangedBy`.
+  /// the element emitted before it.
   ///
   /// Only consecutive repetitions are dropped; a key that comes back later
   /// is emitted again.

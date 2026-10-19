@@ -7,8 +7,8 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Kotlin's coroutines for Dart: structured concurrency with jobs, scopes
-/// and dispatchers, channels, select, hot flows on Dart's `Stream`, stream
+/// Coroutines for Dart: structured concurrency with jobs, scopes and
+/// dispatchers, channels, select, hot flows on Dart's `Stream`, stream
 /// operators, fair locks and an in-process event bus built on them.
 library;
 

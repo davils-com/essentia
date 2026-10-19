@@ -10,8 +10,7 @@
 import 'package:essentia_core/src/version/semantic_version.dart';
 import 'package:essentia_core/src/version/semantic_version_range.dart';
 
-/// Reads text as a semantic version or a version range, Arc's `String`
-/// extensions.
+/// Reads text as a semantic version or a version range.
 ///
 /// ```dart
 /// final shell = '1.4.0'.toSemanticVersion();

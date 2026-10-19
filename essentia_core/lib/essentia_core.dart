@@ -12,10 +12,9 @@
 /// Validation that reports every problem at once, validating configuration
 /// builders, program parameters, layering contracts, RFC 9562 identifiers,
 /// semantic versions, principals, platform detection, a `Result` type,
-/// Kotlin's `lazy`, byte strings and hexadecimal formats, gzip, deflate,
-/// CRC-32 and Adler-32, charsets, typed attributes, a case insensitive map,
-/// decimals, ranges, Kotlin's `Duration` extensions and Kotlin's standard
-/// library extensions on Dart's own classes. It runs on every Dart
+/// `lazy`, byte strings and hexadecimal formats, charsets, typed
+/// attributes, a case insensitive map, decimals, ranges, the `Duration`
+/// extensions and extensions on Dart's own classes. It runs on every Dart
 /// platform, the web and WebAssembly included; `file()` is offered where
 /// `dart:io` is.
 library;
@@ -51,15 +50,10 @@ export 'src/arguments/unknown_argument_policy.dart';
 export 'src/arguments/value_origin.dart';
 export 'src/arguments/value_source.dart';
 export 'src/arguments/version_parameter_converters.dart';
-export 'src/bytes/adler32.dart';
 export 'src/bytes/byte_list_content.dart';
 export 'src/bytes/byte_list_hex.dart';
 export 'src/bytes/byte_list_to_byte_string.dart';
 export 'src/bytes/byte_string.dart';
-export 'src/bytes/compression/brotli.dart';
-export 'src/bytes/compression/deflate.dart';
-export 'src/bytes/compression/gzip.dart';
-export 'src/bytes/crc32.dart';
 export 'src/bytes/hex_format.dart';
 export 'src/bytes/hex_format_builder.dart';
 export 'src/bytes/hex_format_dsl.dart';
@@ -148,6 +142,9 @@ export 'src/result/result_flatten.dart';
 export 'src/result/result_future.dart';
 export 'src/result/result_iterable.dart';
 export 'src/scope/scope_functions.dart';
+export 'src/text/linear_reg_exp.dart';
+export 'src/text/linear_reg_exp_exception.dart';
+export 'src/text/linear_reg_exp_failure.dart';
 export 'src/text/nullable_string.dart';
 export 'src/text/string_affixes.dart';
 export 'src/text/string_blankness.dart';

@@ -7,12 +7,10 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// How a coroutine builder starts its coroutine, Kotlin's
-/// `CoroutineStart`.
+/// How a coroutine builder starts its coroutine.
 enum CoroutineStart {
-  /// Dispatches the body right away; a coroutine cancelled before its body
-  /// ran never runs it. Kotlin's `DEFAULT`; `default` is a reserved word in
-  /// Dart.
+  /// Dispatches the body right away; a coroutine cancelled before its body ran
+  /// never runs it. The name avoids `default`, a reserved word in Dart.
   defaultStart,
 
   /// Starts the coroutine only when it is started, joined or awaited.

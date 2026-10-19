@@ -10,8 +10,7 @@
 import 'package:essentia_io/src/buffer/buffer.dart';
 import 'package:essentia_io/src/channel/byte_write_channel.dart';
 
-/// A channel that counts the bytes written through it to [_delegate],
-/// Ktor's `CountedByteWriteChannel`.
+/// A channel that counts the bytes written through it to [_delegate].
 final class CountedByteWriteChannel implements ByteWriteChannel {
   /// Creates the channel that writes to [_delegate].
   CountedByteWriteChannel(this._delegate)

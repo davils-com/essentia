@@ -20,7 +20,7 @@ const _threeSlots = <FormSlot>[
   FormSlot('c', 1),
 ];
 
-/// Ports `StandaloneValidationTest`.
+/// Covers validating a value on its own, outside a builder.
 void main() {
   test('a value with nothing wrong reports nothing', () {
     final ValidationReport report = const WorkspaceForm().validateAs(

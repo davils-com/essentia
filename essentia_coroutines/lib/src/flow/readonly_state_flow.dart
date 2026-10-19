@@ -13,7 +13,7 @@ import 'package:essentia_coroutines/src/flow/shared_flow.dart';
 import 'package:essentia_coroutines/src/flow/state_flow.dart';
 import 'package:meta/meta.dart';
 
-/// A read-only view of a state flow, Kotlin's `ReadonlyStateFlow`.
+/// A read-only view of a state flow.
 @internal
 final class ReadonlyStateFlow<T> extends Stream<T> implements StateFlow<T> {
   /// Creates the view of [_flow].

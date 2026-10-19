@@ -13,20 +13,20 @@ import 'package:essentia_coroutines/src/channels/closed_send_channel_exception.d
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/selects/select_clause.dart';
 
-/// The sending side of a channel, Kotlin's `SendChannel`.
+/// The sending side of a channel.
 abstract interface class SendChannel<E> {
   /// Whether the channel refuses new elements because it was closed or
-  /// cancelled, Kotlin's `isClosedForSend`.
+  /// cancelled.
   bool get isClosedForSend;
 
-  /// Sends [element], waiting while the buffer is full, Kotlin's `send`.
+  /// Sends [element], waiting while the buffer is full.
   ///
   /// The element is handed to a waiting receiver, buffered, or - when the
   /// buffer is full - dropped or waited with, as the overflow policy of the
-  /// channel says. Like Kotlin's, the wait is cancellable, and cancellation
-  /// is checked only when the send has to wait; a sender cancelled while
-  /// waiting hands its element to `onUndeliveredElement`. A send to a closed
-  /// channel hands its element to `onUndeliveredElement` as well.
+  /// channel says. The wait is cancellable, and cancellation is checked only
+  /// when the send has to wait; a sender cancelled while waiting hands its
+  /// element to `onUndeliveredElement`. A send to a closed channel hands its
+  /// element to `onUndeliveredElement` as well.
   ///
   /// Returns a future that completes once the channel took the element.
   ///
@@ -35,7 +35,7 @@ abstract interface class SendChannel<E> {
   /// [CancellationException] if the sender is cancelled while it waits.
   Future<void> send(E element);
 
-  /// Sends [element] only if that needs no waiting, Kotlin's `trySend`.
+  /// Sends [element] only if that needs no waiting.
   ///
   /// Returns a [ChannelSuccess] when the channel took or - by its overflow
   /// policy - dropped the element, a [ChannelClosed] carrying the reason
@@ -43,7 +43,7 @@ abstract interface class SendChannel<E> {
   /// when it is full.
   ChannelResult<void> trySend(E element);
 
-  /// Closes the channel for new elements, Kotlin's `close`.
+  /// Closes the channel for new elements.
   ///
   /// What is buffered, and what senders already waiting hold, is still
   /// received; receivers that find nothing more afterwards end with [cause]
@@ -54,15 +54,15 @@ abstract interface class SendChannel<E> {
   /// closed already.
   bool close([Object? cause]);
 
-  /// Registers [handler] to run once the channel is closed or cancelled,
-  /// with the cause, Kotlin's `invokeOnClose`.
+  /// Registers [handler] to run once the channel is closed or cancelled, with
+  /// the cause.
   ///
   /// It runs at once when the channel is closed already.
   ///
   /// Throws a [StateError] if a handler was registered already.
   void invokeOnClose(void Function(Object? cause) handler);
 
-  /// The select clause that sends [element], Kotlin's `onSend`.
+  /// The select clause that sends [element].
   ///
   /// It wins once the channel takes the element and hands the block this
   /// channel; on a closed channel it makes the select throw what [send]

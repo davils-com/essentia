@@ -9,8 +9,7 @@
 
 import 'package:essentia_time/src/source/time_source.dart';
 
-/// A time source that only moves when it is told to, Kotlin's
-/// `TestTimeSource`.
+/// A time source that only moves when it is told to.
 ///
 /// It starts at zero and moves on by exactly what [advance] is given, so a
 /// test decides how much time has passed and never waits for it.
@@ -36,7 +35,7 @@ final class TestTimeSource extends TimeSource {
 
   /// Moves the reading on by [duration].
   ///
-  /// Unlike Kotlin, a negative duration is refused: a time source never goes
+  /// A negative duration is refused: a time source never goes
   /// backwards, and a test that needs it to is testing something no real
   /// source does.
   ///

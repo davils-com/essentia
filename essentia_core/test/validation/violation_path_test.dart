@@ -10,7 +10,7 @@
 import 'package:essentia_core/essentia_core.dart';
 import 'package:test/test.dart';
 
-/// Ports `ViolationPathTest`.
+/// Covers building and rendering a violation path.
 void main() {
   test('the root path renders as nothing', () {
     expect(ViolationPath.root.toString(), isEmpty);
@@ -38,10 +38,10 @@ void main() {
 
   test('a map key renders in quoted brackets', () {
     final ViolationPath path = ViolationPath.of('loggers')
-        .key('io.ktor')
+        .key('com.davils')
         .name('level');
 
-    expect(path.toString(), 'loggers["io.ktor"].level');
+    expect(path.toString(), 'loggers["com.davils"].level');
   });
 
   test('an index or a key at the root renders without a leading dot', () {

@@ -14,8 +14,8 @@ import 'package:essentia_coroutines/src/flow/flow_collector.dart';
 import 'package:essentia_coroutines/src/stream/controller_collector.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 
-/// How often `retry` tries again unless told otherwise, Kotlin's
-/// `Long.MAX_VALUE` as far as every platform counts exactly.
+/// How often `retry` tries again unless told otherwise: the largest
+/// integer every platform counts exactly.
 const _unlimited = 9007199254740991;
 
 /// Retries on every error, the default predicate of `retry`.
@@ -23,15 +23,15 @@ const _unlimited = 9007199254740991;
 /// Returns `true`.
 bool _always(Object cause) => true;
 
-/// Kotlin's error handling `Flow` operators for streams.
+/// The error handling operators for streams.
 ///
-/// They treat the first error of this stream as its end, as a failing
-/// Kotlin flow ends: the subscription is cancelled, and the operator
-/// decides what comes next. A [CancellationException] is never handled;
-/// it is passed on and ends the result.
+/// They treat the first error of this stream as its end: the subscription
+/// is cancelled, and the operator decides what comes next. A
+/// [CancellationException] is never handled; it is passed on and ends the
+/// result.
 extension StreamRecovery<T> on Stream<T> {
   /// Listens to this stream again after an error, up to [retries] times
-  /// and as long as [predicate] agrees, Kotlin's `retry`.
+  /// and as long as [predicate] agrees.
   ///
   /// It is `retryWhen` with an attempt below [retries] and [predicate].
   ///
@@ -54,7 +54,7 @@ extension StreamRecovery<T> on Stream<T> {
   }
 
   /// Listens to this stream again after an error whenever [predicate]
-  /// says so, Kotlin's `retryWhen`.
+  /// says so.
   ///
   /// On an error the subscription is cancelled, and [predicate] gets the
   /// error and the number of the attempt, starting at zero. When it
@@ -150,8 +150,7 @@ extension StreamRecovery<T> on Stream<T> {
   }, isBroadcast: isBroadcast);
 
   /// Ends the stream on its first error and runs [action] instead, which
-  /// may emit what the stream continues with, Kotlin's `catch`; `catch` is
-  /// a reserved word in Dart.
+  /// may emit what the stream continues with.
   ///
   /// The subscription of this stream is cancelled, and [action] gets the
   /// collector `it` of the result, the error and its stack trace. The

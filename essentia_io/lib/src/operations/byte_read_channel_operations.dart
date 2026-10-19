@@ -20,9 +20,9 @@ import 'package:essentia_io/src/exception/eof_exception.dart';
 import 'package:essentia_io/src/operations/internal/byte_channel_scanner.dart';
 import 'package:essentia_io/src/operations/internal/line_reader.dart';
 
-/// What a reader does with a [ByteReadChannel], Ktor's
-/// `ByteReadChannelOperations`: read numbers, bytes, lines and everything
-/// that is left, copy to a writer, and scan for a delimiter.
+/// What a reader does with a [ByteReadChannel]: read numbers, bytes,
+/// lines and everything that is left, copy to a writer, and scan for a
+/// delimiter.
 ///
 /// Every operation waits for the bytes it needs and fails with the
 /// [ByteReadChannel.closedCause] of a channel that failed.
@@ -30,8 +30,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
   /// The number of bytes that may be read without waiting.
   int get availableForRead => readBuffer.size;
 
-  /// Waits for a byte and tells whether there is none, Ktor's
-  /// `exhausted()`.
+  /// Waits for a byte and tells whether there is none.
   ///
   /// Returns `true` when the channel ended without one.
   Future<bool> exhausted() async {
@@ -41,7 +40,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
     return readBuffer.exhausted;
   }
 
-  /// Reads everything that is left, Ktor's `toByteArray`.
+  /// Reads everything that is left.
   ///
   /// Returns the bytes.
   Future<Uint8List> toBytes() async => (await readRemaining()).readBytes();
@@ -108,8 +107,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
     return readBuffer.readDouble(endian: endian);
   }
 
-  /// Reads everything that is left, or at most [max] bytes, Ktor's
-  /// `readBuffer`.
+  /// Reads everything that is left, or at most [max] bytes.
   ///
   /// Returns the bytes in a buffer.
   ///
@@ -129,7 +127,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
     return result;
   }
 
-  /// Reads exactly [count] bytes, Ktor's `readPacket`.
+  /// Reads exactly [count] bytes.
   ///
   /// Returns them in a buffer.
   ///
@@ -158,7 +156,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
     return result;
   }
 
-  /// Reads exactly [count] bytes, Ktor's `readByteArray`.
+  /// Reads exactly [count] bytes.
   ///
   /// Returns them.
   ///
@@ -309,7 +307,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
   ).read();
 
   /// Reads a line of UTF-8 of at most [limit] bytes that must have its
-  /// ending, Ktor's `readLineStrict`.
+  /// ending.
   ///
   /// Returns the line without its ending, or `null` when the channel ended
   /// before.
@@ -398,7 +396,7 @@ extension ByteReadChannelOperations on ByteReadChannel {
     _rethrowCloseCause();
   }
 
-  /// The channel that counts the bytes read through it, Ktor's `counted()`.
+  /// The channel that counts the bytes read through it.
   ///
   /// Returns it.
   CountedByteReadChannel asCountedReadChannel() => CountedByteReadChannel(this);

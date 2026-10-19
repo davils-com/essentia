@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// The ball of the ping-pong example of the Kotlin channels guide.
+/// The ball of the ping-pong channel example.
 final class Ball {
   /// Creates a ball hit [hits] times.
   Ball(this.hits);
@@ -15,7 +15,7 @@ final class Ball {
   /// How often the ball was hit.
   int hits;
 
-  /// Renders the ball like the Kotlin data class.
+  /// Renders the ball with its hits.
   @override
   String toString() => 'Ball(hits=$hits)';
 }

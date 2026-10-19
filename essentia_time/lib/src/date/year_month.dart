@@ -15,7 +15,7 @@ import 'package:essentia_time/src/internal/iso_text.dart';
 import 'package:essentia_time/src/internal/time_math.dart';
 import 'package:meta/meta.dart';
 
-/// A month of a year, Kotlin's `kotlinx.datetime.YearMonth`: October 2026.
+/// A month of a year: October 2026.
 @immutable
 final class YearMonth implements Comparable<YearMonth> {
   /// Month [monthNumber] of [year].

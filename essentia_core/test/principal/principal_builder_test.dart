@@ -36,7 +36,7 @@ List<String> _paths(ValidationReport report) =>
 List<ViolationCode> _codes(ValidationReport report) =>
     report.errors.map((violation) => violation.code).toList();
 
-/// Ports `PrincipalBuilderTest`.
+/// Covers building a principal and the violations its builder reports.
 void main() {
   test('builds a principal with every field set', () {
     final Principal alice = principal('alice');

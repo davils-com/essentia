@@ -24,13 +24,13 @@ This document lists the third-party software Essentia uses or integrates with.
 
 - The static dictionary of Brotli, RFC 7932 Appendix A, as
   [google/brotli](https://github.com/google/brotli) 1.1.0 ships it in `c/common/dictionary.bin`, in
-  `essentia_core/tool/brotli/dictionary.bin`, compiled into
-  `essentia_core/lib/src/bytes/compression/brotli/brotli_dictionary_data.dart` by
-  `essentia_core/tool/brotli/generate_dictionary.dart`. Licensed under the
+  `essentia_compression/tool/brotli/dictionary.bin`, compiled into
+  `essentia_compression/lib/src/brotli/brotli_dictionary_data.dart` by
+  `essentia_compression/tool/brotli/generate_dictionary.dart`. Licensed under the
   [MIT License](https://github.com/google/brotli/blob/master/LICENSE), whose notice is at the end
   of this document.
 - The test vectors of [google/brotli](https://github.com/google/brotli) 1.1.0, `tests/testdata`, in
-  `essentia_core/test/fixtures/brotli`, used only by the tests. Licensed under the
+  `essentia_compression/test/fixtures/brotli`, used only by the tests. Licensed under the
   [MIT License](https://github.com/google/brotli/blob/master/LICENSE), whose notice is at the end
   of this document.
 
@@ -44,14 +44,6 @@ This document lists the third-party software Essentia uses or integrates with.
 - [Trivy](https://github.com/aquasecurity/trivy) - vulnerability, secret, misconfiguration and license
   scanner, licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
   Inspectra downloads, verifies and runs the unmodified official release.
-
-## Reference
-
-- [Arc](https://gitlab.davils.com/davils/libraries/arc) - the Davils application runtime core for
-  Kotlin, of which Essentia is the Dart port.
-- [Ktor](https://github.com/ktorio/ktor) - `ktor-io`, whose byte channels, their operations and the
-  `writer` and `reader` coroutines `essentia_io` ports, and `kotlinx-io`, whose buffer it ports.
-  Licensed under the [Apache License 2.0](https://github.com/ktorio/ktor/blob/main/LICENSE).
 
 ## Notices
 

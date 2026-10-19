@@ -9,13 +9,13 @@
 
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 
-/// Where the values of a stream are emitted to, Kotlin's `FlowCollector`.
+/// Where the values of a stream are emitted to.
 ///
 /// A [FlowCollector] is handed to the blocks of `transformLatest` and
 /// `catchError`, and a `MutableSharedFlow` is one, so a stream can be
 /// collected into a shared flow with `stream.collect(flow.emit)`.
 abstract interface class FlowCollector<T> {
-  /// Emits [value], Kotlin's `emit`.
+  /// Emits [value].
   ///
   /// Returns a future that completes once the value is taken; it waits
   /// while the receiving side is paused or its buffer is full.

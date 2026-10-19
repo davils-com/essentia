@@ -10,8 +10,7 @@
 import 'package:essentia_core/src/result/result_dsl.dart';
 import 'package:meta/meta.dart';
 
-/// The outcome of an operation that either produced a value or failed,
-/// Kotlin's `Result`.
+/// The outcome of an operation that either produced a value or failed.
 ///
 /// A result is a [Success] carrying the value or a [Failure] carrying the
 /// error and the stack trace it was thrown with. The family is sealed, so a
@@ -24,37 +23,35 @@ import 'package:meta/meta.dart';
 /// };
 /// ```
 ///
-/// Unlike Kotlin, a failure keeps its stack trace next to the error, because
-/// a Dart error does not carry one by itself.
+/// A failure keeps its stack trace next to the error, because a Dart error
+/// does not carry one by itself.
 @immutable
 sealed class Result<T> {
   /// Creates a result; only [Success] and [Failure] extend it.
   const Result();
 
-  /// Creates a successful result carrying [value], Kotlin's
-  /// `Result.success`.
+  /// Creates a successful result carrying [value].
   const factory Result.success(T value) = Success<T>;
 
-  /// Creates a failed result carrying [error] and [stackTrace], Kotlin's
-  /// `Result.failure`.
+  /// Creates a failed result carrying [error] and [stackTrace].
   ///
   /// The stack trace defaults to [StackTrace.empty].
   const factory Result.failure(Object error, [StackTrace stackTrace]) =
       Failure<T>;
 
-  /// Whether this result is a [Success], Kotlin's `isSuccess`.
+  /// Whether this result is a [Success].
   bool get isSuccess => switch (this) {
     Success<T>() => true,
     Failure<T>() => false,
   };
 
-  /// Whether this result is a [Failure], Kotlin's `isFailure`.
+  /// Whether this result is a [Failure].
   bool get isFailure => switch (this) {
     Success<T>() => false,
     Failure<T>() => true,
   };
 
-  /// The value of a success, Kotlin's `getOrNull`.
+  /// The value of a success.
   ///
   /// Returns the value, or `null` for a failure.
   T? get valueOrNull => switch (this) {
@@ -62,7 +59,7 @@ sealed class Result<T> {
     Failure<T>() => null,
   };
 
-  /// The error of a failure, Kotlin's `exceptionOrNull`.
+  /// The error of a failure.
   ///
   /// Returns the error, or `null` for a success.
   Object? get errorOrNull => switch (this) {
@@ -70,7 +67,7 @@ sealed class Result<T> {
     Failure<T>(:final Object error) => error,
   };
 
-  /// The stack trace of a failure, which Kotlin reads from the exception.
+  /// The stack trace of a failure.
   ///
   /// Returns the stack trace, or `null` for a success.
   StackTrace? get stackTraceOrNull => switch (this) {
@@ -78,7 +75,7 @@ sealed class Result<T> {
     Failure<T>(:final StackTrace stackTrace) => stackTrace,
   };
 
-  /// Unwraps the value, Kotlin's `getOrThrow`.
+  /// Unwraps the value.
   ///
   /// Returns the value of a success.
   ///
@@ -89,8 +86,7 @@ sealed class Result<T> {
       Error.throwWithStackTrace(error, stackTrace),
   };
 
-  /// Unwraps the value or falls back to [fallback], Kotlin's
-  /// `getOrDefault`.
+  /// Unwraps the value or falls back to [fallback].
   ///
   /// Returns the value of a success, or [fallback] for a failure.
   T getOrDefault(T fallback) => switch (this) {
@@ -98,8 +94,7 @@ sealed class Result<T> {
     Failure<T>() => fallback,
   };
 
-  /// Unwraps the value or builds a fallback with [onFailure], Kotlin's
-  /// `getOrElse`.
+  /// Unwraps the value or builds a fallback with [onFailure].
   ///
   /// [onFailure] runs only for a failure and receives its error and stack
   /// trace.
@@ -114,7 +109,7 @@ sealed class Result<T> {
           onFailure(error, stackTrace),
       };
 
-  /// Turns this result into one value, Kotlin's `fold`.
+  /// Turns this result into one value.
   ///
   /// Returns what [onSuccess] returns for a success, or what [onFailure]
   /// returns for a failure.
@@ -131,7 +126,7 @@ sealed class Result<T> {
     ),
   };
 
-  /// Transforms the value of a success with [transform], Kotlin's `map`.
+  /// Transforms the value of a success with [transform].
   ///
   /// A failure passes through with its error and stack trace, and
   /// [transform] is not called.
@@ -148,7 +143,7 @@ sealed class Result<T> {
   };
 
   /// Transforms the value of a success with [transform] and catches what it
-  /// throws, Kotlin's `mapCatching`.
+  /// throws.
   ///
   /// Returns a success carrying the transformed value, a failure carrying
   /// what [transform] threw, or the original failure.
@@ -160,7 +155,7 @@ sealed class Result<T> {
     ),
   };
 
-  /// Turns a failure into a success with [transform], Kotlin's `recover`.
+  /// Turns a failure into a success with [transform].
   ///
   /// Returns this result for a success, or a success carrying what
   /// [transform] returns.
@@ -176,7 +171,7 @@ sealed class Result<T> {
   };
 
   /// Turns a failure into a success with [transform] and catches what it
-  /// throws, Kotlin's `recoverCatching`.
+  /// throws.
   ///
   /// Returns this result for a success, a success carrying what [transform]
   /// returns, or a failure carrying what [transform] threw.
@@ -189,9 +184,6 @@ sealed class Result<T> {
   };
 
   /// Chains a success into the result [transform] returns.
-  ///
-  /// Kotlin's standard library has no counterpart; this is the `flatMap`
-  /// the Kotlin community writes as an extension on `Result`.
   ///
   /// Returns what [transform] returns, or the failure with its error and
   /// stack trace.
@@ -208,9 +200,6 @@ sealed class Result<T> {
   /// Replaces the error of a failure with what [transform] returns and keeps
   /// its stack trace.
   ///
-  /// Kotlin's standard library has no counterpart; it mirrors `mapError` of
-  /// the common Kotlin result libraries.
-  ///
   /// Returns this result for a success, or a failure carrying the new error.
   ///
   /// Throws whatever [transform] throws.
@@ -224,8 +213,7 @@ sealed class Result<T> {
     ),
   };
 
-  /// Pairs the value of this result with the value of [other], like
-  /// Kotlin's `zip` on collections.
+  /// Pairs the value of this result with the value of [other].
   ///
   /// Returns a success carrying both values, or the first failure, this
   /// result first.
@@ -236,7 +224,7 @@ sealed class Result<T> {
   };
 
   /// Transforms the value of a success with the awaited [transform], the
-  /// `map` of Kotlin with a suspending block.
+  /// [map] of an asynchronous block.
   ///
   /// Returns a success carrying the transformed value, or the failure.
   ///
@@ -249,7 +237,7 @@ sealed class Result<T> {
       };
 
   /// Chains a success into the result the awaited [transform] returns, the
-  /// [flatMap] with a suspending block.
+  /// [flatMap] of an asynchronous block.
   ///
   /// Returns what [transform] completes with, or the failure.
   ///
@@ -264,7 +252,7 @@ sealed class Result<T> {
     ),
   };
 
-  /// Runs [action] on the value of a success, Kotlin's `onSuccess`.
+  /// Runs [action] on the value of a success.
   ///
   /// Returns this result.
   ///
@@ -274,8 +262,7 @@ sealed class Result<T> {
     Failure<T>() => this,
   };
 
-  /// Runs [action] on the error and stack trace of a failure, Kotlin's
-  /// `onFailure`.
+  /// Runs [action] on the error and stack trace of a failure.
   ///
   /// Returns this result.
   ///
@@ -289,7 +276,7 @@ sealed class Result<T> {
   };
 }
 
-/// A result that carries a value, Kotlin's successful `Result`.
+/// A result that carries a value.
 final class Success<T> extends Result<T> {
   /// Creates a success carrying [value].
   const Success(this.value);
@@ -315,8 +302,7 @@ final class Success<T> extends Result<T> {
   String toString() => 'Success($value)';
 }
 
-/// A result that carries an error and its stack trace, Kotlin's failed
-/// `Result`.
+/// A result that carries an error and its stack trace.
 final class Failure<T> extends Result<T> {
   /// Creates a failure carrying [error] and [stackTrace], which defaults to
   /// [StackTrace.empty].

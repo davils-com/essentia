@@ -9,7 +9,7 @@
 
 import 'package:essentia_io/src/buffer/buffer.dart';
 
-/// A channel bytes are written to for a reader, Ktor's `ByteWriteChannel`.
+/// A channel bytes are written to for a reader.
 ///
 /// A writer puts bytes into [writeBuffer] and hands them to the reader with
 /// [flush], which waits while the reader is too far behind; the operations

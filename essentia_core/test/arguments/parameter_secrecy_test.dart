@@ -57,7 +57,7 @@ void main() {
 
   test('a collected value is handed over as it was', () {
     final parameters = LenientParameters()
-      ..load(<String>['--name=arc', _placeholder], environment: _nothing);
+      ..load(<String>['--name=essentia', _placeholder], environment: _nothing);
 
     expect(parameters.unknown, <String>[_placeholder]);
   });

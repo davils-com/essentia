@@ -112,7 +112,7 @@ void main() {
     expect(low.compareTo(ByteString(const <int>[0x01])), 0);
   });
 
-  test('renders as Kotlin does', () {
+  test('renders its size and hexadecimal digits', () {
     expect(
       ByteString(const <int>[1, 2, 3]).toString(),
       'ByteString(size=3 hex=010203)',

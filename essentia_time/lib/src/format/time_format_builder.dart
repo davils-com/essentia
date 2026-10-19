@@ -13,8 +13,7 @@ import 'package:essentia_time/src/format/compiled_date_time_format.dart';
 import 'package:essentia_time/src/format/date_time_format.dart';
 import 'package:essentia_time/src/format/format_directive.dart';
 
-/// The builder behind `localTimeFormat`, Kotlin's
-/// `DateTimeFormatBuilder.WithTime`: every call appends one field or
+/// The builder behind `localTimeFormat`: every call appends one field or
 /// literal, written in the order of the calls.
 final class TimeFormatBuilder implements Builder<DateTimeFormat<LocalTime>> {
   /// Creates the builder of a format that writes nothing yet.
@@ -46,7 +45,7 @@ final class TimeFormatBuilder implements Builder<DateTimeFormat<LocalTime>> {
   void time(DateTimeFormat<LocalTime> format) =>
       _directives.add(TimeDirective(format));
 
-  /// Writes the single [character] as it is, Kotlin's `char`.
+  /// Writes the single [character] as it is.
   ///
   /// Throws an [ArgumentError] if [character] is not exactly one
   /// character.
@@ -61,7 +60,7 @@ final class TimeFormatBuilder implements Builder<DateTimeFormat<LocalTime>> {
     _directives.add(LiteralDirective(character));
   }
 
-  /// Writes [text] as it is, Kotlin's `chars`.
+  /// Writes [text] as it is.
   void chars(String text) {
     if (text.isEmpty) {
       return;

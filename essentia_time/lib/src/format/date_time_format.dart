@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A format that writes a value of type [T] as text, Kotlin's
-/// `kotlinx.datetime.format.DateTimeFormat`.
+/// A format that writes a value of type [T] as text.
 ///
 /// A format is immutable and can be shared freely. Essentia's own formats
 /// are made with `localDateTimeFormat`, `localDateFormat`,

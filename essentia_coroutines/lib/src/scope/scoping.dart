@@ -22,8 +22,8 @@ import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/job/supervisor_job.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 
-/// Runs [block] in a scope that completes once the block and every
-/// coroutine it started did, Kotlin's `coroutineScope`.
+/// Runs [block] in a scope that completes once the block and every coroutine it
+/// started did.
 ///
 /// The scope is a child of the current job. A failure of the block or of a
 /// child cancels the rest and is thrown here, after every child stopped.
@@ -45,8 +45,7 @@ Future<R> coroutineScope<R>(FutureOr<R> Function(CoroutineScope it) block) {
   return coroutine.result;
 }
 
-/// Runs [block] in a scope whose children fail on their own, Kotlin's
-/// `supervisorScope`.
+/// Runs [block] in a scope whose children fail on their own.
 ///
 /// A failing child does not cancel the scope or its siblings. The scope
 /// completes once the block and every child did.
@@ -60,8 +59,8 @@ Future<R> supervisorScope<R>(FutureOr<R> Function(CoroutineScope it) block) {
   return coroutine.result;
 }
 
-/// Runs [block] with [context] laid over the current context and waits for
-/// it and every coroutine it started, Kotlin's `withContext`.
+/// Runs [block] with [context] laid over the current context and waits for it
+/// and every coroutine it started.
 ///
 /// A dispatcher in [context] that differs from the current one dispatches
 /// the block; a job in [context] replaces the parent, so
@@ -105,8 +104,8 @@ Future<R> withContext<R>(
   });
 }
 
-/// A scope for the main work of a program or a user interface, Kotlin's
-/// `MainScope()`: a supervisor on the event loop.
+/// A scope for the main work of a program or a user interface: a supervisor on
+/// the event loop.
 ///
 /// Returns the scope.
 CoroutineScope mainScope() =>

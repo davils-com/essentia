@@ -13,10 +13,9 @@ import 'package:essentia_coroutines/src/continuation/suspension.dart';
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// Kotlin's `awaitClose` on a `ProducerScope`.
+/// Waiting for the end of the channel of a `ProducerScope`.
 extension ProducerAwait on ProducerScope<Object?> {
-  /// Waits until the channel is closed or cancelled, then runs [block],
-  /// Kotlin's `awaitClose`.
+  /// Waits until the channel is closed or cancelled, then runs [block].
   ///
   /// It keeps a producer that hands a callback API over to the channel
   /// alive, and [block] unregisters the callback:

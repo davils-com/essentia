@@ -147,7 +147,7 @@ void main() {
     String whole(String text, RoundingMode mode) =>
         _d(text).setScale(0, mode).toString();
 
-    test('rounds by every mode as Java does', () {
+    test('rounds by every mode', () {
       const expected = <RoundingMode, List<String>>{
         RoundingMode.ceiling: <String>['2', '-1', '3', '-2', '2'],
         RoundingMode.floor: <String>['1', '-2', '2', '-3', '2'],

@@ -22,8 +22,8 @@ import 'package:essentia_time/src/internal/iso_text.dart';
 import 'package:essentia_time/src/zone/time_zone.dart';
 import 'package:meta/meta.dart';
 
-/// A date without a time of day and without a time zone, Kotlin's
-/// `kotlinx.datetime.LocalDate`: the day a calendar shows.
+/// A date without a time of day and without a time zone: the day a
+/// calendar shows.
 ///
 /// Arithmetic on it counts days, months and years and never meets the
 /// shifts of daylight saving time that `DateTime` days are subject to.
@@ -83,7 +83,7 @@ final class LocalDate implements Comparable<LocalDate> {
   /// The date it is now in [timeZone], the zone of this system unless
   /// given, read from [clock].
   ///
-  /// Kotlin reads this as `clock.todayIn(timeZone)`, which works here too.
+  /// `clock.todayIn(timeZone)` reads the same date.
   factory LocalDate.today({Clock clock = Clock.system, TimeZone? timeZone}) =>
       clock.todayIn(timeZone ?? TimeZone.currentSystemDefault());
 
@@ -201,23 +201,20 @@ final class LocalDate implements Comparable<LocalDate> {
   /// February becomes the 28th in a year without it.
   LocalDate plusYears(int years) => plusMonths(years * 12);
 
-  /// The date [value] times [unit] later, earlier when negative, Kotlin's
-  /// `plus(value, unit)`.
+  /// The date [value] times [unit] later, earlier when negative.
   LocalDate plus(int value, DateBasedUnit unit) => switch (unit) {
     DayBasedUnit(:final int days) => plusDays(value * days),
     MonthBasedUnit(:final int months) => plusMonths(value * months),
   };
 
-  /// The date [value] times [unit] earlier, later when negative, Kotlin's
-  /// `minus(value, unit)`.
+  /// The date [value] times [unit] earlier, later when negative.
   LocalDate minus(int value, DateBasedUnit unit) => plus(-value, unit);
 
-  /// The date [period] later: first its months, then its days, Kotlin's
-  /// `plus(period)`.
+  /// The date [period] later: first its months, then its days.
   LocalDate plusPeriod(DatePeriod period) =>
       plusMonths(period.totalMonths).plusDays(period.days);
 
-  /// The date [period] earlier, Kotlin's `minus(period)`.
+  /// The date [period] earlier.
   LocalDate minusPeriod(DatePeriod period) =>
       plusMonths(-period.totalMonths).plusDays(-period.days);
 
@@ -249,14 +246,14 @@ final class LocalDate implements Comparable<LocalDate> {
   int yearsUntil(LocalDate other) => monthsUntil(other) ~/ 12;
 
   /// How many whole [unit]s lie from this date to [other], negative when
-  /// [other] is earlier, Kotlin's `until`.
+  /// [other] is earlier.
   int until(LocalDate other, DateBasedUnit unit) => switch (unit) {
     DayBasedUnit(:final int days) => daysUntil(other) ~/ days,
     MonthBasedUnit(:final int months) => monthsUntil(other) ~/ months,
   };
 
   /// The period from this date to [other], whole months first and the
-  /// remaining days after, Kotlin's `periodUntil`.
+  /// remaining days after.
   DatePeriod periodUntil(LocalDate other) {
     final int months = monthsUntil(other);
     return DatePeriod(
@@ -265,19 +262,17 @@ final class LocalDate implements Comparable<LocalDate> {
     );
   }
 
-  /// This date at [time], Kotlin's `atTime`.
+  /// This date at [time].
   LocalDateTime atTime(LocalTime time) => LocalDateTime(this, time);
 
   /// The first moment of this date in [timeZone], which is midnight unless
-  /// a shift of the clocks skips it, Kotlin's `atStartOfDayIn`.
+  /// a shift of the clocks skips it.
   Instant atStartOfDayIn(TimeZone timeZone) => timeZone.startOfDay(this);
 
-  /// The dates from this one up to and including [end], Kotlin's
-  /// `rangeTo` and `..`.
+  /// The dates from this one up to and including [end].
   LocalDateRange rangeTo(LocalDate end) => LocalDateRange(this, end);
 
-  /// The dates from this one up to but excluding [end], Kotlin's
-  /// `rangeUntil` and `..<`.
+  /// The dates from this one up to but excluding [end].
   LocalDateRange rangeUntil(LocalDate end) =>
       LocalDateRange(this, end.plusDays(-1));
 

@@ -62,7 +62,7 @@ void main() {
     expect(iso, 'PT1H30M');
   });
 
-  test('formats days as hours the way Kotlin does', () {
+  test('formats days as hours', () {
     const duration = Duration(days: 1, hours: 12);
 
     final String iso = duration.toIsoString();

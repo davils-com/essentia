@@ -11,8 +11,7 @@ import 'package:essentia_core/essentia_core.dart';
 import 'package:essentia_time/src/date/year_month.dart';
 import 'package:meta/meta.dart';
 
-/// The months from [start] up to and including [endInclusive], Kotlin's
-/// `kotlinx.datetime.YearMonthRange`.
+/// The months from [start] up to and including [endInclusive].
 ///
 /// It is a [ClosedRange] that can also be iterated month by month. It is
 /// empty when [start] lies after [endInclusive].
@@ -75,7 +74,7 @@ final class YearMonthRange extends Iterable<YearMonth>
   @override
   int get hashCode => isEmpty ? 0 : Object.hash(start, endInclusive);
 
-  /// Describes the range as `start..endInclusive`, like Kotlin.
+  /// Describes the range as `start..endInclusive`.
   @override
   String toString() => '$start..$endInclusive';
 }

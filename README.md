@@ -1,47 +1,36 @@
 # Essentia
 
-Essentia is the Davils application runtime core for Dart - a port of the Kotlin library Arc. It
+Essentia is the Davils application runtime core for Dart. It
 validates configuration through one model that reports every problem at once, turns the parameters
 a program is started with into typed immutable values, carries events between the parts of one
 program, and holds the small building blocks the rest is made of: layering contracts, RFC 9562
-identifiers, platform detection, a `Result` type and Kotlin's standard library extensions on
-Dart's own classes.
+identifiers, platform detection, a `Result` type and extensions on Dart's own classes.
 
 Its only runtime dependency is `package:meta`.
 
-Essentia is a workspace of four packages; the workspace root holds no library of its own:
+Essentia is a workspace of five packages; the workspace root holds no library of its own:
 
 | Package | Import | What it holds |
 |---|---|---|
-| `essentia_core` | `package:essentia_core/essentia_core.dart` | Validation, the builder DSL, program parameters, identifiers, semantic versions, principals, layering contracts, platform detection, bytes, gzip, deflate, Brotli decoding, CRC-32 and Adler-32, charsets, typed attributes, a case insensitive map, decimals, ranges, scope functions, `Result`, `lazy`, `Duration` and the Kotlin stdlib extensions |
+| `essentia_core` | `package:essentia_core/essentia_core.dart` | Validation, the builder DSL, program parameters, identifiers, semantic versions, principals, layering contracts, platform detection, bytes, charsets, typed attributes, a case insensitive map, decimals, ranges, scope functions, `Result`, `lazy`, `Duration` and the extensions on Dart's own classes |
+| `essentia_compression` | `package:essentia_compression/essentia_compression.dart` | gzip, zlib and raw deflate with their frames checked, a Brotli decoder written in Dart, CRC-32 and Adler-32 |
 | `essentia_time` | `package:essentia_time/essentia_time.dart`, `package:essentia_time/recurrence.dart` | Time sources, clocks, instants, dates, times, every IANA time zone, date and time formats, RFC 5545 recurrence |
 | `essentia_coroutines` | `package:essentia_coroutines/essentia_coroutines.dart` | Coroutines, channels, `select`, hot flows, stream operators, locks, the event bus and principals in the coroutine context |
-| `essentia_io` | `package:essentia_io/essentia_io.dart` | Byte input and output ported from ktor-io: the segmented `Buffer`, byte channels with back pressure, reading lines and numbers, scanning for a delimiter, `writer` and `reader` coroutines, bridges to streams |
+| `essentia_io` | `package:essentia_io/essentia_io.dart` | Byte input and output: the segmented `Buffer`, byte channels with back pressure, reading lines and numbers, scanning for a delimiter, `writer` and `reader` coroutines, bridges to streams |
 
 Every package keeps its own test support in `lib/testing.dart`: `package:essentia_time/testing.dart`
 holds `TestTimeSource`, `package:essentia_coroutines/testing.dart` testing on virtual time with
-`runTest`. Locales, authorization and iCalendar
-moved to Noria: `noria_locale`, `noria_authorization` and `noria_icalendar`.
+`runTest`.
 
 It runs on every Dart platform: the VM and native executables, Flutter, the web and WebAssembly.
 The test suite runs on all of them. Where a platform has no `dart:io`, the program parameters read
 no process environment, a path with a declared check is refused because it cannot be checked, and
 `file()` is not offered, since there is no `File` to convert to.
 
-## Kotlin lambdas, the Dart way
+## Configuration blocks
 
-Arc's DSLs are lambdas with a receiver. Dart has no receivers, so every configuration block takes
-the object it configures as its parameter, named `it`, and the shape of the code stays the same:
-
-```kotlin
-val bus = eventBus(scope) {
-    listener = MetricsListener(registry)
-    topic(Topics.users) {
-        partitions = 4
-        requiresKey = true
-    }
-}
-```
+Every configuration block takes the object it configures as its only parameter, named `it`, and a
+nested block configures the part it belongs to:
 
 ```dart
 final EventBus bus = eventBus((it) {
@@ -54,10 +43,10 @@ final EventBus bus = eventBus((it) {
 ```
 
 `apply`, `let`, `takeIf` and `takeUnless` are available on every value through `ScopeFunctions`,
-so `LoggingBuilder().apply(block).build()` reads exactly as it does in Kotlin.
+so a builder is configured and finished in one expression: `LoggingBuilder().apply(block).build()`.
 
-Kotlin's `by lazy { }` is a property delegate, which Dart does not have, and Essentia uses no
-`late`. A field holds a `Lazy` instead and reads its `value`:
+Essentia uses no `late`. A value that is expensive to make and may never be needed is held in a
+`Lazy`, and read through its `value`:
 
 ```dart
 final Lazy<RegExp> word = lazy(() => RegExp(r'^[a-z]+$'));
@@ -68,7 +57,7 @@ bool isWord(String text) => word.value.hasMatch(text);
 The initializer runs once, on the first read, and is retried when it throws; `lazyOf(value)` wraps
 a value that is already known.
 
-Kotlin's `use` is `use` on a `Disposable`, and `useAsync` for a block that returns a future or a
+`use` on a `Disposable` works with a resource and disposes of it, and `useAsync` does so for a block that returns a future or a
 resource that is a `DisposableAsync`: the resource is disposed whichever way the block ends, and the
 failure of the block wins over a failure of the disposal.
 
@@ -220,8 +209,8 @@ version.nextMinor();                           // 1.4.0
 ## Principals
 
 Who is acting: a user, a service or the system, with roles, a tenant, maskable attributes and
-delegation that keeps the originator for audit. The current principal travels in a `Zone`, the
-way Arc carries it in the coroutine context:
+delegation that keeps the originator for audit. The current principal travels in a `Zone`, so it
+reaches every `await` of the work done on its behalf:
 
 ```dart
 final Principal alice = principal('alice', (it) => it.roles(<String>['admin']));
@@ -238,7 +227,7 @@ explicitly.
 
 ## Coroutines
 
-Kotlin's `kotlinx-coroutines-core` on Dart's futures and zones: structured concurrency, cancellation,
+Coroutines on Dart's futures and zones: structured concurrency, cancellation,
 timeouts, dispatchers and a virtual event loop for tests. The context of a coroutine - its job, its
 name, its exception handler, its dispatcher, its scheduler and its principal - travels in one `Zone`
 value, so it reaches every `await` of the work.
@@ -267,7 +256,7 @@ await polling.cancelAndJoin();
   children did, and a failing child cancels its parent and its siblings unless the parent is a
   `SupervisorJob`. `coroutineScope`, `supervisorScope`, `withContext` and `withTimeout` wait for
   everything they started.
-- **Cancellable.** A `Future` cannot be interrupted, so cancellation is cooperative, as in Kotlin:
+- **Cancellable.** A `Future` cannot be interrupted, so cancellation is cooperative:
   `delay`, `yieldNow`, `join`, `await` on a `Deferred`, channels, `select`, `Mutex` and `Semaphore`
   end with a `CancellationException`, and `suspendCancellableCoroutine` makes any wait of one's own
   cancellable.
@@ -319,15 +308,15 @@ counter.update((it) => it + 1);
 final Job watching = counter.launchIn(scope);
 ```
 
-- **Channels.** `Channel` with Kotlin's capacities - rendezvous, buffered, conflated, unlimited -
+- **Channels.** `Channel` with four capacities - rendezvous, buffered, conflated, unlimited -
   and `BufferOverflow`, `trySend`, `receiveCatching`, `close` that still delivers what was sent,
   `cancel` that reports every element it drops to `onUndeliveredElement`, `produce`, and
-  `receiveAsStream` / `consumeAsStream` instead of Kotlin's `receiveAsFlow` / `consumeAsFlow`.
+  and `receiveAsStream` / `consumeAsStream`.
 - **select.** Biased and unbiased, over `onAwait`, `onJoin`, `onReceive`, `onReceiveCatching`,
   `onSend`, `onTimeout` and, added for Dart, `onFuture`. A losing clause never consumes an element.
-- **Streams are flows.** Dart's `Stream` plays Kotlin's `Flow`: `SharedFlow` and `StateFlow` are
-  streams, `shareIn`, `stateIn` and `SharingStarted` share any stream, and the operators Kotlin
-  has and Dart lacks are extensions - `collect`, `launchIn`, `buffer`, `conflate`, `debounce`,
+- **Streams are flows.** A hot flow is a Dart `Stream`: `SharedFlow` and `StateFlow` are
+  streams, `shareIn`, `stateIn` and `SharingStarted` share any stream, and the operators Dart's
+  `Stream` lacks are extensions - `collect`, `launchIn`, `buffer`, `conflate`, `debounce`,
   `sample`, `combine`, `flatMapLatest`, `flatMapConcat`, `transformLatest`, `runningFold`,
   `retry`, `retryWhen`, `catchError`, `cancellable`. On `runTest` their time is virtual.
 
@@ -342,19 +331,19 @@ final String? statusLine = await writing.channel.readLineStrict(limit: 8192);
 final int answer = await writing.channel.readInt();
 ```
 
-- **Buffers.** `Buffer` is kotlinx-io's buffer: bytes in segments, numbers big- or little-endian,
+- **Buffers.** `Buffer` holds bytes in segments, numbers big- or little-endian,
   text in any `Charset`, moving the bytes of one buffer into another without copying them.
-- **Channels.** `ByteChannel` is Ktor's: a writer flushes to a reader, and a flush waits once a
+- **Channels.** On a `ByteChannel` a writer flushes to a reader, and a flush waits once a
   mebibyte waits for the reader; every wait is cancellable through the job of its coroutine.
   `ByteReadChannel.fromBytes`, `fromText`, `fromBuffer` and `fromStream`, `toStream`, and the counted
   channels round it off.
-- **Operations.** Ktor's: `readInt`, `readBytes`, `readRemaining`, `readLine` and `readLineStrict`
+- **Operations.** `readInt`, `readBytes`, `readRemaining`, `readLine` and `readLineStrict`
   with LF, CR LF or lenient endings and a limit, `readUntil` a delimiter, `copyTo`, `writeFully`,
   `writeString` and the others; `writer` and `reader` start the coroutine of one side.
 
 ## Dates, times and time zones
 
-Kotlin's `kotlinx-datetime`: `LocalDate`, `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`,
+`LocalDate`, `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`,
 `YearMonth`, `DayOfWeek` and `Month`, periods and units, and `TimeZone` with every zone of the IANA
 time zone database built in, so a zone reads the same on the VM, in Flutter and on the web:
 
@@ -369,7 +358,7 @@ Clock.system.todayIn(berlin);
 ```
 
 `localDateTimeFormat`, `localDateFormat`, `localTimeFormat` and `localDateTimePattern` build
-formats that write every field at its full width, Kotlin's `LocalDateTime.Format { }`;
+formats that write every field at its full width;
 `DateTimeFormats` holds the common ones:
 
 ```dart
@@ -379,7 +368,7 @@ localDateTimePattern("dd.MM.yyyy 'at' HH:mm").format(LocalDateTime.of(2026, 3, 2
 ```
 
 A local time the clocks skip moves forward by the length of the gap, and one they pass twice takes
-the earlier offset, as Kotlin and RFC 5545 do; `ZoneResolution` chooses otherwise. Every count is
+the earlier offset, as RFC 5545 asks; `ZoneResolution` chooses otherwise. Every count is
 exact on the web, where integers are doubles. `tool/generate_tzdata.dart` compiles the database in
 `essentia_time/IANA/tzdata` into compact data that is decoded per zone on first use.
 
@@ -398,28 +387,42 @@ standup.occurrencesBetween(LocalDateTime.of(2026, 10, 1, 0, 0), LocalDateTime.of
 
 Repetitions are computed on the clock of the anchor and lazily, the anchor counts towards a
 `COUNT`, and `truncatedBefore`, `splitAt` and `movedTo` edit "this and following" and whole series.
-The iCalendar format itself lives in `noria_icalendar`.
 
-## Kotlin's standard library on Dart's classes
+## Extensions on Dart's classes
 
-The extensions Kotlin has and Dart does not, under the names Kotlin gives them. Every one says in
-its documentation which Kotlin function it mirrors, and every collection it returns is unmodifiable.
+Extensions that fill the gaps of Dart's core classes. Every collection they return is
+unmodifiable.
 
 | On | Extensions |
 |---|---|
 | `Iterable` | `associate`, `associateWith`, `groupingBy`, `partitionWhere`, `sumOfInt`, `countWhere`, `indexOfFirst`, `maxBy`, `minOf`, `joinToString`, `sortedByDescending`, `toSortedSet`, `random`, `intersect`, `union`, `subtract`, `mapNotNull`, `distinctBy`, `onEach`, `zip`, `windowed`, `zipWithNext`, `runningFold`, `runningReduce`, `requireNoNulls`, `unzip`, `orEmpty`, `isNullOrEmpty` … |
 | `List`, `Set` | `lastIndex`, `indices`, `getOrElse`, `foldRight`, `reduceRight`, `removeFirstOrNull`, `takeLast`, `dropLastWhile`, `plusElement`, `minusAll` … |
 | `Map` | `getValue`, `getOrElse`, `withDefault`, `mapKeys`, `mapValues`, `minusKey`, `toSortedMap`, `any`, `none`, `countWhere` … |
-| `String` | `removePrefix`, `removeSurrounding`, `substringBefore`, `substringAfterLast`, `take`, `dropLast`, `capitalize`, `equalsIgnoreCase`, `isBlank`, `ifBlank`, `trimIndent`, `trimMargin`, `lines`, `windowed`, `chunked`, `splitWithLimit`, `toIsoDuration`, `toDuration` (Kotlin's `Duration.parse`: `1h 30m` or `PT1H30M`), and `words`, `toSnakeCase`, `toKebabCase`, `toCamelCase`, `toPascalCase` spelled as kotlinx serialization's naming strategies spell them, `closestIn`, the bounded "did you mean" search, and `toNfc`, `toNfd`, `isNfc`, the Unicode normalization forms of Unicode 16.0.0 … |
+| `String` | `removePrefix`, `removeSurrounding`, `substringBefore`, `substringAfterLast`, `take`, `dropLast`, `capitalize`, `equalsIgnoreCase`, `isBlank`, `ifBlank`, `trimIndent`, `trimMargin`, `lines`, `windowed`, `chunked`, `splitWithLimit`, `toIsoDuration`, `toDuration` (`1h 30m` or `PT1H30M`), and `words`, `toSnakeCase`, `toKebabCase`, `toCamelCase`, `toPascalCase`, `closestIn`, the bounded "did you mean" search, and `toNfc`, `toNfd`, `isNfc`, the Unicode normalization forms of Unicode 16.0.0 … |
 | `List<int>` | `toHexString`, `contentEquals`, `contentHashCode`, `toByteString`, with `ByteString` and `HexFormat` beside them, and `hexToByteArray`, `hexToByteString`, `encodeToByteString` on `String` |
-| `int`, `double`, `Duration` | `5.seconds`, `1.5.hours`, `floorDiv`, `mod`, `rangeTo`, `until`, `downTo`, `toComponents`, `toIsoString`, `toReadableString` (Kotlin's `Duration.toString()`), `duration / duration`, and `ByteSize` with `16.mebibytes` and `ByteSize.parse('1.5GiB')` |
+| `int`, `double`, `Duration` | `5.seconds`, `1.5.hours`, `floorDiv`, `mod`, `rangeTo`, `until`, `downTo`, `toComponents`, `toIsoString`, `toReadableString`, `duration / duration`, and `ByteSize` with `16.mebibytes` and `ByteSize.parse('1.5GiB')` |
 | `Comparable`, `Comparator` | `coerceIn`, `coerceAtLeast`, `rangeTo`, `rangeUntil`, `thenBy`, `thenByDescending`, with `compareBy`, `naturalOrder` and `nullsLast` beside them |
-| `Future`, `Stream` | `timeoutOrNull`, and the `Flow` operators `mapLatest`, `collectLatest`, `flatMapMerge`, `zip`, `onStart`, `onCompletion`, `onEmpty`, `runningReduce`, `distinctUntilChangedBy` … |
+| `Future`, `Stream` | `timeoutOrNull`, and the stream operators `mapLatest`, `collectLatest`, `flatMapMerge`, `zip`, `onStart`, `onCompletion`, `onEmpty`, `runningReduce`, `distinctUntilChangedBy` … |
 
-`Result` is Kotlin's: `runCatching`, `valueOrNull`, `getOrThrow`, `fold`, `map`, `mapCatching`,
+`Result` holds a value or a failure: `runCatching`, `valueOrNull`, `getOrThrow`, `fold`, `map`, `mapCatching`,
 `recover`, `onSuccess`, `onFailure`, with extensions on `Future<Result<T>>` and
 `Iterable<Result<T>>`. The ranges `IntRange`, `IntProgression`, `ClosedRange` and `OpenEndRange`
 are what `rangeTo`, `until` and `downTo` hand back.
+
+## Compression
+
+`package:essentia_compression/essentia_compression.dart`:
+
+- **gzip and deflate.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder`, and `deflate`,
+  `inflate`, `deflateEncoder` and `deflateDecoder` for zlib streams and, with `raw`, deflate data
+  alone, on the zlib of `dart:io` and on the `CompressionStream` of the browser; decoding checks the
+  CRC-32 and the length of a gzip member and the Adler-32 of a zlib stream. Deflate data alone has
+  no check: on the VM data cut short decodes to what it held.
+- **Brotli.** `unbrotli` and `brotliDecoder` decode a Brotli stream of RFC 7932, HTTP's `br`, as its
+  bytes arrive: a decoder written in Dart with the static dictionary of the RFC, alike on the VM, on
+  the web and in WebAssembly, that refuses damaged, cut short and trailing data. There is no
+  encoder.
+- **Checks.** `Crc32` and `Adler32`, the same on every platform.
 
 ## Also in the box
 
@@ -430,63 +433,38 @@ are what `rangeTo`, `until` and `downTo` hand back.
 - **Platform detection.** `Platform`, `OperatingSystem` (Linux, macOS, Windows, Android, iOS and the
   web) and `Architecture`, with `Platform.current()` read from the VM's ABI and `null` for a machine Essentia cannot name, and
   `Platform.parse('linux-x86_64')` for an identifier read from a path or a manifest.
-- **gzip and deflate.** `gzip`, `gunzip`, `gzipEncoder` and `gzipDecoder`, and `deflate`,
-  `inflate`, `deflateEncoder` and `deflateDecoder` for zlib streams and, with `raw`, deflate data
-  alone, on the zlib of `dart:io` and on the `CompressionStream` of the browser; decoding checks the
-  CRC-32 and the length of a gzip member and the Adler-32 of a zlib stream. `Crc32` and `Adler32`
-  are the checks themselves, the same on every platform. Deflate data alone has no check: on the VM
-  data cut short decodes to what it held.
-- **Brotli.** `unbrotli` and `brotliDecoder` decode a Brotli stream of RFC 7932, HTTP's `br`, as its
-  bytes arrive: a decoder written in Dart with the static dictionary of the RFC, alike on the VM, on
-  the web and in WebAssembly, that refuses damaged, cut short and trailing data. There is no
-  encoder.
 - **Charsets.** `Charset` and `Charsets`: UTF-8, US-ASCII, ISO-8859-1, windows-1252 and UTF-16 with
   and without a byte order mark, found by their IANA names and aliases, as `Encoding`s of
   `dart:convert` that decode chunk by chunk and replace what they cannot decode with U+FFFD.
-- **Typed attributes.** `Attributes` holds values of any type, each under its `AttributeKey`, as
-  Ktor's do; `CaseInsensitiveMap` is a map whose keys compare without regard to case.
+- **Typed attributes.** `Attributes` holds values of any type, each under its `AttributeKey`;
+  `CaseInsensitiveMap` is a map whose keys compare without regard to case.
 - **Causes.** `Causal`, implemented by every failure of Essentia that wraps another, gives the
   `cause` and, where it is known, its `causeStackTrace`.
 
-## Differences to Arc
+## Design notes
 
-Kept deliberately small, and only where Dart has no equivalent:
-
-- `ShutdownHooks` takes the place of the JVM's `Runtime.addShutdownHook`, which Dart does not
-  have. Unlike the JVM's, the hooks run one after the other, the last added first, within a
-  timeout, because a server has to stop before the logging it writes to flushes.
-
-- `Clock.now()` returns an `Instant` as Kotlin's does; `toDateTime()` gives Dart's `DateTime`.
-  Instants cover a million years either way instead of a billion, so every count stays exact on the
-  web, and `toEpochMilliseconds` is clamped to 2^53 - 1. `Instant - Instant` is `difference`, as on
-  `DateTime`, and the unit and period arithmetic takes the zone as a named argument.
+- `ShutdownHooks.process` collects the work every component does when the program is asked to end.
+  The hooks run one after the other, the last added first, within a timeout, because a server has
+  to stop before the logging it writes to flushes.
+- `Clock.now()` returns an `Instant`; `toDateTime()` gives Dart's `DateTime`. Instants cover a
+  million years either way, so every count stays exact on the web, and `toEpochMilliseconds` is
+  clamped to 2^53 - 1. `Instant - Instant` is `difference`, as on `DateTime`, and the unit and
+  period arithmetic takes the zone as a named argument.
 - `LocalDate.today`, `epochDays`, `isoWeekNumber`, `isoWeekYear`, `startOfWeek`, `plusDays`,
-  `plusMonths` and `plusYears` are conveniences beyond Kotlin's API. `TimeZone.offsetInfo`,
-  `ZoneRules` and `ZoneResolution` make public what Kotlin keeps internal, because a calendar has to
-  show the gaps and overlaps of daylight saving time.
+  `plusMonths` and `plusYears` are there for calendars, and `TimeZone.offsetInfo`, `ZoneRules` and
+  `ZoneResolution` are public, because a calendar has to show the gaps and overlaps of daylight
+  saving time.
 - Where a system does not tell its zone by name, as Android, iOS and Windows do not to a program,
-  `TimeZone.currentSystemDefault` is the current fixed offset; an application there hands its zone
-  in.
-- `Clock.now()` returns an `Instant` as Kotlin's does; `toDateTime()` gives Dart's `DateTime`.
-  Instants cover a million years either way instead of a billion, so every count stays exact on the
-  web, and `toEpochMilliseconds` is clamped to 2^53 - 1. `Instant - Instant` is `difference`, as on
-  `DateTime`, and the unit and period arithmetic takes the zone as a named argument.
-- `LocalDate.today`, `epochDays`, `isoWeekNumber`, `isoWeekYear`, `startOfWeek`, `plusDays`,
-  `plusMonths` and `plusYears` are conveniences beyond Kotlin's API. `TimeZone.offsetInfo`,
-  `ZoneRules` and `ZoneResolution` make public what Kotlin keeps internal, because a calendar has to
-  show the gaps and overlaps of daylight saving time.
-- Where a zone does not tell its name, as Android, iOS and Windows do not to a program,
   `TimeZone.currentSystemDefault` is the current fixed offset; an application there hands its zone
   in.
 - A topic runs its lanes and consumers as coroutines under a supervisor of its own and does not
   take a `CoroutineScope`; a consumer runs as the principal that attached it.
-- `select` clauses are calls on the builder, `it.onReceive(channel, ...)`, since Dart has no
-  receiver-scoped syntax; the clause getters `onAwait`, `onJoin`, `onReceive` and `onSend` exist as
-  well. `onFuture` never selects while the clauses register, because a future reports in a later
-  microtask, and a future it loses to is only no longer listened to.
-- `catch` is a reserved word: the `Flow` operator is `catchError`. Kotlin's suspending
-  `stateIn(scope)` is `awaitStateIn`, and `firstOrNull` and `singleOrNull` are getters, like
-  `Stream.first`.
+- `select` clauses are calls on the builder, `it.onReceive(channel, ...)`; the clause getters
+  `onAwait`, `onJoin`, `onReceive` and `onSend` exist as well. `onFuture` never selects while the
+  clauses register, because a future reports in a later microtask, and a future it loses to is only
+  no longer listened to.
+- `catch` is a reserved word: the stream operator is `catchError`. `awaitStateIn` waits for the first
+  value of a shared state, and `firstOrNull` and `singleOrNull` are getters, like `Stream.first`.
 - A hot flow listened to inside a coroutine ends with that coroutine's `CancellationException` once
   it is cancelled; prefer `collect` and `launchIn`. `shareIn`, `stateIn`, `retry` and `retryWhen`
   listen to their upstream again, so it has to be re-listenable; a single-subscription stream fails
@@ -495,58 +473,52 @@ Kept deliberately small, and only where Dart has no equivalent:
   returns when there is nothing to wait for, resumes outside the virtual event loop. `runTest` lets
   the real loop run before virtual time moves on, so such work never comes late; the synchronous
   advance methods inside a test do not, and the operators of Essentia avoid such futures.
-- If `onUndeliveredElement` throws, the operation that dropped the element throws it, instead of
-  Kotlin's `UndeliveredElementException`.
-- No concurrent collections. An isolate shares no memory, so Arc's `CopyOnWriteList`,
-  `CopyOnWriteSet`, `CopyOnWriteMap`, `ConcurrentMap` and `LongAdder` are not ported. Where Arc
-  uses one internally, Essentia uses the Dart idiom: an unmodifiable list that is replaced on every
-  write, and plain `int` counters.
-- `ArcDsl`, `ArcExperimental` and `ArcInternal` are not ported; `package:meta`'s `@internal`,
-  `@protected` and `@visibleForTesting` take their place.
-- Property references become property names: `scope.fail('msg', property: 'sinks')`.
-- Violation codes are namespaced `essentia.*` instead of `arc.*`.
-- The current principal and the envelope being handled travel in a `Zone` instead of the coroutine
-  context. `tryPublish` therefore reads both as well; Arc's `tryPublish` has no context to read.
-  `publishAs` and `tryPublishAs` replace Arc's overloads with an explicit principal.
+- If `onUndeliveredElement` throws, the operation that dropped the element throws it.
+- There are no concurrent collections. An isolate shares no memory, so Essentia uses an
+  unmodifiable list that is replaced on every write, and plain `int` counters.
+- `package:meta`'s `@internal`, `@protected` and `@visibleForTesting` mark what is not public API.
+- Properties are named by strings: `scope.fail('msg', property: 'sinks')`.
+- Violation codes are namespaced `essentia.*`.
+- The current principal and the envelope being handled travel in a `Zone`, so `tryPublish` reads
+  both as well. `publishAs` and `tryPublishAs` publish with an explicit principal.
 - A converter or a value source is contained when it throws an `Exception`; an `Error` is a
   programming mistake and is not caught.
-- Parameters are declared with the top level functions `parameter` and `flag` instead of protected
-  methods of the schema: a Dart field initialiser cannot reach `this`, and Essentia uses no `late`.
-  The schema registers them as it is constructed, as Arc's delegates do, so a clash of names or
-  environment variables is refused by the constructor.
-- Dart has no overloading, so where Arc offers two forms there is one with an optional argument:
+- Parameters are declared with the top level functions `parameter` and `flag`: a Dart field
+  initialiser cannot reach `this`, and Essentia uses no `late`. The schema registers them as it is
+  constructed, so a clash of names or environment variables is refused by the constructor.
+- Dart has no overloading, so where two forms are useful there is one with an optional argument:
   `contains(version, [policy])`, `nextPreRelease([label])`, `principal(id, [block])`.
-- `lazy` has no `LazyThreadSafetyMode`: an isolate runs one thing at a time, so every `Lazy` keeps
-  the `SYNCHRONIZED` contract. A read of the value from inside its own initializer throws a
-  `StateError` instead of recursing.
+- An isolate runs one thing at a time, so a `Lazy` runs its initializer at most once and needs no
+  locking. A read of the value from inside its own initializer throws a `StateError` instead of
+  recursing.
 - Coroutines are Dart's `async` functions, so cancellation is cooperative at every suspension
   Essentia provides, never inside a plain `await` of a `Future`; `future.asDeferred()` makes such a
   wait cancellable. Code resumed after an `await` goes on in a microtask of its zone, not through
   the dispatcher; a dispatcher only decides where a body starts. A value resumed into code whose job
   was cancelled in the same microtask is handed to `onCancellation` instead, never lost.
-- `await` and `yield` are reserved inside asynchronous functions: `Deferred` is a `Future`, so
-  `await deferred` is Kotlin's `deferred.await()`, and Kotlin's `yield()` is `yieldNow()`.
-  `CoroutineStart.DEFAULT` is `defaultStart`, since `default` is reserved, and `MainScope()` is
-  `mainScope()`.
-- Dart operators cannot be generic: `context[Job]` is `context.get(Job.key)` or `context.job`, and
-  an element names its key with `contextKey`. `Job()` returns a `CompletableJob` but is typed
-  `Job`; create a `CompletableJob()` to call `complete`.
-- There are no threads: `Dispatchers.main` is Kotlin's `Main`, `Default` and `IO` on the event loop,
-  and `Dispatchers.isolate` plays `Default` on worker isolates. A body sent there must be sendable;
-  only its `CoroutineName`, its `PrincipalElement` and the elements marked `IsolateTransferable`
-  cross, and its children are not children of the caller. A body that ignores its cancellation for a second has its isolate killed.
-- `Scheduler` bundles what Kotlin spreads over a dispatcher's `Delay`, a `TimeSource` and a
-  `Clock`, and is an element of the coroutine context. `TestScheduler` plays
-  `TestCoroutineScheduler` and is also the virtual event loop: inside it `Timer`, `Future.delayed`
-  and `Scheduler.system` are virtual, `DateTime.now`, `Stopwatch` and `TimeSource.monotonic` are not.
-  Driven from outside, its advance methods let the real event loop settle between tasks.
-  `TestTimeSource.advance` replaces `+=`, and refuses a negative duration.
-- `runTest` reports a failure of a coroutine at its end, as Kotlin does; an error that escapes a
-  plain `Future` fails the test at once through the test's own zone. The test dispatchers are
-  classes rather than functions.
-- `long()` is not needed (Dart's `int` is 64-bit), `default` and `enum` are reserved words
-  (`defaultsTo`, `enumeration`), and errors that are programming mistakes extend `ArgumentError` or
-  `StateError` (`TopicNotDeclaredError`, `ParametersNotLoadedError`).
+- `await` and `yield` are reserved inside asynchronous functions: `Deferred` is a `Future`, so it is
+  awaited with `await deferred`, and a coroutine yields with `yieldNow()`. The default start is
+  `CoroutineStart.defaultStart`, since `default` is reserved, and `mainScope()` creates the scope of
+  the event loop.
+- Dart operators cannot be generic: an element of the context is read with `context.get(Job.key)`
+  or `context.job`, and an element names its key with `contextKey`. `Job()` returns a
+  `CompletableJob` but is typed `Job`; create a `CompletableJob()` to call `complete`.
+- There are no threads: `Dispatchers.main` runs on the event loop, and `Dispatchers.isolate` on
+  worker isolates. A body sent there must be sendable; only its `CoroutineName`, its
+  `PrincipalElement` and the elements marked `IsolateTransferable` cross, and its children are not
+  children of the caller. A body that ignores its cancellation for a second has its isolate killed.
+- `Scheduler` bundles the delays, the `TimeSource` and the `Clock` of a coroutine, and is an element
+  of the coroutine context. `TestScheduler` is the virtual event loop of a test: inside it `Timer`,
+  `Future.delayed` and `Scheduler.system` are virtual, `DateTime.now`, `Stopwatch` and
+  `TimeSource.monotonic` are not. Driven from outside, its advance methods let the real event loop
+  settle between tasks. `TestTimeSource.advance` moves a test time source on, and refuses a negative
+  duration.
+- `runTest` reports a failure of a coroutine at its end; an error that escapes a plain `Future`
+  fails the test at once through the test's own zone. The test dispatchers are classes rather than
+  functions.
+- Dart's `int` is 64-bit, `default` and `enum` are reserved words (`defaultsTo`, `enumeration`), and
+  errors that are programming mistakes extend `ArgumentError` or `StateError`
+  (`TopicNotDeclaredError`, `ParametersNotLoadedError`).
 
 ## Quality gates
 

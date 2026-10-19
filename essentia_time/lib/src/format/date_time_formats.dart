@@ -14,8 +14,7 @@ import 'package:essentia_time/src/format/compiled_date_time_format.dart';
 import 'package:essentia_time/src/format/date_time_format.dart';
 import 'package:essentia_time/src/format/format_directive.dart';
 
-/// The formats most programs need, every field at its full width, Kotlin's
-/// `LocalDateTime.Formats` and their kin.
+/// The formats most programs need, every field at its full width.
 ///
 /// Unlike the ISO 8601 `toString` of the values, which leaves out a zero
 /// second and fraction, these always write the seconds and three digits

@@ -16,7 +16,7 @@ import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/scheduler/scheduled_task.dart';
 import 'package:essentia_coroutines/src/scheduler/scheduler.dart';
 
-/// A counting semaphore, Kotlin's `kotlinx.coroutines.sync.Semaphore`.
+/// A counting semaphore.
 ///
 /// It hands out up to [permits] permits at once. An acquirer that finds
 /// none free waits, oldest first. A fair semaphore hands a permit given
@@ -28,9 +28,8 @@ import 'package:essentia_coroutines/src/scheduler/scheduler.dart';
 /// than are held takes nothing away, and new acquirers wait until enough
 /// were given back.
 ///
-/// Waiting is cancellable like Kotlin's: an acquirer whose job is
-/// cancelled stops waiting with the job's [CancellationException] and never
-/// holds a permit.
+/// Waiting is cancellable: an acquirer whose job is cancelled stops waiting
+/// with the job's [CancellationException] and never holds a permit.
 ///
 /// ```dart
 /// final downloads = Semaphore(4);
@@ -104,8 +103,7 @@ final class Semaphore {
     return true;
   }
 
-  /// Takes a permit, waiting for one if none is free, Kotlin's
-  /// `acquire()`.
+  /// Takes a permit, waiting for one if none is free.
   ///
   /// Returns a future that completes once the permit is taken.
   ///
@@ -126,8 +124,8 @@ final class Semaphore {
   Future<bool> tryAcquireWithin(Duration timeout, {Scheduler? scheduler}) =>
       _acquire(timeout, scheduler ?? Scheduler.current);
 
-  /// Gives a permit back, handing it on to the oldest waiter if the number
-  /// of permits allows, Kotlin's `release()`.
+  /// Gives a permit back, handing it on to the oldest waiter if the number of
+  /// permits allows.
   ///
   /// Throws a [StateError] if more permits are given back than were taken.
   void release() {
@@ -153,8 +151,7 @@ final class Semaphore {
     _dispatch();
   }
 
-  /// Runs [action] while holding a permit, waiting for one if none is free,
-  /// Kotlin's `withPermit`.
+  /// Runs [action] while holding a permit, waiting for one if none is free.
   ///
   /// The permit is given back once [action] completes, whether it succeeds
   /// or fails.

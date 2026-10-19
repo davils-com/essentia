@@ -9,8 +9,7 @@
 
 import 'package:essentia_io/src/exception/closed_byte_channel_exception.dart';
 
-/// Thrown when a byte channel is written after it was closed or cancelled,
-/// Ktor's `ClosedWriteChannelException`.
+/// Thrown when a byte channel is written after it was closed or cancelled.
 final class ClosedWriteChannelException extends ClosedByteChannelException {
   /// Creates the exception for a channel closed, or cancelled with
   /// [cause].

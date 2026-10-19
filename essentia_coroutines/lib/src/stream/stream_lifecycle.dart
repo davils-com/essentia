@@ -12,10 +12,10 @@ import 'dart:async';
 import 'package:essentia_coroutines/src/stream/emission.dart';
 import 'package:essentia_coroutines/src/stream/relay.dart';
 
-/// Kotlin's lifecycle `Flow` operators for streams.
+/// The lifecycle operators for streams.
 extension StreamLifecycle<T> on Stream<T> {
   /// Runs [action] whenever a listener starts listening, before this stream
-  /// is listened to, the counterpart of Kotlin's `onStart`.
+  /// is listened to.
   ///
   /// An error thrown by [action] becomes an error event and ends the result
   /// without listening to this stream.
@@ -29,8 +29,7 @@ extension StreamLifecycle<T> on Stream<T> {
     unawaited(controller.addStream(this).whenComplete(controller.close));
   }, isBroadcast: isBroadcast);
 
-  /// Runs [action] once when this stream ends or the listener cancels, the
-  /// counterpart of Kotlin's `onCompletion`.
+  /// Runs [action] once when this stream ends or the listener cancels.
   ///
   /// When this stream ends, an error thrown by [action] becomes an error
   /// event before the result ends. When the listener cancels, nobody
@@ -57,8 +56,7 @@ extension StreamLifecycle<T> on Stream<T> {
   });
 
   /// Emits the elements of the stream that [fallback] creates when this
-  /// stream ends without an element, the counterpart of Kotlin's
-  /// `onEmpty`.
+  /// stream ends without an element.
   ///
   /// An error event does not count as an element.
   ///

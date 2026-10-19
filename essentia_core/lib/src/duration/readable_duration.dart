@@ -12,11 +12,11 @@ import 'package:meta/meta.dart';
 /// Trailing zeros of the digits of a fraction.
 final _trailingZeros = RegExp(r'0+$');
 
-/// Kotlin's `Duration.toString()`: the readable form `String.toDuration`
-/// reads back.
+/// Renders a duration in the readable form `String.toDuration` reads
+/// back.
 extension ReadableDuration on Duration {
-  /// Renders the duration the way Kotlin's `Duration.toString()` does, such
-  /// as `1h 30m`, `1d 0h 0m 5s`, `2.5s`, `1.5ms`, `250us` or `-(1m 30s)`.
+  /// Renders the duration in its readable form, such as `1h 30m`,
+  /// `1d 0h 0m 5s`, `2.5s`, `1.5ms`, `250us` or `-(1m 30s)`.
   ///
   /// A duration of a second or more is written as days, hours, minutes and
   /// seconds; the components between the first and the last one that are

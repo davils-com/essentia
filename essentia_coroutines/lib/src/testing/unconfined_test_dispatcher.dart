@@ -15,8 +15,7 @@ import 'package:essentia_coroutines/src/dispatcher/parallelism.dart';
 import 'package:essentia_coroutines/src/testing/test_dispatcher.dart';
 import 'package:essentia_coroutines/src/testing/test_scheduler.dart';
 
-/// A test dispatcher that starts a body at once, Kotlin's
-/// `UnconfinedTestDispatcher`.
+/// A test dispatcher that starts a body at once.
 ///
 /// It suits code under test that has to be subscribed or running before
 /// the test goes on, such as a collector of a hot flow.

@@ -15,9 +15,8 @@ import 'package:test/test.dart';
 import 'guide_counter.dart';
 import 'guide_resource.dart';
 
-/// Covers the examples of the kotlinx.coroutines guide "Cancellation and
-/// timeouts", ported line by line, with the output they print as a golden
-/// log.
+/// Covers the worked examples of cancellation and timeouts, with the output
+/// they print as a golden log.
 void main() {
   test(
     'cancelling coroutine execution',

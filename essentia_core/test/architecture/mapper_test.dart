@@ -38,7 +38,7 @@ String _text(Random random) {
   return text.toString();
 }
 
-/// Ports `MapperTest`.
+/// Covers mappers between domain values and their transport shapes.
 void main() {
   test('a mapper writes the domain value back into the shape that carries '
       'it', () {

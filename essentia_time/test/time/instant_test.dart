@@ -26,7 +26,7 @@ void main() {
       expect(Instant.fromEpochMilliseconds(-1).nanosecondsOfSecond, 999000000);
     });
 
-    test('clamps beyond its range as Kotlin does', () {
+    test('clamps beyond its range', () {
       expect(Instant.fromEpochSeconds(1125899906842624), Instant.max);
       expect(Instant.fromEpochSeconds(-1125899906842624), Instant.min);
       expect(Instant.max + const Duration(days: 1), Instant.max);

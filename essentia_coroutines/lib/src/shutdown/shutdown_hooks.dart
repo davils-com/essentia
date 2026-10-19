@@ -17,8 +17,7 @@ import 'package:essentia_coroutines/src/shutdown/shutdown_host.dart';
 import 'package:essentia_coroutines/src/shutdown/shutdown_registration.dart';
 import 'package:essentia_coroutines/src/shutdown/shutdown_signal.dart';
 
-/// The work a program does when its host signals its end, the JVM's
-/// shutdown hooks.
+/// The work a program does when its host signals its end: its shutdown hooks.
 ///
 /// Watching a signal replaces what a process does on it by default, so two
 /// components that each watched `SIGTERM` and each ended the process when

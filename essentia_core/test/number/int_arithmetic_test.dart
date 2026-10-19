@@ -10,7 +10,7 @@
 import 'package:essentia_core/src/number/int_arithmetic.dart';
 import 'package:test/test.dart';
 
-/// Covers Kotlin's floored division `floorDiv` and its modulus `mod`.
+/// Covers the floored division `floorDiv` and its modulus `mod`.
 void main() {
   test('divides positive numbers downwards', () {
     final int result = 7.floorDiv(2);
@@ -54,7 +54,7 @@ void main() {
     expect(result, 2);
   });
 
-  test('takes a negative modulus for a negative divisor like Kotlin', () {
+  test('takes a negative modulus for a negative divisor', () {
     final int result = 7.mod(-3);
 
     expect(result, -2);

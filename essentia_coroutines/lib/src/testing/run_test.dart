@@ -28,7 +28,7 @@ import 'package:essentia_coroutines/src/testing/test_scope_impl.dart';
 import 'package:essentia_coroutines/src/testing/uncompleted_coroutines_error.dart';
 
 /// Runs [body] as a coroutine on virtual time and waits until it and every
-/// coroutine it started completed, Kotlin's `runTest`.
+/// coroutine it started completed.
 ///
 /// Everything the body starts - coroutines, `Timer`s, `Future.delayed`,
 /// `Scheduler.system` - runs on the virtual event loop of one

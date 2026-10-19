@@ -10,10 +10,10 @@
 import 'package:essentia_coroutines/src/stream/emission.dart';
 import 'package:essentia_coroutines/src/stream/relay.dart';
 
-/// Kotlin's accumulating `Flow` operators for streams.
+/// The accumulating operators for streams.
 extension StreamAccumulation<T> on Stream<T> {
   /// Emits the first element and then every element combined with the
-  /// value emitted before it, the counterpart of Kotlin's `runningReduce`.
+  /// value emitted before it.
   ///
   /// `[1, 2, 3]` reduced by addition becomes `[1, 3, 6]`. An error thrown
   /// by [combine] becomes an error event and leaves the running value
@@ -43,7 +43,7 @@ extension StreamAccumulation<T> on Stream<T> {
       });
 
   /// Emits [initial] and then every element folded into the value emitted
-  /// before it with [operation], Kotlin's `runningFold`.
+  /// before it with [operation].
   ///
   /// `[1, 2, 3]` folded from `0` by addition becomes `[0, 1, 3, 6]`.
   /// [initial] is emitted as soon as a listener subscribes. An error thrown
@@ -71,8 +71,7 @@ extension StreamAccumulation<T> on Stream<T> {
   });
 
   /// Emits [initial] and then every element folded into the value emitted
-  /// before it with [operation], Kotlin's `scan`, the same as
-  /// [runningFold].
+  /// before it with [operation], the same as [runningFold].
   ///
   /// Returns a stream that is a broadcast stream exactly when this one is.
   Stream<R> scan<R>(

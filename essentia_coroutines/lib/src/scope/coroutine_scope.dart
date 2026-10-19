@@ -11,8 +11,7 @@ import 'package:essentia_coroutines/src/context/coroutine_context.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/scope/context_scope.dart';
 
-/// What coroutines are started in, and whose job is their parent, Kotlin's
-/// `CoroutineScope`.
+/// What coroutines are started in, and whose job is their parent.
 ///
 /// A scope owns the work started in it: `launch` and `async` start
 /// children of its job, and cancelling the scope cancels them all. A
@@ -30,8 +29,7 @@ import 'package:essentia_coroutines/src/scope/context_scope.dart';
 /// }
 /// ```
 abstract interface class CoroutineScope {
-  /// Creates a scope with [context], adding a `Job()` when it holds none,
-  /// Kotlin's `CoroutineScope(context)`.
+  /// Creates a scope with [context], adding a `Job()` when it holds none.
   factory CoroutineScope(CoroutineContext context) =>
       ContextScope(context.get(Job.key) == null ? context + Job() : context);
 

@@ -18,9 +18,8 @@ import 'package:essentia_time/src/zone/utc_offset.dart';
 import 'package:essentia_time/src/zone/zone_resolution.dart';
 import 'package:meta/meta.dart';
 
-/// A date and a time of day without a time zone, Kotlin's
-/// `kotlinx.datetime.LocalDateTime`: what a calendar and a wall clock show
-/// together.
+/// A date and a time of day without a time zone: what a calendar and a
+/// wall clock show together.
 ///
 /// It names no moment until a `TimeZone` or a `UtcOffset` says where the
 /// clock hangs; [toInstant] and [toInstantAt] do that.
@@ -29,7 +28,7 @@ final class LocalDateTime implements Comparable<LocalDateTime> {
   /// The [time] of day on [date].
   const LocalDateTime(this.date, this.time);
 
-  /// The date and time of the given parts, Kotlin's seven-part constructor.
+  /// The date and time of the given parts.
   ///
   /// Throws an [ArgumentError] for a part that does not exist.
   factory LocalDateTime.of(
@@ -108,14 +107,13 @@ final class LocalDateTime implements Comparable<LocalDateTime> {
       date.epochDays * secondsPerDay + time.toSecondOfDay();
 
   /// The moment this date and time is at where clocks run [offset] from
-  /// UTC, Kotlin's `toInstant(offset)`.
+  /// UTC.
   Instant toInstantAt(UtcOffset offset) => Instant.fromEpochSeconds(
     localEpochSeconds - offset.totalSeconds,
     time.nanosecond,
   );
 
-  /// The moment this date and time is at in [timeZone], Kotlin's
-  /// `toInstant(timeZone)`.
+  /// The moment this date and time is at in [timeZone].
   ///
   /// A time the clocks skip moves forward by the length of the gap; a time
   /// they pass twice takes the offset [resolution] chooses, the earlier

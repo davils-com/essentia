@@ -13,21 +13,19 @@ import 'dart:collection';
 import 'package:essentia_coroutines/src/channels/buffer_overflow.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 
-/// The capacity of `Channel.buffered`, Kotlin's
-/// `CHANNEL_DEFAULT_CAPACITY`.
+/// The capacity of `Channel.buffered`.
 const _defaultCapacity = 64;
 
-/// The capacity that asks for conflation, Kotlin's `Channel.CONFLATED`.
+/// The capacity that asks for conflation, `Channel.conflated`.
 const _conflated = -1;
 
-/// The capacity that asks for the default buffer, Kotlin's
-/// `Channel.BUFFERED`.
+/// The capacity that asks for the default buffer, `Channel.buffered`.
 const _buffered = -2;
 
-/// Kotlin's buffering `Flow` operators for streams.
+/// The buffering operators for streams.
 extension StreamBuffering<T> on Stream<T> {
   /// Lets this stream run ahead of a slow listener by up to [capacity]
-  /// elements, Kotlin's `buffer`.
+  /// elements.
   ///
   /// This stream is listened to on its own pace: elements the listener
   /// cannot take yet, because it is paused - `await for` pauses while its
@@ -35,10 +33,10 @@ extension StreamBuffering<T> on Stream<T> {
   /// [onBufferOverflow] decides: [BufferOverflow.suspend] pauses this
   /// stream until the listener took one, [BufferOverflow.dropOldest] drops
   /// the oldest waiting element and [BufferOverflow.dropLatest] the new
-  /// one. [capacity] is a count, `-2` for the default of 64 (Kotlin's
-  /// `Channel.BUFFERED`) or `-1` for conflation (Kotlin's
-  /// `Channel.CONFLATED`, see [conflate]). As in Kotlin, a dropping buffer
-  /// of zero or the default capacity holds one element.
+  /// one. [capacity] is a count, `-2` for the default of 64
+  /// (`Channel.buffered`) or `-1` for conflation (`Channel.conflated`, see
+  /// [conflate]). A dropping buffer of zero or the default capacity holds
+  /// one element.
   ///
   /// Errors keep their place among the elements and are never dropped. The
   /// result ends once this stream ended and the buffer is empty. Cancel
@@ -89,8 +87,7 @@ extension StreamBuffering<T> on Stream<T> {
     );
   }
 
-  /// Keeps only the latest element while the listener is busy, Kotlin's
-  /// `conflate`.
+  /// Keeps only the latest element while the listener is busy.
   ///
   /// The listener gets the elements it is ready for and, after a pause,
   /// the latest element that arrived meanwhile; the ones in between are

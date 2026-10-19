@@ -9,8 +9,7 @@
 
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 
-/// The handle a suspended piece of work is resumed through, Kotlin's
-/// `CancellableContinuation`.
+/// The handle a suspended piece of work is resumed through.
 ///
 /// `suspendCancellableCoroutine` hands it to the code that registers the
 /// wait. Exactly one of [resume], [resumeWithException] and [cancel] takes
@@ -28,8 +27,8 @@ abstract interface class CancellableContinuation<T> {
   /// Resumes the waiting code with [value].
   ///
   /// When the continuation was cancelled already, or the waiting code is
-  /// cancelled before it can take [value], [onCancellation] receives the
-  /// value so it is never lost, Kotlin's `resume(value, onCancellation)`.
+  /// cancelled before it can take [value], [onCancellation] receives the value
+  /// so it is never lost.
   ///
   /// Throws a [StateError] if the continuation was resumed already.
   void resume(T value, {void Function(Object cause, T value)? onCancellation});
@@ -45,9 +44,8 @@ abstract interface class CancellableContinuation<T> {
   /// Returns `true` when this call cancelled it.
   bool cancel([Object? cause]);
 
-  /// Registers [handler] to run once the continuation is cancelled,
-  /// Kotlin's `invokeOnCancellation`; it runs at once when it is cancelled
-  /// already, and never when it is resumed.
+  /// Registers [handler] to run once the continuation is cancelled; it runs at
+  /// once when it is cancelled already, and never when it is resumed.
   ///
   /// Throws a [StateError] if a handler is registered already.
   void invokeOnCancellation(void Function(Object? cause) handler);

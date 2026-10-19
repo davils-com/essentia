@@ -10,8 +10,8 @@
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:meta/meta.dart';
 
-/// What waits on a byte channel, Ktor's `Slot`: nothing, the reader or
-/// the writer, or nobody any more because the channel is closed.
+/// What waits on a byte channel: nothing, the reader or the writer, or
+/// nobody any more because the channel is closed.
 @internal
 sealed class ChannelSlot {
   /// Creates the slot.

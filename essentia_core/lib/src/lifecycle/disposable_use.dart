@@ -11,8 +11,8 @@ import 'dart:async';
 
 import 'package:essentia_core/src/lifecycle/disposable.dart';
 
-/// Kotlin's `use` on a [Disposable]: a block that works with a resource and
-/// leaves it disposed, whichever way it ends.
+/// Runs a block that works with a [Disposable] and leaves it disposed,
+/// whichever way the block ends.
 ///
 /// ```dart
 /// final int size = openArchive(path).use((it) => it.entries.length);

@@ -10,10 +10,9 @@
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// Kotlin's `joinAll` on a collection of jobs.
+/// Waiting for a collection of jobs.
 extension JoinAll on Iterable<Job> {
-  /// Waits until every job is complete, one after another, Kotlin's
-  /// `joinAll()`.
+  /// Waits until every job is complete, one after another.
   ///
   /// Returns a future that completes once all are.
   ///

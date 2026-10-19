@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Which line endings a line reader accepts, Ktor's `LineEnding`.
+/// Which line endings a line reader accepts.
 enum LineEnding {
   /// A line ends with LF or CR LF, as HTTP and most text formats say.
   defaultEnding,

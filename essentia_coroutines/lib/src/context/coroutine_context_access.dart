@@ -12,9 +12,9 @@ import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/job/job_operations.dart';
 
-/// Kotlin's job extensions on `CoroutineContext`.
+/// The job operations on a `CoroutineContext`.
 extension CoroutineContextAccess on CoroutineContext {
-  /// The job of the context, Kotlin's `CoroutineContext.job`.
+  /// The job of the context.
   ///
   /// Throws a [StateError] if the context holds no job.
   Job get job {
@@ -25,22 +25,18 @@ extension CoroutineContextAccess on CoroutineContext {
     return found;
   }
 
-  /// Whether the job of the context is active, `true` without a job,
-  /// Kotlin's `CoroutineContext.isActive`.
+  /// Whether the job of the context is active, `true` without a job.
   bool get isActive => get(Job.key)?.isActive ?? true;
 
-  /// Throws if the job of the context is not active, Kotlin's
-  /// `CoroutineContext.ensureActive()`.
+  /// Throws if the job of the context is not active.
   ///
   /// Throws the [CancellationException] of the job if it is cancelled.
   void ensureActive() => get(Job.key)?.ensureActive();
 
-  /// Cancels the job of the context, if it holds one, Kotlin's
-  /// `CoroutineContext.cancel()`.
+  /// Cancels the job of the context, if it holds one.
   void cancel([CancellationException? cause]) => get(Job.key)?.cancel(cause);
 
-  /// Cancels the children of the job of the context, Kotlin's
-  /// `CoroutineContext.cancelChildren()`.
+  /// Cancels the children of the job of the context.
   void cancelChildren([CancellationException? cause]) =>
       get(Job.key)?.cancelChildren(cause);
 }

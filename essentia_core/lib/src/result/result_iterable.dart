@@ -10,10 +10,6 @@
 import 'package:essentia_core/src/result/result.dart';
 
 /// Splits and combines a collection of results.
-///
-/// Kotlin's standard library has no counterpart; the members follow
-/// `partition` on collections and the `values`, `errors` and `combine` of
-/// the common Kotlin result libraries.
 extension ResultIterable<T> on Iterable<Result<T>> {
   /// The values of every success, in order.
   ///
@@ -27,8 +23,7 @@ extension ResultIterable<T> on Iterable<Result<T>> {
   List<Object> get errors =>
       List.unmodifiable(whereType<Failure<T>>().map((result) => result.error));
 
-  /// Splits the results into their values and their errors, like Kotlin's
-  /// `partition`.
+  /// Splits the results into their values and their errors.
   ///
   /// Returns both unmodifiable lists, each in order.
   ({List<T> values, List<Object> errors}) partition() =>

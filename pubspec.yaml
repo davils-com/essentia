@@ -1,20 +1,21 @@
 name: essentia_workspace
 description: >-
-  The workspace of Essentia, the Davils application runtime core for Dart,
-  ported from Arc: essentia_core - validation, configuration builders,
-  program parameters, identifiers, versions, principals, platform
-  detection, byte strings, a Result type and Kotlin's standard library
-  extensions on Dart's own classes -, essentia_time - time sources, dates,
-  times, every IANA time zone and RFC 5545 recurrence - and
-  essentia_coroutines - Kotlin's coroutines, channels, select, hot flows,
-  fair locks and an in-process event bus - and essentia_io - Ktor's byte
-  channels on a segmented buffer -, each with its test support.
+  The workspace of Essentia, the Davils application runtime core for Dart:
+  essentia_core - validation, configuration builders, program parameters,
+  identifiers, versions, principals, platform detection, byte strings, a
+  Result type and extensions on Dart's own classes -, essentia_compression
+  - gzip, deflate, a Brotli decoder, CRC-32 and Adler-32 -, essentia_time -
+  time sources, dates, times, every IANA time zone and RFC 5545 recurrence
+  -, essentia_coroutines - coroutines, channels, select, hot flows, fair
+  locks and an in-process event bus - and essentia_io - byte channels on a
+  segmented buffer -, each with its test support.
 publish_to: none
 
 environment:
   sdk: ^3.13.5
 
 workspace:
+  - essentia_compression
   - essentia_core
   - essentia_coroutines
   - essentia_io
@@ -123,8 +124,8 @@ inspectra:
       fail_on_findings: true
       severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
       scanners: [vuln, secret, misconfig, license]
-  # The layers, from the bottom: the core, time on top of it and the
-  # coroutines above both.
+  # The layers, from the bottom: the core and compression, time on top of
+  # the core, the coroutines above both and io above all three.
   workspace_policy:
     enabled: true
     align_versions: exact
@@ -136,6 +137,9 @@ inspectra:
       - name: core
         packages: [essentia_core]
         may_depend_on: []
+      - name: compression
+        packages: [essentia_compression]
+        may_depend_on: [core]
       - name: time
         packages: [essentia_time]
         may_depend_on: [core]

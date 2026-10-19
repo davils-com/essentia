@@ -12,10 +12,10 @@ import 'dart:async';
 import 'package:essentia_coroutines/src/stream/combine_latest.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 
-/// Kotlin's combining `Flow` operators for streams.
+/// The combining operators for streams.
 extension StreamCombination<T> on Stream<T> {
   /// Pairs every element of this stream with the element of [other] at the
-  /// same position, the counterpart of Kotlin's `zip`.
+  /// same position.
   ///
   /// The result ends as soon as either stream ends, and then cancels the
   /// other one. A stream that runs ahead is paused until the other one
@@ -89,7 +89,7 @@ extension StreamCombination<T> on Stream<T> {
   });
 
   /// Combines the latest element of this stream with the latest element of
-  /// [other] through [transform], Kotlin's `combine`.
+  /// [other] through [transform].
   ///
   /// Once both streams emitted, the result emits whenever either of them
   /// emits, with the latest element of each. The result ends once both

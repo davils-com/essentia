@@ -15,8 +15,7 @@ import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 import 'package:essentia_coroutines/src/timeout/timeout_cancellation_exception.dart';
 import 'package:essentia_coroutines/src/timeout/timeout_coroutine.dart';
 
-/// Runs [block] in a scope that is cancelled once [timeout] passed,
-/// Kotlin's `withTimeout`.
+/// Runs [block] in a scope that is cancelled once [timeout] passed.
 ///
 /// The time is measured on the scheduler of the current context, so it is
 /// virtual under `runTest`. The block and its children see the timeout as
@@ -40,8 +39,7 @@ Future<R> withTimeout<R>(
   return coroutine.result;
 }
 
-/// Runs [block] in a scope that is cancelled once [timeout] passed,
-/// Kotlin's `withTimeoutOrNull`.
+/// Runs [block] in a scope that is cancelled once [timeout] passed.
 ///
 /// Only its own timeout turns into `null`; the timeout of an inner
 /// `withTimeout` that the block lets escape is thrown on.

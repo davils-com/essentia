@@ -13,7 +13,7 @@ import 'package:test/test.dart';
 import 'pipeline_config.dart';
 import 'pipeline_config_builder.dart';
 
-/// Ports `NestedReportFormatTest`.
+/// Covers the report of problems from nested builders.
 void main() {
   test('problems from three levels render as one report with the path of '
       'each', () {

@@ -65,7 +65,7 @@ const _noLineMessage =
 /// What the specification refuses is refused: a leading `v`, a leading
 /// zero in a number or a numeric pre-release identifier, an empty
 /// identifier, surrounding whitespace, a number beyond 2147483647, the
-/// largest 32-bit integer, as in Arc. Trim at the boundary where text
+/// largest 32-bit integer. Trim at the boundary where text
 /// arrives from somewhere loose.
 ///
 /// ## The next version

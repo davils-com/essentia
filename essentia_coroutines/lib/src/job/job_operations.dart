@@ -10,10 +10,9 @@
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// Kotlin's extensions on `Job`.
+/// The operations on a `Job` built from its contract.
 extension JobOperations on Job {
-  /// Cancels the job and waits until it is complete, Kotlin's
-  /// `cancelAndJoin()`.
+  /// Cancels the job and waits until it is complete.
   ///
   /// Returns a future that completes once the job is complete.
   Future<void> cancelAndJoin([CancellationException? cause]) {
@@ -21,15 +20,14 @@ extension JobOperations on Job {
     return join();
   }
 
-  /// Cancels every child of the job, not the job itself, Kotlin's
-  /// `cancelChildren()`.
+  /// Cancels every child of the job, not the job itself.
   void cancelChildren([CancellationException? cause]) {
     for (final Job child in children.toList()) {
       child.cancel(cause);
     }
   }
 
-  /// Throws if the job is not active, Kotlin's `ensureActive()`.
+  /// Throws if the job is not active.
   ///
   /// Throws the [CancellationException] of the job if it is cancelling,
   /// cancelled or complete.

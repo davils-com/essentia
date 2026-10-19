@@ -16,12 +16,10 @@ final _trailingZeros = RegExp(r'0+$');
 /// How many digits a fraction of a second has at microsecond precision.
 const _fractionDigits = 6;
 
-/// Kotlin's `Duration` operations Dart lacks: division by a duration,
+/// The [Duration] operations Dart lacks: division by a duration,
 /// `toComponents` and `toIsoString`.
 extension DurationArithmetic on Duration {
   /// How many times [other] fits into this duration.
-  ///
-  /// Kotlin's `Duration.div(other: Duration)`.
   ///
   /// Returns the ratio of both durations.
   double operator /(Duration other) => inMicroseconds / other.inMicroseconds;
@@ -29,7 +27,6 @@ extension DurationArithmetic on Duration {
   /// Splits the duration into days, hours, minutes, seconds and
   /// microseconds.
   ///
-  /// Kotlin's `Duration.toComponents`, as a record instead of an action.
   /// Every component of a negative duration is negative.
   ///
   /// Returns the components.
@@ -45,7 +42,7 @@ extension DurationArithmetic on Duration {
   /// Renders the duration in the ISO 8601 format, such as `PT1H30M`.
   ///
   /// Days are rendered as hours, a negative duration gets a leading `-`,
-  /// and zero is `PT0S`. Kotlin's `Duration.toIsoString()`.
+  /// and zero is `PT0S`.
   ///
   /// Returns the ISO 8601 text.
   @useResult

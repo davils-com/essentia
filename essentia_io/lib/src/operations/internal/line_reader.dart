@@ -25,7 +25,7 @@ const _lf = 0x0A;
 @internal
 const unlimitedLine = 0x1FFFFFFFFFFFFF;
 
-/// Reads one line of UTF-8 from a channel, Ktor's `internalReadLineTo`.
+/// Reads one line of UTF-8 from a channel.
 @internal
 final class LineReader {
   /// Creates the reader of a line of [_channel] into [_out], of at most

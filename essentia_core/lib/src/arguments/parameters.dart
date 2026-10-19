@@ -69,11 +69,10 @@ import 'package:meta/meta.dart';
 /// }
 /// ```
 ///
-/// Dart has no delegated properties, so where Kotlin registers a parameter
-/// as its property is created, a Dart schema lists its parameters once in
-/// [declared], and the schema registers that list as it is constructed. The
-/// order of the list is the order of the usage listing, and a parameter
-/// missing from it fails loudly when it is read.
+/// A schema lists its parameters once in [declared], and the schema
+/// registers that list as it is constructed. The order of the list is the
+/// order of the usage listing, and a parameter missing from it fails loudly
+/// when it is read.
 ///
 /// Reading a parameter costs a list access. Nothing about it converts,
 /// validates or waits, which is why [load] is the only place that has to be

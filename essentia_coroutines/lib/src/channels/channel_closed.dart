@@ -52,7 +52,7 @@ final class ChannelClosed<T> extends ChannelFailure<T> implements Causal {
   @override
   int get hashCode => Object.hash(ChannelClosed, cause);
 
-  /// Renders the cause, like Kotlin's `Closed(...)`.
+  /// Renders the cause.
   @override
   String toString() => 'ChannelClosed($cause)';
 }

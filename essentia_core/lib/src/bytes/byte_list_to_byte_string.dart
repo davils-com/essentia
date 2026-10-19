@@ -10,9 +10,9 @@
 import 'package:essentia_core/src/bytes/byte_string.dart';
 import 'package:meta/meta.dart';
 
-/// Kotlin's `ByteArray.toByteString` on any list of bytes.
+/// Turns any list of bytes into a [ByteString].
 extension ByteListToByteString on List<int> {
-  /// Copies the bytes into a [ByteString], Kotlin's `toByteString`.
+  /// Copies the bytes into a [ByteString].
   ///
   /// Returns the byte string.
   @useResult

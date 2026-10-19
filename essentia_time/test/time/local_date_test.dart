@@ -141,7 +141,7 @@ void main() {
     expect(LocalDate(2026, 6, 1).isoWeekYear, 2026);
   });
 
-  test('adds units and periods as Kotlin does', () {
+  test('adds units and periods', () {
     final date = LocalDate(2024, 1, 31);
 
     expect(date.plus(2, DateTimeUnit.week), LocalDate(2024, 2, 14));

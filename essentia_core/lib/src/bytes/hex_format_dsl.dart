@@ -11,8 +11,7 @@ import 'package:essentia_core/src/bytes/hex_format.dart';
 import 'package:essentia_core/src/bytes/hex_format_builder.dart';
 import 'package:essentia_core/src/scope/scope_functions.dart';
 
-/// Builds a [HexFormat] from a configuration block, Kotlin's
-/// `HexFormat { }`.
+/// Builds a [HexFormat] from a configuration block.
 ///
 /// Returns the format.
 HexFormat hexFormat(void Function(HexFormatBuilder it) block) =>

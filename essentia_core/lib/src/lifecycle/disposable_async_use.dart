@@ -11,9 +11,8 @@ import 'dart:async';
 
 import 'package:essentia_core/src/lifecycle/disposable_async.dart';
 
-/// Kotlin's `use` on a [DisposableAsync]: a block that works with a
-/// resource and leaves it disposed, waiting for the disposal, whichever way
-/// it ends.
+/// Runs a block that works with a [DisposableAsync] and leaves it disposed,
+/// waiting for the disposal, whichever way the block ends.
 ///
 /// ```dart
 /// await openQueue().useAsync((it) => it.send(message));

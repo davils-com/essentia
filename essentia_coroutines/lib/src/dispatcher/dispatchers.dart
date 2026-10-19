@@ -12,18 +12,18 @@ import 'package:essentia_coroutines/src/dispatcher/event_loop_dispatcher.dart';
 import 'package:essentia_coroutines/src/dispatcher/unconfined_dispatcher.dart';
 import 'package:essentia_coroutines/src/isolate/isolate_dispatcher.dart';
 
-/// The dispatchers every program has, Kotlin's `Dispatchers`.
+/// The dispatchers every program has.
 abstract final class Dispatchers {
-  /// The event loop of the isolate, the default of every coroutine:
-  /// Kotlin's `Main`, `Default` and `IO` in one, because an isolate runs
-  /// one thing at a time.
+  /// The event loop of the isolate, the default of every coroutine: the
+  /// dispatcher for the main work, for computation and for IO in one, because
+  /// an isolate runs one thing at a time.
   static const CoroutineDispatcher main = EventLoopDispatcher();
 
-  /// Starts a body at once, in the caller's frame, Kotlin's `Unconfined`.
+  /// Starts a body at once, in the caller's frame.
   static const CoroutineDispatcher unconfined = UnconfinedDispatcher();
 
   /// Runs every body on a worker isolate of a pool with one isolate per
-  /// processor, Kotlin's `Default` for work that keeps a processor busy.
+  /// processor, for work that keeps a processor busy.
   ///
   /// The body, everything it captures and its result must be sendable
   /// through a `SendPort`; otherwise it fails with an

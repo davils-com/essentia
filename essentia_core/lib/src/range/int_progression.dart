@@ -15,19 +15,18 @@ import 'package:meta/meta.dart';
 part 'int_range.dart';
 
 /// An arithmetic progression of integers from [start] to [endInclusive] in
-/// steps of [step], Kotlin's `IntProgression`.
+/// steps of [step].
 ///
-/// A positive step counts upwards, a negative one downwards. Like Kotlin,
-/// the progression ends at the last element the step reaches, so
-/// [endInclusive] is always an element of a progression that is not empty.
-/// It computes its [length], its elements and [contains] without iterating.
+/// A positive step counts upwards, a negative one downwards. The progression
+/// ends at the last element the step reaches, so [endInclusive] is always an
+/// element of a progression that is not empty. It computes its [length], its
+/// elements and [contains] without iterating.
 @immutable
 final class IntProgression with Iterable<int> {
   /// Creates the progression from [start] towards [endInclusive] in steps
   /// of [step].
   ///
-  /// The end is moved to the last element the step reaches, as Kotlin
-  /// does.
+  /// The end is moved to the last element the step reaches.
   ///
   /// Throws an [ArgumentError] if [step] is zero.
   IntProgression(int start, int endInclusive, {int step = 1})
@@ -93,14 +92,14 @@ final class IntProgression with Iterable<int> {
   int elementAt(int index) =>
       _elementAtUnchecked(RangeError.checkValidIndex(index, this));
 
-  /// The same elements in the opposite order, Kotlin's `reversed`.
+  /// The same elements in the opposite order.
   ///
   /// Returns the progression from [endInclusive] back to [start].
   @useResult
   IntProgression reversed() => IntProgression._(endInclusive, start, -step);
 
   /// The progression with the same start and direction but a step of
-  /// [step], Kotlin's `step` infix function.
+  /// [step].
   ///
   /// Returns the new progression, whose end is the last element the new
   /// step reaches.
@@ -124,7 +123,7 @@ final class IntProgression with Iterable<int> {
   int _elementAtUnchecked(int index) => start + index * step;
 
   /// Whether [other] is a progression with the same elements and step;
-  /// every empty progression equals every other, as in Kotlin.
+  /// every empty progression equals every other.
   ///
   /// Returns `true` for an equal progression.
   @override
@@ -135,13 +134,12 @@ final class IntProgression with Iterable<int> {
               endInclusive == other.endInclusive &&
               step == other.step);
 
-  /// The hash code of the ends and the step, and zero when empty, as in
-  /// Kotlin.
+  /// The hash code of the ends and the step, and zero when empty.
   @override
   int get hashCode => isEmpty ? 0 : Object.hash(start, endInclusive, step);
 
   /// Describes the progression as `start..end step n` or
-  /// `start downTo end step n`, like Kotlin.
+  /// `start downTo end step n`.
   ///
   /// Returns the description.
   @override
@@ -163,8 +161,7 @@ int _nonZero(int step) {
 }
 
 /// The last element a progression from [start] in steps of [step] reaches
-/// before passing [end], computed the way Kotlin's
-/// `getProgressionLastElement` does.
+/// before passing [end].
 ///
 /// Returns [end] itself when the progression is empty.
 int _lastElement(int start, int end, int step) {

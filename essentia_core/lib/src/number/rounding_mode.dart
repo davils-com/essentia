@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// How a number that falls between two representable values is rounded,
-/// the modes of Java's and Kotlin's `RoundingMode`.
+/// How a number that falls between two representable values is rounded.
 enum RoundingMode {
   /// Towards positive infinity: 1.1 is 2, -1.9 is -1.
   ceiling,

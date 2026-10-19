@@ -10,7 +10,7 @@
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 import 'package:essentia_coroutines/src/testing/test_scheduler.dart';
 
-/// The scope the body of `runTest` runs in, Kotlin's `TestScope`.
+/// The scope the body of `runTest` runs in.
 ///
 /// Its coroutines run on the virtual time of [testScheduler]. Work that
 /// runs for the whole test, such as a collector, is started in

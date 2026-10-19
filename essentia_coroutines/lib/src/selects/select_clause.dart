@@ -10,8 +10,8 @@
 import 'package:essentia_coroutines/src/selects/select_instance.dart';
 import 'package:meta/meta.dart';
 
-/// Something a `select` can wait for, which hands a [Q] to the block of
-/// the clause that wins, Kotlin's `SelectClause`.
+/// Something a `select` can wait for, which hands a [Q] to the block of the
+/// clause that wins.
 ///
 /// Clauses come from the things waited for: `channel.onReceive`,
 /// `channel.onReceiveCatching`, `channel.onSend(element)`,

@@ -11,7 +11,7 @@ import 'package:essentia_core/essentia_core.dart';
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_io/src/job/channel_job.dart';
 
-/// Ktor's operations on a [ChannelJob], all on its [ChannelJob.job].
+/// The operations on a [ChannelJob], all on its [ChannelJob.job].
 extension ChannelJobOperations on ChannelJob {
   /// Whether the coroutine completed.
   bool get isCompleted => job.isCompleted;

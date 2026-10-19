@@ -23,8 +23,8 @@ import 'package:essentia_time/src/zone/zone_rules.dart';
 import 'package:essentia_time/src/zone/zone_transition.dart';
 import 'package:meta/meta.dart';
 
-/// A time zone, Kotlin's `kotlinx.datetime.TimeZone`: the rules by which
-/// the clocks of a region relate to UTC, daylight saving time included.
+/// A time zone: the rules by which the clocks of a region relate to UTC,
+/// daylight saving time included.
 ///
 /// [of] reads a zone of the IANA time zone database, such as
 /// `Europe/Berlin`, or a fixed offset such as `+02:00` or `UTC+2`; the
@@ -38,7 +38,7 @@ sealed class TimeZone {
   /// Creates a zone of [id].
   const TimeZone._(this.id);
 
-  /// The zone [zoneId] names, Kotlin's `TimeZone.of`.
+  /// The zone [zoneId] names.
   ///
   /// [zoneId] is an identifier of the time zone database such as
   /// `Europe/Berlin`, `UTC` or `Z`, an offset such as `+02:00`, or an
@@ -91,11 +91,10 @@ sealed class TimeZone {
     return _RuleTimeZone(id, rules);
   }
 
-  /// UTC itself, Kotlin's `TimeZone.UTC`.
+  /// UTC itself.
   static const utc = FixedOffsetTimeZone._(UtcOffset.zero, 'UTC');
 
-  /// The zone of the system the program runs on, Kotlin's
-  /// `currentSystemDefault`.
+  /// The zone of the system the program runs on.
   ///
   /// Where the system does not tell its zone by name, which Android, iOS
   /// and Windows do not to a program, this is a fixed offset, the one the
@@ -114,7 +113,7 @@ sealed class TimeZone {
   }
 
   /// The identifiers of every zone of the built-in database, links
-  /// included, Kotlin's `availableZoneIds`.
+  /// included.
   static Set<String> get availableZoneIds => zoneIds();
 
   /// The version of the built-in time zone database, such as `2026a`.
@@ -140,15 +139,14 @@ sealed class TimeZone {
   /// The offsets of the zone over time.
   ZoneRules get rules;
 
-  /// The offset of the zone at [instant], Kotlin's `offsetAt`.
+  /// The offset of the zone at [instant].
   UtcOffset offsetAt(Instant instant) => rules.offsetAt(instant);
 
   /// What the zone makes of [local]: one offset, or the shift of the
   /// clocks that skips or repeats it.
   ZoneOffsetInfo offsetInfo(LocalDateTime local) => rules.infoAt(local);
 
-  /// The date and time the clocks of the zone show at [instant], Kotlin's
-  /// `Instant.toLocalDateTime(zone)`.
+  /// The date and time the clocks of the zone show at [instant].
   LocalDateTime toLocalDateTime(Instant instant) {
     final int seconds = instant.epochSeconds + offsetAt(instant).totalSeconds;
     final int secondOfDay = floorMod(seconds, secondsPerDay);
@@ -160,8 +158,7 @@ sealed class TimeZone {
     );
   }
 
-  /// The moment at which the clocks of the zone show [local], Kotlin's
-  /// `LocalDateTime.toInstant(zone)`.
+  /// The moment at which the clocks of the zone show [local].
   ///
   /// A local time the clocks skip moves forward by the length of the gap.
   /// A local time they pass twice takes [preferredOffset] when it is one of
@@ -205,7 +202,7 @@ sealed class TimeZone {
   }
 
   /// The first moment of [date] in the zone: midnight, or the moment the
-  /// clocks skip to when they skip midnight, Kotlin's `atStartOfDayIn`.
+  /// clocks skip to when they skip midnight.
   Instant startOfDay(LocalDate date) {
     final local = LocalDateTime(date, LocalTime.midnight);
     final ZoneOffsetInfo info = offsetInfo(local);
@@ -228,8 +225,7 @@ sealed class TimeZone {
   String toString() => id;
 }
 
-/// A time zone whose offset never changes, Kotlin's
-/// `kotlinx.datetime.FixedOffsetTimeZone`.
+/// A time zone whose offset never changes.
 final class FixedOffsetTimeZone extends TimeZone {
   /// The zone that always has [offset], named [id] or after the offset.
   factory FixedOffsetTimeZone(UtcOffset offset, {String? id}) =>

@@ -82,8 +82,7 @@ void main() {
       bus.dispose();
     });
 
-    test('a publish that will not wait reads the zone as well, where Arc '
-        'records only what it is told', () {
+    test('a publish that will not wait reads the zone as well', () {
       final EventBus bus = eventBus((it) => it.topic(users));
 
       final EventEnvelope<UserEvent>? fromZone = runAsPrincipal(

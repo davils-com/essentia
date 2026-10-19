@@ -17,9 +17,9 @@ import 'package:essentia_io/src/channel/byte_write_channel.dart';
 import 'package:essentia_io/src/exception/io_exception.dart';
 import 'package:meta/meta.dart';
 
-/// Copies the bytes of a channel to another up to a delimiter, Ktor's
-/// `ByteChannelScanner`: a Knuth-Morris-Pratt search that reads every byte
-/// once and keeps only what may still turn out to be the delimiter.
+/// Copies the bytes of a channel to another up to a delimiter: a
+/// Knuth-Morris-Pratt search that reads every byte once and keeps only
+/// what may still turn out to be the delimiter.
 @internal
 final class ByteChannelScanner {
   /// Creates the scanner of [_channel] for [matchString], which copies to
@@ -147,7 +147,7 @@ final class ByteChannelScanner {
   }
 
   /// Flushes the copied bytes once there are many or the channel flushes
-  /// every write, Ktor's `flushIfNeeded`.
+  /// every write.
   Future<void> _flushIfNeeded() async {
     if (_writeChannel.autoFlush ||
         _writeChannel.writeBuffer.size >= ByteChannel.maxSize) {

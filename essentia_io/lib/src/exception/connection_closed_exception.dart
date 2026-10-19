@@ -9,8 +9,7 @@
 
 import 'package:essentia_io/src/exception/io_exception.dart';
 
-/// Thrown when the peer of a connection closed it, Ktor's
-/// `ConnectionClosedException`.
+/// Thrown when the peer of a connection closed it.
 final class ConnectionClosedException extends IoException {
   /// Creates the exception with [message].
   const ConnectionClosedException([super.message = 'Connection was closed']);

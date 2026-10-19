@@ -19,8 +19,7 @@ import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 import 'package:meta/meta.dart';
 
 /// Maps every element of [source] to an inner stream with [convert] and
-/// emits the events of the most recent inner stream only, the counterpart
-/// of Kotlin's `flatMapLatest`.
+/// emits the events of the most recent inner stream only.
 ///
 /// When [source] emits, the subscription of the previous inner stream is
 /// cancelled, and the new inner stream is listened to once that cancel
@@ -36,9 +35,8 @@ import 'package:meta/meta.dart';
 /// replaced or the result is cancelled, so cancellable waits of the
 /// superseded work - a `delay` in an `async*` generator, a `Deferred` it
 /// awaits - end at once with a `CancellationException` instead of holding
-/// up the cancel, as Kotlin cancels the block of `transformLatest`. The job
-/// of the current inner stream is cancelled as well when the job the result
-/// was listened in is cancelled.
+/// up the cancel. The job of the current inner stream is cancelled as well
+/// when the job the result was listened in is cancelled.
 ///
 /// Pause and resume reach [source] and the current inner stream, and
 /// cancelling the result cancels both.

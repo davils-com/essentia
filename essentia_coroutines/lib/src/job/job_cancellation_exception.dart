@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// The cancellation a job hands its children and its waiters, Kotlin's
-/// `JobCancellationException`.
+/// The cancellation a job hands its children and its waiters.
 ///
 /// It names the [job] that was cancelled, and the failure that cancelled
 /// it as its [cause].

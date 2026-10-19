@@ -34,7 +34,7 @@ Matcher _throwsReport(Matcher matcher) => throwsA(
 Matcher _hasPaths(List<String> paths) =>
     isA<ValidationReport>().having(_paths, 'paths', paths);
 
-/// Ports `ValidatingBuilderTest`.
+/// Covers validating builders and the reports they throw.
 void main() {
   test('a valid configuration builds', () {
     final LoggingData data = _logging((it) {

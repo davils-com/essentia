@@ -11,7 +11,7 @@ import 'package:essentia_coroutines/src/job/completable_job.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/job/supervisor_job_impl.dart';
 
-/// A job whose children fail on their own, Kotlin's `SupervisorJob`.
+/// A job whose children fail on their own.
 ///
 /// A failing child neither cancels the supervisor nor its siblings; a
 /// child started with `launch` reports its failure to the

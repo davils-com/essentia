@@ -10,7 +10,7 @@
 import 'package:essentia_core/src/bytes/hex_format.dart';
 import 'package:essentia_core/src/dsl/builder.dart';
 
-/// The builder behind `hexFormat`, Kotlin's `HexFormat.Builder`.
+/// The builder behind `hexFormat`.
 final class HexFormatBuilder implements Builder<HexFormat> {
   /// Whether the digits `a` to `f` are written in upper case.
   var upperCase = false;

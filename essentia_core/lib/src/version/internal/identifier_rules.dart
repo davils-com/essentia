@@ -81,7 +81,7 @@ bool isPreReleaseIdentifier(String identifier) {
 }
 
 /// Whether every character of [text] is an ASCII digit; `true` for the
-/// empty text, as Kotlin's `all` is.
+/// empty text, as [Iterable.every] is.
 ///
 /// Returns `true` for a numeral.
 @internal

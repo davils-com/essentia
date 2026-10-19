@@ -11,7 +11,7 @@ import 'package:essentia_coroutines/src/context/abstract_coroutine_context_eleme
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 import 'package:meta/meta.dart';
 
-/// The name of a coroutine, for diagnostics, Kotlin's `CoroutineName`.
+/// The name of a coroutine, for diagnostics.
 ///
 /// ```dart
 /// scope.launch((it) => index(), context: const CoroutineName('indexer'));

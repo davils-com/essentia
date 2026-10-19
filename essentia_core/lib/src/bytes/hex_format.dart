@@ -9,8 +9,7 @@
 
 import 'package:meta/meta.dart';
 
-/// How bytes are written as hexadecimal digits and read back, Kotlin's
-/// `HexFormat`.
+/// How bytes are written as hexadecimal digits and read back.
 ///
 /// Every byte is two digits, wrapped in [bytePrefix] and [byteSuffix], and
 /// neighbouring bytes are joined by [byteSeparator]. Reading accepts either
@@ -32,10 +31,10 @@ final class HexFormat {
     this.byteSuffix = '',
   });
 
-  /// Lowercase digits without separators, Kotlin's `HexFormat.Default`.
+  /// Lowercase digits without separators.
   static const defaultFormat = HexFormat();
 
-  /// Uppercase digits without separators, Kotlin's `HexFormat.UpperCase`.
+  /// Uppercase digits without separators.
   static const upperCaseFormat = HexFormat(upperCase: true);
 
   /// Whether the digits `a` to `f` are written in upper case.

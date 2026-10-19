@@ -12,8 +12,7 @@ import 'package:essentia_coroutines/src/context/coroutine_context_element.dart';
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 import 'package:essentia_coroutines/src/exception/function_exception_handler.dart';
 
-/// Where a coroutine reports a failure nobody else handles, Kotlin's
-/// `CoroutineExceptionHandler`.
+/// Where a coroutine reports a failure nobody else handles.
 ///
 /// A coroutine started with `launch` that fails, and whose parent does not
 /// take the failure over, reports it here; without a handler it goes to the
@@ -30,9 +29,8 @@ import 'package:essentia_coroutines/src/exception/function_exception_handler.dar
 /// ```
 abstract interface class CoroutineExceptionHandler
     implements CoroutineContextElement {
-  /// Creates the handler that passes every failure to [handler].
-  ///
-  /// The stack trace is a Dart addition to Kotlin's contract.
+  /// Creates the handler that passes every failure to [handler], together with
+  /// its stack trace.
   factory CoroutineExceptionHandler(
     void Function(CoroutineContext context, Object error, StackTrace stackTrace)
     handler,

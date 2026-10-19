@@ -12,14 +12,14 @@ import 'package:meta/meta.dart';
 part 'comparable_open_end_range.dart';
 
 /// A range of comparable values from [start] up to but excluding
-/// [endExclusive], Kotlin's `OpenEndRange`.
+/// [endExclusive].
 ///
 /// The range is empty when [start] reaches [endExclusive].
 abstract interface class OpenEndRange<T extends Comparable<Object>> {
   /// Creates the range from [start] up to but excluding [endExclusive].
   ///
   /// Two such ranges are equal when both of their ends are equal, and the
-  /// range describes itself as `start..<endExclusive`, like Kotlin's.
+  /// range describes itself as `start..<endExclusive`.
   const factory OpenEndRange(T start, T endExclusive) = _ComparableOpenEndRange;
 
   /// The smallest value of the range.

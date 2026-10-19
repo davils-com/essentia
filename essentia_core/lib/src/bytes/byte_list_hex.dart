@@ -16,12 +16,11 @@ const _lowerDigits = '0123456789abcdef';
 /// The uppercase digits, in the order of their value.
 const _upperDigits = '0123456789ABCDEF';
 
-/// Kotlin's `ByteArray.toHexString` on any list of bytes.
+/// Writes any list of bytes as hexadecimal digits.
 extension ByteListHex on List<int> {
   /// Writes the bytes as hexadecimal digits in [format].
   ///
   /// Every element is read as a byte, so only its low eight bits count.
-  /// Kotlin's `ByteArray.toHexString`.
   ///
   /// Returns the text, empty for no bytes.
   @useResult

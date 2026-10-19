@@ -10,7 +10,7 @@
 import 'package:essentia_time/src/source/time_source.dart';
 import 'package:meta/meta.dart';
 
-/// A point in time of one [TimeSource], Kotlin's `ComparableTimeMark`.
+/// A point in time of one [TimeSource].
 ///
 /// A mark remembers the reading of its source when it was made, so it can
 /// tell how much time has passed since then. Marks of the same source can be
@@ -34,7 +34,7 @@ final class TimeMark implements Comparable<TimeMark> {
   /// The reading of [source] this mark stands for.
   final Duration reading;
 
-  /// How much time has passed since this mark, Kotlin's `elapsedNow()`.
+  /// How much time has passed since this mark.
   ///
   /// Returns a negative duration for a mark that lies in the future.
   Duration elapsedNow() => source.read() - reading;
@@ -61,8 +61,7 @@ final class TimeMark implements Comparable<TimeMark> {
   TimeMark operator -(Duration duration) =>
       TimeMark(source, reading - duration);
 
-  /// How much later this mark lies than [other], Kotlin's
-  /// `mark - other`.
+  /// How much later this mark lies than [other].
   ///
   /// Returns a negative duration when [other] lies later.
   ///

@@ -15,10 +15,10 @@ import 'package:essentia_coroutines/src/flow/shared_flow.dart';
 import 'package:essentia_coroutines/src/stream/cancellation_watch.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 
-/// Kotlin's cancellation operator for streams.
+/// The cancellation operator for streams.
 extension StreamCancellation<T> on Stream<T> {
   /// Ends the stream for a listener once the job it listened in is
-  /// cancelled, Kotlin's `cancellable`.
+  /// cancelled.
   ///
   /// The subscription of this stream is cancelled, and the listener gets
   /// the [CancellationException] of the job as an error event before the

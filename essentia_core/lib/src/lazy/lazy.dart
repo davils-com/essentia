@@ -7,11 +7,10 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A value computed on first use and kept from then on, Kotlin's `Lazy`.
+/// A value computed on first use and kept from then on.
 ///
-/// Dart has no property delegates, so where Kotlin writes
-/// `val word by lazy { Regex("^[a-z]+$") }` a field holds the [Lazy] itself and
-/// reads [value] where the value is needed:
+/// A field holds the [Lazy] itself and reads [value] where the value is
+/// needed:
 ///
 /// ```dart
 /// final Lazy<RegExp> word = lazy(() => RegExp(r'^[a-z]+$'));
@@ -29,7 +28,7 @@ abstract interface class Lazy<T> {
   /// initializer again.
   T get value;
 
-  /// Whether [value] has been computed, Kotlin's `isInitialized()`.
+  /// Whether [value] has been computed.
   ///
   /// Reading this never runs the initializer.
   bool get isInitialized;

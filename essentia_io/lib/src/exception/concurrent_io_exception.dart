@@ -8,7 +8,7 @@
  */
 
 /// Thrown when two coroutines read, or two write, a byte channel at the
-/// same time, Ktor's `ConcurrentIOException`.
+/// same time.
 ///
 /// A channel has one reader and one writer; a second one at the same time
 /// is a programming mistake, so this is an [Error].

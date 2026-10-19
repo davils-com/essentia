@@ -10,7 +10,7 @@
 import 'package:essentia_core/essentia_core.dart';
 import 'package:test/test.dart';
 
-/// Covers Kotlin's `lazy` and `lazyOf`: one computation, retry after a
+/// Covers `lazy` and `lazyOf`: one computation, retry after a
 /// failure, refusal of a read from inside the initializer.
 void main() {
   group('lazy', () {
@@ -87,7 +87,7 @@ void main() {
       expect(value.value, 7);
     });
 
-    test('renders like Kotlin before and after the first read', () {
+    test('renders before and after the first read', () {
       final Lazy<int> value = lazy(() => 42);
 
       expect(value.toString(), 'Lazy value not initialized yet.');

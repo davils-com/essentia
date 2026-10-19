@@ -17,8 +17,8 @@ import 'package:essentia_time/src/zone/time_zone.dart';
 import 'package:essentia_time/src/zone/utc_offset.dart';
 import 'package:meta/meta.dart';
 
-/// A moment on the time line, Kotlin's `kotlin.time.Instant`: the same
-/// everywhere on earth, whatever a clock on the wall reads.
+/// A moment on the time line: the same everywhere on earth, whatever a
+/// clock on the wall reads.
 ///
 /// It counts [epochSeconds] from 1970-01-01T00:00:00Z and
 /// [nanosecondsOfSecond] within that second, and covers a million years
@@ -30,9 +30,9 @@ import 'package:meta/meta.dart';
 @immutable
 final class Instant implements Comparable<Instant> {
   /// The moment [epochSeconds] seconds and [nanosecondAdjustment]
-  /// nanoseconds after the epoch, Kotlin's `fromEpochSeconds`.
+  /// nanoseconds after the epoch.
   ///
-  /// A moment beyond the range is clamped to its end, as in Kotlin.
+  /// A moment beyond the range is clamped to its end.
   factory Instant.fromEpochSeconds(
     int epochSeconds, [
     int nanosecondAdjustment = 0,
@@ -41,8 +41,7 @@ final class Instant implements Comparable<Instant> {
     floorMod(nanosecondAdjustment, nanosPerSecond),
   );
 
-  /// The moment [epochMilliseconds] milliseconds after the epoch,
-  /// Kotlin's `fromEpochMilliseconds`.
+  /// The moment [epochMilliseconds] milliseconds after the epoch.
   factory Instant.fromEpochMilliseconds(int epochMilliseconds) =>
       Instant._clamped(
         floorDiv(epochMilliseconds, 1000),
@@ -101,11 +100,11 @@ final class Instant implements Comparable<Instant> {
   static const epoch = Instant._(0, 0);
 
   /// A moment so far in the past that it stands for "always before",
-  /// -100001-12-31T23:59:59.999999999Z, Kotlin's `DISTANT_PAST`.
+  /// -100001-12-31T23:59:59.999999999Z.
   static const distantPast = Instant._(-3217862419201, nanosPerSecond - 1);
 
   /// A moment so far in the future that it stands for "never",
-  /// +100000-01-01T00:00:00Z, Kotlin's `DISTANT_FUTURE`.
+  /// +100000-01-01T00:00:00Z.
   static const distantFuture = Instant._(3093527980800, 0);
 
   /// The first moment there is, -1000000-01-01T00:00:00Z.
@@ -143,7 +142,7 @@ final class Instant implements Comparable<Instant> {
   bool get isDistantFuture => compareTo(distantFuture) >= 0;
 
   /// The milliseconds since the epoch, rounded down and clamped to
-  /// 2^53 - 1 either way, Kotlin's `toEpochMilliseconds`.
+  /// 2^53 - 1 either way.
   int toEpochMilliseconds() {
     if (epochSeconds > _maxSafe ~/ 1000 - 1) {
       return _maxSafe;
@@ -168,7 +167,7 @@ final class Instant implements Comparable<Instant> {
   }
 
   /// The moment [duration] later, earlier when negative, clamped to the
-  /// range as in Kotlin.
+  /// range.
   Instant operator +(Duration duration) {
     final int micros = duration.inMicroseconds;
     final int nanos = nanosecondsOfSecond + floorMod(micros, 1000000) * 1000;
@@ -179,19 +178,18 @@ final class Instant implements Comparable<Instant> {
   }
 
   /// The moment [duration] earlier, later when negative, clamped to the
-  /// range as in Kotlin.
+  /// range.
   Instant operator -(Duration duration) => this + -duration;
 
   /// The time from [other] to this moment, negative when [other] is later,
-  /// to the microsecond; Kotlin writes it `this - other`.
+  /// to the microsecond.
   Duration difference(Instant other) => Duration(
     microseconds:
         (epochSeconds - other.epochSeconds) * 1000000 +
         (nanosecondsOfSecond - other.nanosecondsOfSecond) ~/ 1000,
   );
 
-  /// The moment [value] times [unit] later, earlier when negative,
-  /// Kotlin's `plus(value, unit)`.
+  /// The moment [value] times [unit] later, earlier when negative.
   ///
   /// A time based unit adds exact time. A date based unit moves the date a
   /// clock in [timeZone] shows and keeps its time of day, so a day can last
@@ -219,15 +217,14 @@ final class Instant implements Comparable<Instant> {
     }
   }
 
-  /// The moment [value] times [unit] earlier, Kotlin's `minus(value, unit)`.
+  /// The moment [value] times [unit] earlier.
   ///
   /// Throws as [plus] does.
   Instant minus(int value, DateTimeUnit unit, {TimeZone? timeZone}) =>
       plus(-value, unit, timeZone: timeZone);
 
-  /// The moment [period] later in [timeZone], Kotlin's `plus(period, zone)`:
-  /// first its months and days on the dates a clock there shows, then its
-  /// time as exact time.
+  /// The moment [period] later in [timeZone]: first its months and days
+  /// on the dates a clock there shows, then its time as exact time.
   ///
   /// Throws a [DateTimeArithmeticException] beyond the range.
   Instant plusPeriod(DateTimePeriod period, TimeZone timeZone) {
@@ -251,15 +248,14 @@ final class Instant implements Comparable<Instant> {
     );
   }
 
-  /// The moment [period] earlier in [timeZone], Kotlin's
-  /// `minus(period, zone)`.
+  /// The moment [period] earlier in [timeZone].
   ///
   /// Throws a [DateTimeArithmeticException] beyond the range.
   Instant minusPeriod(DateTimePeriod period, TimeZone timeZone) =>
       plusPeriod(-period, timeZone);
 
   /// How many whole [unit]s lie from this moment to [other], negative when
-  /// [other] is earlier, Kotlin's `until`.
+  /// [other] is earlier.
   ///
   /// A date based unit counts on the dates a clock in [timeZone] shows and
   /// needs the zone.
@@ -307,9 +303,8 @@ final class Instant implements Comparable<Instant> {
   int yearsUntil(Instant other, TimeZone timeZone) =>
       until(other, DateTimeUnit.year, timeZone: timeZone);
 
-  /// The period from this moment to [other] in [timeZone], Kotlin's
-  /// `periodUntil`: whole months, then whole days, then the exact time
-  /// that remains, all with one sign.
+  /// The period from this moment to [other] in [timeZone]: whole months,
+  /// then whole days, then the exact time that remains, all with one sign.
   DateTimePeriod periodUntil(Instant other, TimeZone timeZone) {
     final int months = _wholeUnitsUntil(other, DateTimeUnit.month, timeZone);
     final Instant afterMonths = plus(
@@ -335,13 +330,11 @@ final class Instant implements Comparable<Instant> {
     );
   }
 
-  /// The date and time a clock in [timeZone] shows at this moment,
-  /// Kotlin's `toLocalDateTime`.
+  /// The date and time a clock in [timeZone] shows at this moment.
   LocalDateTime toLocalDateTime(TimeZone timeZone) =>
       timeZone.toLocalDateTime(this);
 
-  /// The offset [timeZone] has from UTC at this moment, Kotlin's
-  /// `offsetIn`.
+  /// The offset [timeZone] has from UTC at this moment.
   UtcOffset offsetIn(TimeZone timeZone) => timeZone.offsetAt(this);
 
   /// How many whole [unit]s, a day or a month, lie from this moment to

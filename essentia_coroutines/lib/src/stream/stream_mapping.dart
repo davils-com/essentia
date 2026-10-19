@@ -20,20 +20,18 @@ import 'package:essentia_coroutines/src/stream/switch_map.dart';
 import 'package:essentia_coroutines/src/sync/semaphore.dart';
 
 /// How many inner streams `flatMapMerge` runs at once unless told
-/// otherwise, the default of Kotlin's `DEFAULT_CONCURRENCY`.
+/// otherwise.
 const _defaultConcurrency = 16;
 
-/// Kotlin's mapping `Flow` operators for streams.
+/// The mapping operators for streams.
 extension StreamMapping<T> on Stream<T> {
-  /// Maps every element with [transform] and drops the `null` results, the
-  /// counterpart of Kotlin's `mapNotNull`.
+  /// Maps every element with [transform] and drops the `null` results.
   ///
   /// Returns a stream that is a broadcast stream exactly when this one is.
   Stream<R> mapNotNull<R extends Object>(R? Function(T element) transform) =>
       expand((element) => <R>[?transform(element)]);
 
-  /// Pairs every element with its position, starting at zero, the
-  /// counterpart of Kotlin's `withIndex`.
+  /// Pairs every element with its position, starting at zero.
   ///
   /// Every listener counts from zero, and pause, resume and cancel reach
   /// this stream.
@@ -49,7 +47,7 @@ extension StreamMapping<T> on Stream<T> {
   });
 
   /// Maps every element with [transform] and emits only the result for the
-  /// latest element, the counterpart of Kotlin's `mapLatest`.
+  /// latest element.
   ///
   /// When an element arrives while the result of the previous one is still
   /// pending, that result is dropped. [transform] runs in a job of its own,
@@ -66,7 +64,7 @@ extension StreamMapping<T> on Stream<T> {
       );
 
   /// Maps every element to an inner stream with [transform] and emits the
-  /// events of the latest inner stream only, Kotlin's `flatMapLatest`.
+  /// events of the latest inner stream only.
   ///
   /// When an element arrives, the inner stream of the previous one is
   /// cancelled, and the new one is listened to once that cancel completed;
@@ -92,10 +90,10 @@ extension StreamMapping<T> on Stream<T> {
       switchMap<T, R>(this, transform);
 
   /// Maps every element to an inner stream with [transform] and emits the
-  /// inner streams one after the other, Kotlin's `flatMapConcat`.
+  /// inner streams one after the other.
   ///
   /// This stream is paused while an inner stream runs. It is Dart's
-  /// `asyncExpand` under its Kotlin name.
+  /// `asyncExpand` under another name.
   ///
   /// Returns a stream that is a broadcast stream exactly when this one is.
   Stream<R> flatMapConcat<R>(Stream<R> Function(T value) transform) =>
@@ -103,7 +101,7 @@ extension StreamMapping<T> on Stream<T> {
 
   /// Runs [transform] for every element, which emits through the collector
   /// `it` it is handed, and cancels the run of the previous element when a
-  /// new one arrives, Kotlin's `transformLatest`.
+  /// new one arrives.
   ///
   /// Every run happens in a job of its own: when the next element arrives,
   /// that job is cancelled, so `delay` and other cancellable waits of the
@@ -126,8 +124,7 @@ extension StreamMapping<T> on Stream<T> {
     FutureOr<void> Function(FlowCollector<R> it, T value) transform,
   ) => switchMap<T, R>(this, (value) => _run(transform, value));
 
-  /// Runs [action] for every element before it is emitted, Kotlin's
-  /// `onEach`.
+  /// Runs [action] for every element before it is emitted.
   ///
   /// When [action] returns a future, this stream is paused until it
   /// completes, and the element is emitted afterwards. An error of
@@ -144,8 +141,7 @@ extension StreamMapping<T> on Stream<T> {
       });
 
   /// Maps every element to an inner stream with [transform] and merges the
-  /// inner streams, running up to [concurrency] of them at once, the
-  /// counterpart of Kotlin's `flatMapMerge`.
+  /// inner streams, running up to [concurrency] of them at once.
   ///
   /// An inner stream beyond [concurrency] is opened only once a running
   /// one ended. The limit is shared by every listener of the result.

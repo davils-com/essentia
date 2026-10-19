@@ -18,12 +18,12 @@ import 'package:essentia_coroutines/src/selects/select_clause.dart';
 import 'package:essentia_coroutines/src/selects/timeout_clause.dart';
 import 'package:meta/meta.dart';
 
-/// The state machine of `select`, Kotlin's `SelectImplementation`.
+/// The state machine of `select`.
 ///
 /// An isolate runs one thing at a time, so a single flag decides the winner
-/// instead of Kotlin's atomic state: the first clause that selects wins,
-/// every other registration is disposed at once, and the block of the
-/// winner runs in the caller's context.
+/// instead of an atomic state: the first clause that selects wins, every other
+/// registration is disposed at once, and the block of the winner runs in the
+/// caller's context.
 @internal
 final class SelectImplementation<R> implements SelectBuilder<R> {
   /// The clauses, in the order they were registered with the builder.

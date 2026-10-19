@@ -11,7 +11,7 @@ import 'job_node.dart';
 
 /// The model of the job contract the real jobs are held against.
 final class JobModel {
-  /// Cancels [node], Kotlin's `cancel()`.
+  /// Cancels [node].
   void cancel(JobNode node) {
     if (node.isFinal || node.cancelling) {
       return;
@@ -19,7 +19,7 @@ final class JobModel {
     _markCancelling(node, null);
   }
 
-  /// Completes [node], Kotlin's `complete()`.
+  /// Completes [node].
   void complete(JobNode node) {
     if (node.isFinal || node.cancelling || node.bodyDone) {
       return;
@@ -28,7 +28,7 @@ final class JobModel {
     _tryFinalize(node);
   }
 
-  /// Fails [node] with [failure], Kotlin's `completeExceptionally`.
+  /// Fails [node] with [failure].
   void fail(JobNode node, Object failure) {
     if (node.isFinal || node.bodyDone) {
       return;

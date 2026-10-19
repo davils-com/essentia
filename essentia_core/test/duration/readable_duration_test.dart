@@ -11,7 +11,7 @@ import 'package:essentia_core/essentia_core.dart';
 import 'package:essentia_core/src/duration/readable_duration.dart';
 import 'package:test/test.dart';
 
-/// Durations and the text Kotlin's `Duration.toString()` writes for them.
+/// Durations and the readable text `toReadableString` writes for them.
 final _rendered = <Duration, String>{
   Duration.zero: '0s',
   const Duration(seconds: 30): '30s',

@@ -95,7 +95,7 @@ int _readAt(String rendered, int cursor, List<PathStep> into) {
   return end;
 }
 
-/// Ports `ViolationPathPropertyTest` as seeded random loops.
+/// Covers the properties of a violation path in seeded random loops.
 void main() {
   test('every segment that was appended is present, in the order it was '
       'appended', () {

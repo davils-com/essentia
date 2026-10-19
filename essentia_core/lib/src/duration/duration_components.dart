@@ -10,8 +10,8 @@
 /// A duration split into whole days, hours, minutes and seconds and the
 /// microseconds of the last second.
 ///
-/// What Kotlin's `Duration.toComponents` hands to its action. Every
-/// component carries the sign of the duration.
+/// What `Duration.toComponents` returns. Every component carries the sign
+/// of the duration.
 typedef DurationComponents = ({
   int days,
   int hours,

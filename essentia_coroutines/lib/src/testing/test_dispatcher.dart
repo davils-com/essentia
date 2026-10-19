@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/dispatcher/coroutine_dispatcher.dart';
 import 'package:essentia_coroutines/src/testing/test_scheduler.dart';
 
-/// A dispatcher on the virtual time of a [TestScheduler], Kotlin's
-/// `TestDispatcher`.
+/// A dispatcher on the virtual time of a [TestScheduler].
 abstract class TestDispatcher extends CoroutineDispatcher {
   /// Creates the dispatcher.
   const TestDispatcher();

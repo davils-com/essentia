@@ -7,5 +7,5 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A failure standing in for Kotlin's `AssertionError`.
+/// A failure standing in for a broken assertion.
 final class AssertionException implements Exception {}

@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/channels/channel_closed.dart';
 import 'package:meta/meta.dart';
 
-/// The outcome of a channel operation that does not wait, Kotlin's
-/// `ChannelResult`.
+/// The outcome of a channel operation that does not wait.
 ///
 /// It is a [ChannelSuccess] carrying the value, a [ChannelFailure] when the
 /// channel was full or empty, or a [ChannelClosed] - a failure as well -
@@ -33,23 +32,22 @@ sealed class ChannelResult<T> {
   /// Creates a result.
   const ChannelResult();
 
-  /// Whether the operation succeeded, Kotlin's `isSuccess`.
+  /// Whether the operation succeeded.
   bool get isSuccess;
 
   /// Whether the operation failed, because the channel was full, empty or
-  /// closed, Kotlin's `isFailure`.
+  /// closed.
   bool get isFailure => !isSuccess;
 
-  /// Whether the operation failed because the channel is closed, Kotlin's
-  /// `isClosed`.
+  /// Whether the operation failed because the channel is closed.
   bool get isClosed;
 
-  /// The value of a successful operation, Kotlin's `getOrNull()`.
+  /// The value of a successful operation, or `null` for a failure.
   ///
   /// Returns the value, or `null` for a failure.
   T? getOrNull();
 
-  /// The value of a successful operation, Kotlin's `getOrThrow()`.
+  /// The value of a successful operation, throwing for a failure.
   ///
   /// Returns the value.
   ///
@@ -57,7 +55,7 @@ sealed class ChannelResult<T> {
   /// for any other failure.
   T getOrThrow();
 
-  /// Why the channel is closed, Kotlin's `exceptionOrNull()`.
+  /// Why the channel is closed.
   ///
   /// Returns the cause of a [ChannelClosed], or `null` for a success, a
   /// plain failure and a channel closed without a cause.
@@ -101,7 +99,7 @@ final class ChannelSuccess<T> extends ChannelResult<T> {
   @override
   int get hashCode => Object.hash(ChannelSuccess, value);
 
-  /// Renders the value, like Kotlin's `Value(...)`.
+  /// Renders the value.
   @override
   String toString() => 'ChannelSuccess($value)';
 }
@@ -143,7 +141,7 @@ base class ChannelFailure<T> extends ChannelResult<T> {
   @override
   int get hashCode => (ChannelFailure).hashCode;
 
-  /// Renders the failure, like Kotlin's `Failed`.
+  /// Renders the failure.
   @override
   String toString() => 'ChannelFailure';
 }

@@ -11,10 +11,9 @@ import 'package:essentia_time/src/internal/iso_text.dart';
 import 'package:essentia_time/src/internal/time_math.dart';
 import 'package:meta/meta.dart';
 
-/// An amount of calendar and clock time, Kotlin's
-/// `kotlinx.datetime.DateTimePeriod`: "1 month, 2 days and 3 hours".
+/// An amount of calendar and clock time: "1 month, 2 days and 3 hours".
 ///
-/// It is normalised as Kotlin's is: years and months are held as
+/// It is normalised: years and months are held as
 /// [totalMonths], hours, minutes, seconds and nanoseconds as one exact time
 /// whose parts share a sign, and [days] on their own, because a day can
 /// last 23 or 25 hours. The three may carry different signs.
@@ -136,7 +135,7 @@ sealed class DateTimePeriod {
     nanoseconds: -nanosecondsOfTime,
   );
 
-  /// The sum of this period and [other], part by part, Kotlin's `plus`.
+  /// The sum of this period and [other], part by part.
   DateTimePeriod operator +(DateTimePeriod other) => DateTimePeriod(
     months: totalMonths + other.totalMonths,
     days: days + other.days,
@@ -169,7 +168,7 @@ sealed class DateTimePeriod {
   int get hashCode =>
       Object.hash(totalMonths, days, secondsOfTime, nanosecondsOfTime);
 
-  /// The period as ISO 8601 writes it, as Kotlin does: `P1Y2M3DT4H`,
+  /// The period as ISO 8601 writes it: `P1Y2M3DT4H`,
   /// `-P1D` when no part is positive, and `P0D` when it is empty.
   @override
   String toString() {
@@ -202,8 +201,8 @@ sealed class DateTimePeriod {
   }
 }
 
-/// A period of years, months and days without time, Kotlin's
-/// `kotlinx.datetime.DatePeriod`; what moves a `LocalDate`.
+/// A period of years, months and days without time; what moves a
+/// `LocalDate`.
 final class DatePeriod extends DateTimePeriod {
   /// The period of [years], [months] and [days].
   factory DatePeriod({int years = 0, int months = 0, int days = 0}) =>

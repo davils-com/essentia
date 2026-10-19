@@ -11,7 +11,7 @@ import 'package:essentia_io/src/buffer/buffer.dart';
 import 'package:essentia_io/src/channel/byte_read_channel.dart';
 import 'package:meta/meta.dart';
 
-/// A channel without bytes that is closed, Ktor's `ByteReadChannel.Empty`.
+/// A channel without bytes that is closed.
 @internal
 final class EmptyByteReadChannel implements ByteReadChannel {
   /// Creates the channel.

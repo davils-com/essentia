@@ -10,8 +10,8 @@
 import 'package:essentia_coroutines/src/channels/send_channel.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 
-/// The scope the body of `produce` runs in, Kotlin's `ProducerScope`: a
-/// coroutine scope that is also the sending side of the channel it fills.
+/// The scope the body of `produce` runs in: a coroutine scope that is also the
+/// sending side of the channel it fills.
 ///
 /// ```dart
 /// final ReceiveChannel<int> squares = scope.produce((it) async {
@@ -22,6 +22,6 @@ import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 /// ```
 abstract interface class ProducerScope<E>
     implements CoroutineScope, SendChannel<E> {
-  /// The channel the producer sends to, Kotlin's `ProducerScope.channel`.
+  /// The channel the producer sends to.
   SendChannel<E> get channel;
 }

@@ -14,8 +14,7 @@ import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/exception/coroutine_exception_handler.dart';
 import 'package:essentia_coroutines/src/exception/suppressed_exceptions.dart';
 
-/// Reports a failure of a coroutine nobody else handles, Kotlin's
-/// `handleCoroutineException`.
+/// Reports a failure of a coroutine nobody else handles.
 ///
 /// A [CancellationException] is never reported. Otherwise the
 /// [CoroutineExceptionHandler] of [context] gets it; without one, or when

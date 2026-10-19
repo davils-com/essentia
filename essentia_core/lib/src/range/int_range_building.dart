@@ -10,25 +10,22 @@
 import 'package:essentia_core/src/range/int_progression.dart';
 import 'package:meta/meta.dart';
 
-/// Builds integer ranges and progressions the way Kotlin's `..`, `until`
-/// and `downTo` do.
+/// Builds integer ranges and progressions with [rangeTo], [until] and
+/// [downTo].
 extension IntRangeBuilding on int {
-  /// The integers from this one up to and including [end], Kotlin's
-  /// `rangeTo` and `..`.
+  /// The integers from this one up to and including [end].
   ///
   /// Returns the range, which is empty when [end] is smaller.
   @useResult
   IntRange rangeTo(int end) => IntRange(this, end);
 
-  /// The integers from this one up to but excluding [end], Kotlin's
-  /// `until`.
+  /// The integers from this one up to but excluding [end].
   ///
   /// Returns the range, which is empty when [end] is not larger.
   @useResult
   IntRange until(int end) => IntRange(this, end - 1);
 
-  /// The integers from this one down to and including [end], Kotlin's
-  /// `downTo`.
+  /// The integers from this one down to and including [end].
   ///
   /// Returns the progression with a step of minus one, which is empty when
   /// [end] is larger.

@@ -11,8 +11,7 @@ import 'package:essentia_core/essentia_core.dart';
 import 'package:essentia_time/src/date/local_date.dart';
 import 'package:meta/meta.dart';
 
-/// The dates from [start] up to and including [endInclusive], Kotlin's
-/// `kotlinx.datetime.LocalDateRange`.
+/// The dates from [start] up to and including [endInclusive].
 ///
 /// It is a [ClosedRange] that can also be iterated day by day, indexed and
 /// measured without iterating. It is empty when [start] lies after
@@ -100,7 +99,7 @@ final class LocalDateRange extends Iterable<LocalDate>
   @override
   int get hashCode => isEmpty ? 0 : Object.hash(start, endInclusive);
 
-  /// Describes the range as `start..endInclusive`, like Kotlin.
+  /// Describes the range as `start..endInclusive`.
   @override
   String toString() => '$start..$endInclusive';
 }

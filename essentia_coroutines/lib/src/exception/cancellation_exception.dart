@@ -9,8 +9,7 @@
 
 import 'package:essentia_core/essentia_core.dart';
 
-/// Reports that work stopped because its job was cancelled, Kotlin's
-/// `CancellationException`.
+/// Reports that work stopped because its job was cancelled.
 ///
 /// It is not a failure of the work: whoever cancelled the job asked for it.
 /// Code that counts failures, retries them or records them leaves a

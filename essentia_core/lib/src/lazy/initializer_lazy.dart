@@ -11,7 +11,7 @@ import 'package:essentia_core/src/lazy/lazy.dart';
 import 'package:meta/meta.dart';
 
 /// The [Lazy] that `lazy` creates: it runs its initializer on the first read
-/// and keeps the result, Kotlin's `SynchronizedLazyImpl`.
+/// and keeps the result.
 @internal
 final class InitializerLazy<T> implements Lazy<T> {
   /// Creates the [Lazy] that [initializer] computes on the first read.
@@ -55,7 +55,7 @@ final class InitializerLazy<T> implements Lazy<T> {
     }
   }
 
-  /// Renders the value once it is computed, and Kotlin's
+  /// Renders the value once it is computed, and
   /// `Lazy value not initialized yet.` before.
   @override
   String toString() {

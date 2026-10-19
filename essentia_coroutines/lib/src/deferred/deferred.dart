@@ -10,13 +10,12 @@
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// A job with a result, Kotlin's `Deferred`.
+/// A job with a result.
 ///
-/// A deferred is a `Future`: `await deferred` is Kotlin's
-/// `deferred.await()`, which Dart cannot spell because `await` is reserved
-/// inside asynchronous functions. Awaiting is cancellable: the waiting code
-/// ends with a [CancellationException] once its own job is cancelled, and
-/// a lazily started deferred is started by awaiting it.
+/// A deferred is a `Future`, so `await deferred` waits for its result. Awaiting
+/// is cancellable: the waiting code ends with a [CancellationException] once
+/// its own job is cancelled, and a lazily started deferred is started by
+/// awaiting it.
 ///
 /// ```dart
 /// final Deferred<User> user = scope.async((it) => loadUser(id));
@@ -24,7 +23,7 @@ import 'package:essentia_coroutines/src/job/job.dart';
 /// render(await user, await orders);
 /// ```
 abstract interface class Deferred<T> implements Job, Future<T> {
-  /// The result of a completed deferred, Kotlin's `getCompleted()`.
+  /// The result of a completed deferred.
   ///
   /// Returns the value.
   ///
@@ -32,8 +31,7 @@ abstract interface class Deferred<T> implements Job, Future<T> {
   /// it is not complete yet.
   T getCompleted();
 
-  /// The failure of a completed deferred, Kotlin's
-  /// `getCompletionExceptionOrNull()`.
+  /// The failure of a completed deferred.
   ///
   /// Returns the failure or cancellation, or `null` after a normal
   /// completion.

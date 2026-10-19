@@ -22,8 +22,8 @@ const _readableUnits = <String, int>{
 /// One component of the readable form: a number and a unit.
 final _readableComponent = RegExp(r'(\d+(?:\.\d+)?)\s*(ms|us|ns|d|h|m|s)');
 
-/// Reads text as a duration in either form Kotlin's `Duration.parse`
-/// accepts: the readable one `Duration.toString` writes, and ISO-8601.
+/// Reads text as a duration in either of two forms: the readable one
+/// `Duration.toReadableString` writes, and ISO-8601.
 ///
 /// ```dart
 /// final Duration timeout = '1h 30m'.toDuration();
@@ -35,8 +35,8 @@ final _readableComponent = RegExp(r'(\d+(?:\.\d+)?)\s*(ms|us|ns|d|h|m|s)');
 /// `h`, `m`, `s`, `ms`, `us` or `ns`, each unit at most once and largest
 /// first, such as `30s`, `1h 30m` or `1.5ms`. A negative duration has a
 /// leading `-`, and one of several components may be wrapped in
-/// parentheses, `-(1h 30m)`, as Kotlin writes it. Fractions finer than a
-/// microsecond are rounded to the nearest microsecond.
+/// parentheses, `-(1h 30m)`. Fractions finer than a microsecond are rounded
+/// to the nearest microsecond.
 extension DurationText on String {
   /// Reads this text, such as `30s`, `1h 30m`, `-(2m 5s)` or `PT30S`, as a
   /// duration.
@@ -70,8 +70,8 @@ extension DurationText on String {
   }
 }
 
-/// Removes the parentheses Kotlin wraps a negative duration of several
-/// components in.
+/// Removes the parentheses that may wrap a negative duration of several
+/// components.
 ///
 /// Returns [body] without them, or [body] unchanged when it is not wrapped
 /// or the duration is not [negative].

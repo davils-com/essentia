@@ -7,12 +7,10 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Kotlin's scope functions, for writing configuration blocks the way a
-/// Kotlin DSL does.
+/// Scope functions, for writing configuration blocks on any value.
 ///
-/// Dart has no lambda with a receiver, so a block takes the object it
-/// configures as its parameter, named `it` by convention, and the shape of
-/// the call stays the same:
+/// A block takes the object it configures as its parameter, named `it` by
+/// convention:
 ///
 /// ```dart
 /// final LoggingData config = LoggingBuilder().apply((it) {
@@ -24,9 +22,6 @@
 extension ScopeFunctions<T> on T {
   /// Runs [block] on this value and returns the value itself.
   ///
-  /// Kotlin's `apply` and `also` in one: without a receiver both hand the
-  /// value to the block and return it.
-  ///
   /// Returns this value.
   T apply(void Function(T it) block) {
     block(this);
@@ -35,8 +30,8 @@ extension ScopeFunctions<T> on T {
 
   /// Runs [action] on this value and returns the value itself.
   ///
-  /// The same as [apply]; Kotlin keeps both names to say whether the block
-  /// configures the value or merely looks at it, and so does this.
+  /// The same as [apply]; the two names say whether the block configures
+  /// the value or merely looks at it.
   ///
   /// Returns this value.
   T also(void Function(T it) action) {

@@ -12,7 +12,7 @@ import 'package:essentia_coroutines/src/context/coroutine_context_element.dart';
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 
 /// An immutable set of elements, at most one per key, that a coroutine runs
-/// with, Kotlin's `CoroutineContext`.
+/// with.
 ///
 /// The elements say which job the work belongs to, what it is called, how
 /// its unhandled failures are reported, where it is dispatched, which
@@ -26,10 +26,10 @@ import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 /// context.get(CoroutineName.key)?.name; // 'indexer'
 /// ```
 abstract interface class CoroutineContext {
-  /// The context without any element, Kotlin's `EmptyCoroutineContext`.
+  /// The context without any element.
   static const CoroutineContext empty = CombinedCoroutineContext.empty;
 
-  /// The element stored under [key], Kotlin's `context[key]`.
+  /// The element stored under [key].
   ///
   /// Returns the element, or `null` when the context holds none under
   /// [key].

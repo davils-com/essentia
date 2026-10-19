@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// What a job calls once it completes, Kotlin's `CompletionHandler`.
+/// What a job calls once it completes.
 ///
 /// [cause] is `null` when the job completed normally, a
 /// `CancellationException` when it was cancelled, and the failure when it

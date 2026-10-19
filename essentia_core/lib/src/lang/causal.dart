@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Something that happened because of an earlier failure, which it keeps,
-/// Kotlin's `Throwable.cause`.
+/// Something that happened because of an earlier failure, which it keeps.
 ///
 /// Dart's errors and exceptions carry no cause of their own. The ones of
 /// Essentia that wrap another failure implement this interface, so code

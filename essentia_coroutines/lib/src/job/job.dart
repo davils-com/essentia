@@ -15,7 +15,7 @@ import 'package:essentia_coroutines/src/job/completion_handler.dart';
 import 'package:essentia_coroutines/src/job/job_impl.dart';
 
 /// A cancellable piece of work with a life cycle, the parent of the work it
-/// starts, Kotlin's `Job`.
+/// starts.
 ///
 /// A job is new (only a lazily started coroutine), active, completing while
 /// it waits for its children, cancelling, and finally cancelled or
@@ -50,8 +50,7 @@ import 'package:essentia_coroutines/src/job/job_impl.dart';
 /// await job.cancelAndJoin();
 /// ```
 abstract interface class Job implements CoroutineContextElement {
-  /// Creates an active job without a body, a child of [parent] if given,
-  /// Kotlin's `Job(parent)`.
+  /// Creates an active job without a body, a child of [parent] if given.
   ///
   /// The job is a `CompletableJob`; create it as one to call `complete`.
   /// Once cancelled it completes as soon as its children did.
@@ -76,19 +75,19 @@ abstract interface class Job implements CoroutineContextElement {
   /// The children that have not completed yet.
   Iterable<Job> get children;
 
-  /// Starts a lazily started job, Kotlin's `start()`.
+  /// Starts a lazily started job.
   ///
   /// Returns `true` when this call started it, `false` when it was started
   /// already or is complete.
   bool start();
 
-  /// Cancels the job and its children, Kotlin's `cancel(cause)`.
+  /// Cancels the job and its children.
   ///
   /// [cause] says why; without one a `JobCancellationException` is used.
   /// Cancelling a job that is cancelling or complete does nothing.
   void cancel([CancellationException? cause]);
 
-  /// Why the job is cancelled, Kotlin's `getCancellationException()`.
+  /// Why the job is cancelled.
   ///
   /// Returns the cancellation exception, wrapping the failure of a failed
   /// job, or one saying that the job completed normally.
@@ -96,7 +95,7 @@ abstract interface class Job implements CoroutineContextElement {
   /// Throws a [StateError] while the job is new or active.
   CancellationException getCancellationException();
 
-  /// Waits until the job is complete, Kotlin's `join()`.
+  /// Waits until the job is complete.
   ///
   /// It does not throw the failure of the job. A lazily started job is
   /// started.
@@ -107,8 +106,7 @@ abstract interface class Job implements CoroutineContextElement {
   /// cancelled while it waits.
   Future<void> join();
 
-  /// Registers [handler] to run once the job completes, Kotlin's
-  /// `invokeOnCompletion`.
+  /// Registers [handler] to run once the job completes.
   ///
   /// With [onCancelling] the handler runs as soon as the job starts to be
   /// cancelled instead. A handler registered with a job that is complete,

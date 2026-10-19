@@ -9,8 +9,7 @@
 
 import 'package:essentia_io/src/exception/io_exception.dart';
 
-/// Thrown when a line is longer than a reader allows, Ktor's
-/// `TooLongLineException`.
+/// Thrown when a line is longer than a reader allows.
 final class TooLongLineException extends IoException {
   /// Creates the exception with [message].
   const TooLongLineException(super.message);

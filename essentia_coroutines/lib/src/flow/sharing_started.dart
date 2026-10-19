@@ -13,21 +13,19 @@ import 'package:essentia_coroutines/src/flow/started_lazily.dart';
 import 'package:essentia_coroutines/src/flow/started_while_subscribed.dart';
 import 'package:essentia_coroutines/src/flow/state_flow.dart';
 
-/// When `shareIn` and `stateIn` listen to their upstream stream, Kotlin's
-/// `SharingStarted`.
+/// When `shareIn` and `stateIn` listen to their upstream stream.
 ///
 /// A strategy turns the count of listeners of the shared flow into
 /// [SharingCommand]s; implement [command] for a strategy of your own.
 abstract interface class SharingStarted {
-  /// Starts at once and never stops, Kotlin's `SharingStarted.Eagerly`.
+  /// Starts at once and never stops.
   static const SharingStarted eagerly = StartedEagerly();
 
-  /// Starts with the first listener and never stops, Kotlin's
-  /// `SharingStarted.Lazily`.
+  /// Starts with the first listener and never stops.
   static const SharingStarted lazily = StartedLazily();
 
   /// Starts with the first listener and stops [stopTimeout] after the last
-  /// one left, Kotlin's `SharingStarted.WhileSubscribed`.
+  /// one left.
   ///
   /// The replay values, or the value of a state flow, are kept for
   /// [replayExpiration] after stopping and then reset; without
@@ -69,8 +67,7 @@ abstract interface class SharingStarted {
   }
 
   /// The commands for the sharing coroutine, derived from
-  /// [subscriptionCount], the count of listeners of the shared flow,
-  /// Kotlin's `command`.
+  /// [subscriptionCount], the count of listeners of the shared flow.
   ///
   /// Repeated commands are ignored, and commands before the first
   /// [SharingCommand.start] do nothing.

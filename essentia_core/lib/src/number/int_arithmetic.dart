@@ -9,14 +9,13 @@
 
 import 'package:meta/meta.dart';
 
-/// Floored integer division, Kotlin's `floorDiv` and `mod`.
+/// Floored integer division, `floorDiv` and `mod`.
 ///
 /// Dart's `~/` truncates towards zero and its `%` is never negative; these
-/// round towards negative infinity and take the sign of the divisor, as
-/// Kotlin's do.
+/// round towards negative infinity and take the sign of the divisor.
 extension IntArithmetic on int {
   /// Divides this integer by [divisor] and rounds the quotient towards
-  /// negative infinity, Kotlin's `floorDiv`.
+  /// negative infinity.
   ///
   /// Returns the floored quotient.
   ///
@@ -29,7 +28,7 @@ extension IntArithmetic on int {
     return roundedUp ? quotient - 1 : quotient;
   }
 
-  /// The remainder of the floored division by [divisor], Kotlin's `mod`.
+  /// The remainder of the floored division by [divisor].
   ///
   /// Returns the remainder, which has the sign of [divisor] or is zero.
   ///

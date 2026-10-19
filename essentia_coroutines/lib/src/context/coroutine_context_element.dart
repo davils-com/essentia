@@ -10,13 +10,12 @@
 import 'package:essentia_coroutines/src/context/coroutine_context.dart';
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 
-/// One element of a coroutine context, which is a context of its own,
-/// Kotlin's `CoroutineContext.Element`.
+/// One element of a coroutine context, which is a context of its own.
 ///
 /// An element names the [contextKey] it is stored under. Mixing in
 /// `AbstractCoroutineContextElement` supplies the rest of the context
 /// contract.
 abstract interface class CoroutineContextElement implements CoroutineContext {
-  /// The key this element is stored under, Kotlin's `Element.key`.
+  /// The key this element is stored under.
   CoroutineContextKey<CoroutineContextElement> get contextKey;
 }

@@ -136,8 +136,7 @@ int _byStart(VersionInterval left, VersionInterval right) {
   return left.startExclusive ? 1 : -1;
 }
 
-/// Compares the starts [left] and [right], `null` - no lower bound - first,
-/// Kotlin's `compareValues`.
+/// Compares the starts [left] and [right], `null` - no lower bound - first.
 ///
 /// Returns a negative number, zero or a positive number when [left] comes
 /// before, with or after [right].

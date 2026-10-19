@@ -12,8 +12,8 @@ import 'package:essentia_coroutines/src/channels/buffered_channel.dart';
 import 'package:essentia_coroutines/src/channels/receive_channel.dart';
 import 'package:essentia_coroutines/src/channels/send_channel.dart';
 
-/// A queue between pieces of asynchronous work: senders wait while it is
-/// full and receivers while it is empty, Kotlin's `Channel`.
+/// A queue between pieces of asynchronous work: senders wait while it is full
+/// and receivers while it is empty.
 ///
 /// Every element sent is received exactly once, by one receiver, in the
 /// order it was sent; several receivers share the elements (fan-out), and
@@ -42,15 +42,13 @@ import 'package:essentia_coroutines/src/channels/send_channel.dart';
 abstract interface class Channel<E>
     implements SendChannel<E>, ReceiveChannel<E> {
   /// Creates a channel buffering up to [capacity] elements, applying
-  /// [onBufferOverflow] once the buffer is full and handing every element
-  /// that is never received to [onUndeliveredElement], Kotlin's
-  /// `Channel(capacity, onBufferOverflow, onUndeliveredElement)`.
+  /// [onBufferOverflow] once the buffer is full and handing every element that
+  /// is never received to [onUndeliveredElement].
   ///
   /// [capacity] is a number of elements or one of [rendezvous], [buffered],
-  /// [conflated] and [unlimited]. Like Kotlin's, a [rendezvous] or
-  /// [buffered] channel with an overflow policy other than
-  /// [BufferOverflow.suspend] buffers one element, and an [unlimited]
-  /// channel never overflows.
+  /// [conflated] and [unlimited]. A [rendezvous] or [buffered] channel with an
+  /// overflow policy other than [BufferOverflow.suspend] buffers one element,
+  /// and an [unlimited] channel never overflows.
   ///
   /// Throws an [ArgumentError] if [capacity] is negative and none of these
   /// constants, or if a [conflated] channel is given an overflow policy
@@ -65,22 +63,20 @@ abstract interface class Channel<E>
     onUndeliveredElement: onUndeliveredElement,
   );
 
-  /// No buffer: a send completes once a receiver took the element, Kotlin's
-  /// `Channel.RENDEZVOUS`.
+  /// No buffer: a send completes once a receiver took the element.
   static const rendezvous = 0;
 
-  /// A buffer without a bound, Kotlin's `Channel.UNLIMITED`; a send never
-  /// waits. The value is `0x7fffffff` on every platform.
+  /// A buffer without a bound; a send never waits. The value is `0x7fffffff` on
+  /// every platform.
   static const unlimited = 0x7fffffff;
 
-  /// A buffer of one element that the newest element replaces, Kotlin's
-  /// `Channel.CONFLATED`: capacity one and [BufferOverflow.dropOldest].
+  /// A buffer of one element that the newest element replaces: capacity one and
+  /// [BufferOverflow.dropOldest].
   static const conflated = -1;
 
-  /// The default buffer of [defaultCapacity] elements, Kotlin's
-  /// `Channel.BUFFERED`.
+  /// The default buffer of [defaultCapacity] elements.
   static const buffered = -2;
 
-  /// How many elements a [buffered] channel holds, Kotlin's default of 64.
+  /// How many elements a [buffered] channel holds.
   static const defaultCapacity = 64;
 }

@@ -9,8 +9,8 @@
 
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 
-/// The activity of the guide "Coroutine context and dispatchers", which
-/// owns the scope of its coroutines.
+/// The activity of the coroutine context and dispatcher examples, which owns
+/// the scope of its coroutines.
 final class GuideActivity {
   /// Creates the activity logging into [log].
   GuideActivity(this.log);

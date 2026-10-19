@@ -14,8 +14,8 @@ import 'package:essentia_time/src/format/date_time_format_builder.dart';
 /// The quote that encloses literal text in a pattern.
 const _quote = "'";
 
-/// Compiles [pattern], written in the pattern letters of Java's
-/// `DateTimeFormatter` that it knows, into a format of a [LocalDateTime].
+/// Compiles [pattern], written in the pattern letters below, into a
+/// format of a [LocalDateTime].
 ///
 /// | Letters | Writes |
 /// |---|---|

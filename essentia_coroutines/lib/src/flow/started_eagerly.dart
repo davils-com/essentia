@@ -12,8 +12,7 @@ import 'package:essentia_coroutines/src/flow/sharing_started.dart';
 import 'package:essentia_coroutines/src/flow/state_flow.dart';
 import 'package:meta/meta.dart';
 
-/// The strategy behind `SharingStarted.eagerly`, Kotlin's
-/// `StartedEagerly`.
+/// The strategy behind `SharingStarted.eagerly`.
 @internal
 final class StartedEagerly implements SharingStarted {
   /// Creates the strategy; there is one, `SharingStarted.eagerly`.

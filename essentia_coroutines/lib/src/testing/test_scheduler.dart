@@ -19,8 +19,7 @@ import 'package:essentia_coroutines/src/testing/virtual_timer.dart';
 import 'package:essentia_time/essentia_time.dart';
 import 'package:meta/meta.dart';
 
-/// A scheduler on virtual time, and the event loop it runs on, Kotlin's
-/// `TestCoroutineScheduler`.
+/// A scheduler on virtual time, and the event loop it runs on.
 ///
 /// Nothing it schedules runs on its own. A test moves virtual time on with
 /// [advanceTimeBy], [runCurrent] or [advanceUntilIdle], and every task that
@@ -76,8 +75,7 @@ final class TestScheduler extends Scheduler
   /// up.
   void Function()? _onWork;
 
-  /// The virtual time passed since the scheduler was created, Kotlin's
-  /// `currentTime`.
+  /// The virtual time passed since the scheduler was created.
   Duration get currentTime => _now;
 
   /// How many timers wait to fire.
@@ -146,8 +144,8 @@ final class TestScheduler extends Scheduler
   ScheduledTask schedule(Duration delay, void Function() action) =>
       _addTimer(delay, Zone.current, Zone.current.bindCallback(action));
 
-  /// Moves virtual time on by [duration] and runs every task that falls
-  /// due on the way, Kotlin's `advanceTimeBy` followed by `runCurrent`.
+  /// Moves virtual time on by [duration] and runs every task that falls due on
+  /// the way.
   ///
   /// Tasks run in due order, at their own virtual time, with the
   /// microtasks they start settled before the next one runs.
@@ -175,14 +173,12 @@ final class TestScheduler extends Scheduler
     return _advanceOutside(target);
   }
 
-  /// Runs every task due at the current virtual time without moving it,
-  /// Kotlin's `runCurrent`.
+  /// Runs every task due at the current virtual time without moving it.
   ///
   /// Returns a future that completes once no task is due any more.
   Future<void> runCurrent() => advanceTimeBy(Duration.zero);
 
-  /// Moves virtual time on until no task waits any more, Kotlin's
-  /// `advanceUntilIdle`.
+  /// Moves virtual time on until no task waits any more.
   ///
   /// Timers of the background scope of a test do not keep it going. Work
   /// that keeps scheduling more work never lets it finish.

@@ -11,7 +11,7 @@ import 'package:essentia_core/src/number/rounding_mode.dart';
 import 'package:meta/meta.dart';
 
 /// An exact decimal number: an integer of any size and how many of its
-/// digits lie after the decimal point, Java's `BigDecimal` in small.
+/// digits lie after the decimal point.
 ///
 /// It is what formatters count digits of, so `1.50` keeps its two fraction
 /// digits, and what money is held in, so cents never become a binary
@@ -242,7 +242,7 @@ final class DecimalValue implements Comparable<DecimalValue> {
   }
 
   /// Whether [other] has the same digits and scale; `1.5` and `1.50` are
-  /// not equal, as with Java's `BigDecimal`.
+  /// not equal.
   @override
   bool operator ==(Object other) =>
       other is DecimalValue &&

@@ -11,7 +11,7 @@ import 'package:essentia_core/essentia_core.dart';
 import 'package:essentia_time/src/recurrence/recurrence_rule.dart';
 import 'package:essentia_time/src/recurrence/recurrence_rule_builder.dart';
 
-/// Builds a recurrence rule in a configuration block, the Kotlin way.
+/// Builds a recurrence rule in a configuration block.
 ///
 /// ```dart
 /// final RecurrenceRule everyOtherWeek = recurrenceRule((it) {

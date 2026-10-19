@@ -31,23 +31,23 @@ ParameterException _failure(List<String> argv) => failureOf(() => _load(argv));
 /// Tests how a command line is read.
 void main() {
   test('reads a long parameter written with an equals sign', () {
-    expect(_load(<String>['--name=arc']).name.value, 'arc');
+    expect(_load(<String>['--name=essentia']).name.value, 'essentia');
   });
 
   test('reads a long parameter whose value is the next token', () {
-    expect(_load(<String>['--name', 'arc']).name.value, 'arc');
+    expect(_load(<String>['--name', 'essentia']).name.value, 'essentia');
   });
 
   test('reads a short parameter whose value is the next token', () {
-    expect(_load(<String>['-n', 'arc']).name.value, 'arc');
+    expect(_load(<String>['-n', 'essentia']).name.value, 'essentia');
   });
 
   test('reads a short parameter with an attached value', () {
-    expect(_load(<String>['-narc']).name.value, 'arc');
+    expect(_load(<String>['-nessentia']).name.value, 'essentia');
   });
 
   test('reads a short parameter written with an equals sign', () {
-    expect(_load(<String>['-n=arc']).name.value, 'arc');
+    expect(_load(<String>['-n=essentia']).name.value, 'essentia');
   });
 
   test('splits a value at the first equals sign only', () {
@@ -90,18 +90,18 @@ void main() {
   });
 
   test('a clustered run may end in a parameter that takes a value', () {
-    final SyntaxParameters parameters = _load(<String>['-van', 'arc']);
+    final SyntaxParameters parameters = _load(<String>['-van', 'essentia']);
 
     expect(parameters.verbose.value, isTrue);
     expect(parameters.archive.value, isTrue);
-    expect(parameters.name.value, 'arc');
+    expect(parameters.name.value, 'essentia');
   });
 
   test('a clustered run may end in an attached value', () {
-    final SyntaxParameters parameters = _load(<String>['-vnarc']);
+    final SyntaxParameters parameters = _load(<String>['-vnessentia']);
 
     expect(parameters.verbose.value, isTrue);
-    expect(parameters.name.value, 'arc');
+    expect(parameters.name.value, 'essentia');
   });
 
   test('an unknown letter in a cluster is reported', () {
@@ -133,14 +133,14 @@ void main() {
 
   test('everything after the terminator is left untouched', () {
     final SyntaxParameters parameters = _load(<String>[
-      '--name=arc',
+      '--name=essentia',
       '--',
       '--not-mine',
       '-x',
       'plain',
     ]);
 
-    expect(parameters.name.value, 'arc');
+    expect(parameters.name.value, 'essentia');
     expect(parameters.rest, <String>['--not-mine', '-x', 'plain']);
   });
 
@@ -232,16 +232,16 @@ void main() {
   test('an undeclared parameter is collected instead of rejected', () {
     final parameters = LenientParameters()
       ..load(<String>[
-        '--name=arc',
+        '--name=essentia',
         '--theirs',
         'stray',
       ], environment: _nothing);
 
-    expect(parameters.name.value, 'arc');
+    expect(parameters.name.value, 'essentia');
     expect(parameters.unknown, <String>['--theirs', 'stray']);
   });
 
   test('nothing is collected under the default policy', () {
-    expect(_load(<String>['--name=arc']).unknown, isEmpty);
+    expect(_load(<String>['--name=essentia']).unknown, isEmpty);
   });
 }

@@ -28,7 +28,7 @@ final class AuditEvent implements Event {
   @override
   int get hashCode => action.hashCode;
 
-  /// Renders the record the way a Kotlin data class does.
+  /// Renders the record with its field.
   @override
   String toString() => 'AuditEvent(action=$action)';
 }

@@ -24,17 +24,16 @@ import 'package:essentia_coroutines/src/flow/state_flow.dart';
 import 'package:essentia_coroutines/src/flow/state_flow_impl.dart';
 import 'package:meta/meta.dart';
 
-/// Marks a place of the buffer whose emitter was cancelled or moved on,
-/// Kotlin's `NO_VALUE`.
+/// Marks a place of the buffer whose emitter was cancelled or moved on.
 const _noValue = Object();
 
-/// The shared flow behind `MutableSharedFlow`, Kotlin's `SharedFlowImpl`.
+/// The shared flow behind `MutableSharedFlow`.
 ///
 /// The buffer holds the values at the indices from the head on, followed
 /// by the queue of emitters waiting for room. The head is the smaller of
 /// the replay index, where a new listener starts, and the smallest index a
-/// listener still has to take. The bookkeeping is Kotlin's, one to one; an
-/// isolate runs one thing at a time, so nothing is locked.
+/// listener still has to take. An isolate runs one thing at a time, so
+/// nothing is locked.
 @internal
 final class SharedFlowImpl<T> extends Stream<T>
     implements MutableSharedFlow<T> {
@@ -187,7 +186,7 @@ final class SharedFlowImpl<T> extends Stream<T>
     _resume(_updateCollectorIndex(oldIndex));
   }
 
-  /// Emits [value] if that needs no waiting, Kotlin's `tryEmitLocked`.
+  /// Emits [value] if that needs no waiting.
   ///
   /// Returns whether the value is taken care of.
   bool _tryEmitLocked(T value) {
@@ -283,10 +282,9 @@ final class SharedFlowImpl<T> extends Stream<T>
   void _setBufferAt(int index, Object? item) =>
       _buffer[index % _buffer.length] = item;
 
-  /// Queues an emitter of [value] until there is room, Kotlin's
-  /// `emitSuspend`.
+  /// Queues an emitter of [value] until there is room.
   ///
-  /// Kotlin checks for room once more under its lock; an isolate runs one
+  /// There is no need to check for room once more: an isolate runs one
   /// thing at a time, so the failed `tryEmit` right before still holds.
   ///
   /// Returns a future that completes once the value is in the buffer.
@@ -328,7 +326,7 @@ final class SharedFlowImpl<T> extends Stream<T>
   }
 
   /// Moves the buffer on after a listener moved on from, or left, the
-  /// index [oldIndex], Kotlin's `updateCollectorIndexLocked`.
+  /// index [oldIndex].
   ///
   /// Returns the emitters that found room and are to be resumed.
   List<CancellableContinuation<void>> _updateCollectorIndex(int oldIndex) {
@@ -402,9 +400,8 @@ final class SharedFlowImpl<T> extends Stream<T>
   /// Whether the listeners of a flow without a buffer moved past the first
   /// queued emitter, which was cancelled.
   ///
-  /// Nobody is to be resumed for it then: Kotlin's bookkeeping would hand
-  /// the room it left to the next emitter, whose value nobody took yet, and
-  /// lose that value.
+  /// Nobody is to be resumed for it then: handing the room it left to the
+  /// next emitter, whose value nobody took yet, would lose that value.
   ///
   /// Returns whether that is the case.
   bool _passedCancelledEmitter() =>
@@ -413,7 +410,7 @@ final class SharedFlowImpl<T> extends Stream<T>
       identical(_bufferAt(_bufferEndIndex), _noValue);
 
   /// Sets the indices of the buffer, clearing what falls behind the new
-  /// head, Kotlin's `updateBufferLocked`.
+  /// head.
   void _updateBuffer(
     int newReplayIndex,
     int newMinCollectorIndex,
@@ -430,8 +427,7 @@ final class SharedFlowImpl<T> extends Stream<T>
     _queueSize = newQueueEndIndex - newBufferEndIndex;
   }
 
-  /// Drops the cancelled emitters at the end of the queue, Kotlin's
-  /// `cleanupTailLocked`.
+  /// Drops the cancelled emitters at the end of the queue.
   void _cleanupTail() {
     if (_bufferCapacity == 0 && _queueSize <= 1) {
       return;
@@ -443,9 +439,8 @@ final class SharedFlowImpl<T> extends Stream<T>
     }
   }
 
-  /// Takes the next value for the listener of [slot], or marks it waiting,
-  /// Kotlin's `tryTakeValue`; the place of a cancelled emitter it meets on
-  /// the way is skipped.
+  /// Takes the next value for the listener of [slot], or marks it waiting;
+  /// the place of a cancelled emitter it meets on the way is skipped.
   ///
   /// Returns the value, or `null` when there is none yet.
   ({T value})? _tryTakeValue(SharedFlowSlot slot) {
@@ -465,8 +460,7 @@ final class SharedFlowImpl<T> extends Stream<T>
     }
   }
 
-  /// The index of the value the listener of [slot] can take now, Kotlin's
-  /// `tryPeekLocked`.
+  /// The index of the value the listener of [slot] can take now.
   ///
   /// Returns the index, or `-1` when it has to wait.
   int _tryPeek(SharedFlowSlot slot) {
@@ -480,8 +474,7 @@ final class SharedFlowImpl<T> extends Stream<T>
     return index;
   }
 
-  /// Wakes the waiting listeners that can take a value now, Kotlin's
-  /// `findSlotsToResumeLocked`.
+  /// Wakes the waiting listeners that can take a value now.
   void _wakeSlots() {
     for (final SharedFlowSlot slot in _slots) {
       if (slot.waiting && _tryPeek(slot) >= 0) {

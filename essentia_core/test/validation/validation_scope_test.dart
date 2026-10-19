@@ -23,7 +23,7 @@ ValidationReport _report(void Function(ValidationScope it) rules) =>
 List<String> _paths(ValidationReport report) =>
     report.violations.map((violation) => violation.path.toString()).toList();
 
-/// Ports `ValidationScopeTest`.
+/// Covers the checks of a validation scope and the report they build.
 void main() {
   test('failing without a property reports at the root', () {
     final ValidationReport result = _report(

@@ -21,8 +21,7 @@ import 'package:meta/meta.dart';
 ///
 /// The three parts of the pattern are the builder, the immutable
 /// [Validatable] it assembles, and a function taking a configuration block
-/// that ties them together, the way a Kotlin DSL takes a lambda with a
-/// receiver:
+/// that ties them together:
 ///
 /// ```dart
 /// final class LoggingBuilder extends ValidatingBuilder<LoggingData> {

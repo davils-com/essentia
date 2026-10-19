@@ -53,12 +53,10 @@ void main() {
     expect(result.valueOrNull, 42);
   });
 
-  test('formatting and compression resolve through the library', () async {
+  test('formatting resolves through the library', () {
     final epoch = Instant.fromEpochSeconds(0);
 
     expect(epoch.format(DateTimeFormats.isoLocal), '1970-01-01T00:00:00.000');
-    expect(await gunzip(await gzip(<int>[1, 2, 3])), <int>[1, 2, 3]);
-    expect(Crc32.of(const <int>[]), 0);
   });
 
   test('byte members resolve beside the list members', () {

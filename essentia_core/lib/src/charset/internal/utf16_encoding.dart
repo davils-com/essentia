@@ -15,7 +15,7 @@ import 'package:meta/meta.dart';
 @internal
 final class Utf16Encoding implements StringEncoding {
   /// Creates the encoding of UTF-16 that writes the big-endian byte order
-  /// mark before the first character, as Java does.
+  /// mark before the first character.
   Utf16Encoding.marked() : _bigEndian = true, _markPending = true;
 
   /// Creates the encoding of big-endian UTF-16 without a mark.

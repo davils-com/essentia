@@ -54,7 +54,7 @@ Principal _longestChain() {
 List<String> _ids(Principal principal) =>
     principal.chain.map((link) => link.id).toList();
 
-/// Ports `PrincipalDelegationTest`.
+/// Covers a principal acting on behalf of another.
 void main() {
   test('a principal acts for nobody unless told to', () {
     expect(_alice.actingFor, isNull);

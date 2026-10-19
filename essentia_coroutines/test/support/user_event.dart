@@ -34,7 +34,7 @@ final class Registered extends UserEvent {
   @override
   int get hashCode => Object.hash(Registered, userId);
 
-  /// Renders the event the way a Kotlin data class does.
+  /// Renders the event with its field.
   @override
   String toString() => 'Registered(userId=$userId)';
 }
@@ -56,7 +56,7 @@ final class Deleted extends UserEvent {
   @override
   int get hashCode => Object.hash(Deleted, userId, reason);
 
-  /// Renders the event the way a Kotlin data class does.
+  /// Renders the event with its fields.
   @override
   String toString() => 'Deleted(userId=$userId, reason=$reason)';
 }

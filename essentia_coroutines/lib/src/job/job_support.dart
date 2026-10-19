@@ -26,8 +26,7 @@ import 'package:essentia_coroutines/src/job/job_operations.dart';
 import 'package:essentia_coroutines/src/job/job_phase.dart';
 import 'package:meta/meta.dart';
 
-/// The state machine behind every job and coroutine, Kotlin's
-/// `JobSupport`.
+/// The state machine behind every job and coroutine.
 ///
 /// A job finishes once its body is done and every child reached its final
 /// state. The first failure cancels the job, its children and - unless the

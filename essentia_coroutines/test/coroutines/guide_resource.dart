@@ -9,8 +9,8 @@
 
 import 'guide_counter.dart';
 
-/// A resource of the guide "Cancellation and timeouts" that counts how
-/// many are open.
+/// A resource of the cancellation and timeout examples that counts how many are
+/// open.
 final class GuideResource {
   /// Opens the resource.
   GuideResource(this.counter) {

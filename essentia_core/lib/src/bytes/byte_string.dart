@@ -15,8 +15,7 @@ import 'package:essentia_core/src/bytes/byte_list_hex.dart';
 import 'package:essentia_core/src/bytes/hex_format.dart';
 import 'package:meta/meta.dart';
 
-/// An immutable sequence of bytes, Kotlin's
-/// `kotlinx.io.bytestring.ByteString`.
+/// An immutable sequence of bytes.
 ///
 /// It copies what it is made from and hands out copies or unmodifiable
 /// views, so nobody holding one can change it under somebody else. Two byte
@@ -38,7 +37,7 @@ final class ByteString implements Comparable<ByteString> {
   /// Creates a byte string around [bytes], which nobody else holds.
   const ByteString._(this._bytes);
 
-  /// The byte string without bytes, Kotlin's `ByteString.EMPTY`.
+  /// The byte string without bytes.
   static final empty = ByteString._(Uint8List(0));
 
   /// The bytes, owned by this byte string alone.
@@ -55,8 +54,7 @@ final class ByteString implements Comparable<ByteString> {
 
   /// An unmodifiable view of the bytes.
   ///
-  /// Kotlin has no such view and offers `toByteArray` alone; reading a
-  /// view costs no copy.
+  /// Reading the view costs no copy.
   Uint8List get bytes => _bytes.asUnmodifiableView();
 
   /// The byte at [index], between 0 and 255.
@@ -64,8 +62,7 @@ final class ByteString implements Comparable<ByteString> {
   /// Throws a [RangeError] when [index] is outside the byte string.
   int operator [](int index) => _bytes[index];
 
-  /// Copies the bytes from [start] up to [end] into a new list, Kotlin's
-  /// `toByteArray`.
+  /// Copies the bytes from [start] up to [end] into a new list.
   ///
   /// Returns the copy, which the caller owns.
   ///
@@ -74,7 +71,7 @@ final class ByteString implements Comparable<ByteString> {
   Uint8List toByteArray([int start = 0, int? end]) =>
       Uint8List.fromList(_bytes.sublist(start, end));
 
-  /// The bytes from [start] up to [end], Kotlin's `substring`.
+  /// The bytes from [start] up to [end].
   ///
   /// Returns a byte string of those bytes.
   ///
@@ -97,22 +94,21 @@ final class ByteString implements Comparable<ByteString> {
       suffix.size <= size &&
       _bytes.sublist(size - suffix.size).contentEquals(suffix._bytes);
 
-  /// Where [byte] first occurs at or after [start], Kotlin's `indexOf`.
+  /// Where [byte] first occurs at or after [start].
   ///
   /// Returns its index, or -1 when it does not occur.
   int indexOf(int byte, [int start = 0]) => _bytes.indexOf(byte, start);
 
-  /// Writes the bytes as hexadecimal digits in [format], Kotlin's
-  /// `toHexString`.
+  /// Writes the bytes as hexadecimal digits in [format].
   ///
   /// Returns the text.
   @useResult
   String toHexString([HexFormat format = HexFormat.defaultFormat]) =>
       _bytes.toHexString(format);
 
-  /// Decodes the bytes as UTF-8, Kotlin's `decodeToString`.
+  /// Decodes the bytes as UTF-8.
   ///
-  /// A malformed sequence becomes U+FFFD, as it does in Kotlin.
+  /// A malformed sequence becomes U+FFFD.
   ///
   /// Returns the text.
   @useResult
@@ -143,7 +139,7 @@ final class ByteString implements Comparable<ByteString> {
   @override
   int get hashCode => _bytes.contentHashCode();
 
-  /// Kotlin's rendering, `ByteString(size=3 hex=010203)`.
+  /// Describes the byte string as `ByteString(size=3 hex=010203)`.
   @override
   String toString() => 'ByteString(size=$size hex=${toHexString()})';
 }

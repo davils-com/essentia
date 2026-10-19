@@ -15,7 +15,7 @@ import 'package:test/test.dart';
 /// A value that must never appear in a rendering.
 const _placeholder = 'placeholder-value';
 
-/// Ports `PrincipalAttributesTest`.
+/// Covers the attributes of a principal.
 void main() {
   test('an empty set has nothing in it and renders as nothing', () {
     expect(PrincipalAttributes.empty.isEmpty, isTrue);

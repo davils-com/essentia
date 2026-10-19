@@ -19,39 +19,35 @@ import 'package:essentia_coroutines/src/selects/future_clause.dart';
 import 'package:essentia_coroutines/src/selects/job_select_clauses.dart';
 import 'package:essentia_coroutines/src/selects/select_builder.dart';
 
-/// The clauses of Kotlin's `select`, spelled as calls on the builder.
+/// The clauses of `select`, spelled as calls on the builder.
 ///
-/// Kotlin writes `channel.onReceive { value -> ... }` inside the select
-/// block; Dart has no receiver-scoped syntax for that, so the clause is
-/// `it.onReceive(channel, (value) => ...)`, the same as
+/// A clause is written `it.onReceive(channel, (value) => ...)`, the same as
 /// `it.invoke(channel.onReceive, (value) => ...)`.
 extension SelectBuilderClauses<R> on SelectBuilder<R> {
-  /// Selects the value of [deferred] once it is complete, Kotlin's
-  /// `onAwait`; a failed deferred makes the select throw its failure.
+  /// Selects the value of [deferred] once it is complete; a failed deferred
+  /// makes the select throw its failure.
   void onAwait<T>(Deferred<T> deferred, FutureOr<R> Function(T value) block) =>
       invoke(deferred.onAwait, block);
 
-  /// Selects once [job] is complete, Kotlin's `onJoin`.
+  /// Selects once [job] is complete.
   void onJoin(Job job, FutureOr<R> Function() block) =>
       invoke(job.onJoin, (value) => block());
 
-  /// Selects an element received from [channel], Kotlin's `onReceive`; a
-  /// channel closed for receive makes the select throw what `receive`
-  /// would.
+  /// Selects an element received from [channel]; a channel closed for receive
+  /// makes the select throw what `receive` would.
   void onReceive<E>(
     ReceiveChannel<E> channel,
     FutureOr<R> Function(E value) block,
   ) => invoke(channel.onReceive, block);
 
-  /// Selects an element received from [channel], or its closure, Kotlin's
-  /// `onReceiveCatching`.
+  /// Selects an element received from [channel], or its closure.
   void onReceiveCatching<E>(
     ReceiveChannel<E> channel,
     FutureOr<R> Function(ChannelResult<E> result) block,
   ) => invoke(channel.onReceiveCatching, block);
 
-  /// Selects once [channel] took [element], Kotlin's `onSend`; a closed
-  /// channel makes the select throw what `send` would.
+  /// Selects once [channel] took [element]; a closed channel makes the select
+  /// throw what `send` would.
   void onSend<E>(
     SendChannel<E> channel,
     E element,

@@ -34,19 +34,17 @@ import 'package:essentia_coroutines/src/selects/select_clause.dart';
 import 'package:essentia_coroutines/src/selects/select_instance.dart';
 import 'package:meta/meta.dart';
 
-/// The channel behind `Channel()`, Kotlin's `BufferedChannel` and
-/// `ConflatedBufferedChannel` in one.
+/// The channel behind `Channel()`, buffered and conflated channels in one.
 ///
-/// An isolate runs one thing at a time, so the channel is a plain buffer
-/// and two queues of waiters instead of Kotlin's lock-free segments. A
-/// waiter is always resumed before the element offered to it moves: a
-/// waiter that cannot take part any more - a select that chose another
-/// clause - leaves the element where it is. A select never pairs its own
-/// sender with its own receiver.
+/// An isolate runs one thing at a time, so the channel is a plain buffer and
+/// two queues of waiters. A waiter is always resumed before the element offered
+/// to it moves: a waiter that cannot take part any more - a select that chose
+/// another clause - leaves the element where it is. A select never pairs its
+/// own sender with its own receiver.
 @internal
 final class BufferedChannel<E> implements Channel<E> {
-  /// Creates a channel the way `Channel()` documents it, resolving
-  /// [capacity] and [onBufferOverflow] like Kotlin's `Channel()` factory.
+  /// Creates a channel the way `Channel()` documents it, resolving [capacity]
+  /// and [onBufferOverflow].
   ///
   /// Throws an [ArgumentError] if [capacity] is negative and no constant
   /// of `Channel`, or if a conflated channel is given an overflow policy.
@@ -344,8 +342,7 @@ final class BufferedChannel<E> implements Channel<E> {
   /// element moves.
   ///
   /// [sending] says whether a `send` offers it, which is the only one that
-  /// reports an element dropped by [BufferOverflow.dropLatest], as in
-  /// Kotlin.
+  /// reports an element dropped by [BufferOverflow.dropLatest].
   ///
   /// Returns `false` when the sender has to wait for room.
   bool _offer(

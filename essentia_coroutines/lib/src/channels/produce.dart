@@ -18,10 +18,10 @@ import 'package:essentia_coroutines/src/context/coroutine_context.dart';
 import 'package:essentia_coroutines/src/coroutine/coroutine_start.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 
-/// Kotlin's `produce` coroutine builder.
+/// The `produce` coroutine builder.
 extension Produce on CoroutineScope {
-  /// Starts [block] as a child of the scope's job, sending to a new
-  /// channel, and hands out the receiving side, Kotlin's `produce`.
+  /// Starts [block] as a child of the scope's job, sending to a new channel,
+  /// and hands out the receiving side.
   ///
   /// The channel buffers [capacity] elements with [onBufferOverflow], as
   /// `Channel()` does, and [context] is laid over the scope's context. The

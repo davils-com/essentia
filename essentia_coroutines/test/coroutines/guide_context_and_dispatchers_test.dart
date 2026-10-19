@@ -14,21 +14,19 @@ import 'package:test/test.dart';
 
 import 'guide_activity.dart';
 
-/// What the request of the guide prints once its own body is done.
+/// What the request of the example prints once its own body is done.
 const _requestDone =
     "request: I'm done and I don't explicitly join my children that are "
     'still active';
 
-/// Renders the name of the current coroutine the way the guide's `log`
-/// does, without the thread.
+/// Renders [message] behind the name of the current coroutine.
 ///
 /// Returns `[name] message`.
 String _named(String message) =>
     '[${currentCoroutineContext().get(CoroutineName.key)?.name}] $message';
 
-/// Covers the examples of the kotlinx.coroutines guide "Coroutine context
-/// and dispatchers" that a single isolate can express, ported line by line,
-/// with the output they print as a golden log.
+/// Covers the worked examples of coroutine context and dispatchers that a
+/// single isolate can express, with the output they print as a golden log.
 void main() {
   test(
     'dispatchers',

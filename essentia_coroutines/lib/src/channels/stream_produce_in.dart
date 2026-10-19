@@ -17,10 +17,10 @@ import 'package:essentia_coroutines/src/coroutine/coroutine_start.dart';
 import 'package:essentia_coroutines/src/deferred/completable_deferred.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 
-/// Kotlin's `Flow.produceIn` on a Dart `Stream`.
+/// Turns a Dart `Stream` into a channel produced in a scope.
 extension StreamProduceIn<T> on Stream<T> {
-  /// Listens to the stream in a producer coroutine started in [scope] and
-  /// hands out a channel of its events, Kotlin's `Flow.produceIn(scope)`.
+  /// Listens to the stream in a producer coroutine started in [scope] and hands
+  /// out a channel of its events.
   ///
   /// The channel buffers the default `Channel.buffered` capacity; while it
   /// is full the subscription is paused. The channel is closed when the

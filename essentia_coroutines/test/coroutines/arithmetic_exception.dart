@@ -7,5 +7,5 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A failure standing in for Kotlin's `ArithmeticException`.
+/// A failure standing in for an arithmetic error.
 final class ArithmeticException implements Exception {}

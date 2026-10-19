@@ -15,8 +15,7 @@ import 'package:meta/meta.dart';
 /// The zone value under which the coroutine context travels.
 const _contextKey = #_coroutineContext;
 
-/// The context the current code runs with, Kotlin's
-/// `currentCoroutineContext()`.
+/// The context the current code runs with.
 ///
 /// The context travels in a `Zone`, so it reaches every `await`, `Future`,
 /// `Timer`, microtask and stream listener started inside a coroutine, and

@@ -18,8 +18,8 @@ import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/scheduler/scheduler.dart';
 
-/// Waits until [block] resumes the continuation it is handed, or the job
-/// of the current code is cancelled, Kotlin's `suspendCancellableCoroutine`.
+/// Waits until [block] resumes the continuation it is handed, or the job of the
+/// current code is cancelled.
 ///
 /// This is the building block of every cancellable wait: register the wait
 /// in [block], resume the continuation once it is over, and undo the
@@ -58,8 +58,7 @@ Future<T> suspendCancellableCoroutine<T>(
   return continuation.result;
 }
 
-/// Waits for [duration] on the scheduler of the current context, Kotlin's
-/// `delay`.
+/// Waits for [duration] on the scheduler of the current context.
 ///
 /// The scheduler is `Scheduler.current`: the one in the context, or the
 /// system scheduler. The wait is cancellable, and a zero or negative
@@ -70,8 +69,9 @@ Future<T> suspendCancellableCoroutine<T>(
 /// Throws a [CancellationException] if the current job is cancelled.
 Future<void> delay(Duration duration) => Scheduler.current.delay(duration);
 
-/// Lets other work run before the current code goes on, Kotlin's
-/// `yield()`; `yield` is a reserved word in Dart.
+/// Lets other work run before the current code goes on.
+///
+/// The name avoids `yield`, a reserved word in Dart.
 ///
 /// It waits for a zero delay timer, so microtasks, timers and input that
 /// are due run first. Long work of one's own calls it between steps to stay
@@ -91,8 +91,7 @@ Future<void> yieldNow() {
   });
 }
 
-/// Waits until the current job is cancelled, Kotlin's
-/// `awaitCancellation()`.
+/// Waits until the current job is cancelled.
 ///
 /// Returns a future that never completes normally.
 ///
@@ -100,8 +99,7 @@ Future<void> yieldNow() {
 Future<Never> awaitCancellation() =>
     suspendCancellableCoroutine<Never>((it) {});
 
-/// Throws if the job of the current code is cancelled, Kotlin's
-/// `currentCoroutineContext().ensureActive()`.
+/// Throws if the job of the current code is cancelled.
 ///
 /// Code outside every job is never cancelled and passes.
 ///

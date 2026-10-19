@@ -15,11 +15,9 @@ import 'package:meta/meta.dart';
 /// The lowercase digits, in the order of their value.
 const _lowerDigits = '0123456789abcdef';
 
-/// Kotlin's `String.hexToByteArray` and `hexToByteString`.
+/// Reads text of hexadecimal digits as bytes.
 extension HexParsing on String {
   /// Reads the bytes [format] wrote, digits in either case.
-  ///
-  /// Kotlin's `String.hexToByteArray`.
   ///
   /// Returns the bytes, empty for empty text.
   ///

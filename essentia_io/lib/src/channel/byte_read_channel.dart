@@ -15,7 +15,7 @@ import 'package:essentia_io/src/channel/internal/buffer_byte_read_channel.dart';
 import 'package:essentia_io/src/channel/internal/empty_byte_read_channel.dart';
 import 'package:essentia_io/src/stream/stream_byte_read_channel.dart';
 
-/// A channel bytes are read from as they arrive, Ktor's `ByteReadChannel`.
+/// A channel bytes are read from as they arrive.
 ///
 /// A reader waits with [awaitContent] until bytes are there, and then
 /// takes them from [readBuffer]; the operations of
@@ -63,7 +63,7 @@ abstract interface class ByteReadChannel {
   factory ByteReadChannel.fromStream(Stream<List<int>> stream) =>
       streamByteReadChannel(stream);
 
-  /// A channel without bytes that is closed, Ktor's `ByteReadChannel.Empty`.
+  /// A channel without bytes that is closed.
   static final ByteReadChannel empty = EmptyByteReadChannel();
 
   /// Why the channel failed: a cancellation, or the failure it was

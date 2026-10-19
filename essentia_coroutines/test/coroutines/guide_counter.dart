@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// How many resources of the guide "Cancellation and timeouts" are open.
+/// How many resources of the cancellation and timeout examples are open.
 final class GuideCounter {
   /// The number of open resources.
   var open = 0;

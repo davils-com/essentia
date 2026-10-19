@@ -25,12 +25,12 @@ import 'package:essentia_coroutines/src/job/job_operations.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 import 'package:essentia_coroutines/src/stream/stream_collection.dart';
 
-/// The buffer a shared flow gets beyond its replay, Kotlin's
-/// `Channel.CHANNEL_DEFAULT_CAPACITY`.
+/// The buffer a shared flow gets beyond its replay, the capacity of
+/// `Channel.buffered`.
 const _defaultCapacity = 64;
 
-/// Kotlin's sharing `Flow` operators for streams, which turn a cold stream
-/// into a hot flow.
+/// The sharing operators for streams, which turn a cold stream into a hot
+/// flow.
 ///
 /// A sharing coroutine is started in the given scope; it listens to this
 /// stream when the `SharingStarted` strategy says so and emits what it gets
@@ -45,8 +45,7 @@ const _defaultCapacity = 64;
 /// listener throws a [StateError] on the second listen, which fails the
 /// sharing coroutine; it never fails silently.
 extension StreamSharing<T> on Stream<T> {
-  /// Shares this stream with every listener of the returned flow, Kotlin's
-  /// `shareIn`.
+  /// Shares this stream with every listener of the returned flow.
   ///
   /// The flow replays the last [replay] values to a new listener and
   /// buffers up to 64 values in all, so a listener that lags behind slows
@@ -77,7 +76,7 @@ extension StreamSharing<T> on Stream<T> {
   }
 
   /// Shares the latest value of this stream as a state flow starting with
-  /// [initialValue], Kotlin's `stateIn`.
+  /// [initialValue].
   ///
   /// When the strategy resets, the state goes back to [initialValue].
   ///
@@ -101,7 +100,7 @@ extension StreamSharing<T> on Stream<T> {
   }
 
   /// Shares the latest value of this stream as a state flow once it
-  /// emitted its first value, Kotlin's suspending `stateIn(scope)`.
+  /// emitted its first value.
   ///
   /// The sharing starts at once and never stops; the state flow keeps the
   /// last value after this stream ended.
@@ -140,7 +139,7 @@ extension StreamSharing<T> on Stream<T> {
 
   /// Launches the coroutine that listens to this stream as [started] says
   /// and emits into [shared], calling [reset] on
-  /// [SharingCommand.stopAndResetReplayCache], Kotlin's `launchSharing`.
+  /// [SharingCommand.stopAndResetReplayCache].
   ///
   /// Returns the job of the sharing coroutine.
   Job _launchSharing(

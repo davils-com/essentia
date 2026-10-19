@@ -15,7 +15,7 @@
 /// in an overlap, which the clocks pass twice, takes the offset chosen.
 enum ZoneResolution {
   /// The offset in effect before the shift: the first of two passes,
-  /// Kotlin's and RFC 5545's choice and the default.
+  /// RFC 5545's choice and the default.
   earlierOffset,
 
   /// The offset in effect after the shift: the second of two passes.

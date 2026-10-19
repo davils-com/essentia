@@ -12,7 +12,7 @@ import 'package:meta/meta.dart';
 part 'comparable_closed_range.dart';
 
 /// A range of comparable values from [start] up to and including
-/// [endInclusive], Kotlin's `ClosedRange`.
+/// [endInclusive].
 ///
 /// The range is empty when [start] lies beyond [endInclusive]. `IntRange`
 /// is the closed range of integers that can also be iterated.
@@ -20,7 +20,7 @@ abstract interface class ClosedRange<T extends Comparable<Object>> {
   /// Creates the range from [start] up to and including [endInclusive].
   ///
   /// Two such ranges are equal when both of their ends are equal, and the
-  /// range describes itself as `start..endInclusive`, like Kotlin's.
+  /// range describes itself as `start..endInclusive`.
   const factory ClosedRange(T start, T endInclusive) = _ComparableClosedRange;
 
   /// The smallest value of the range.

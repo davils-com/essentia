@@ -13,13 +13,12 @@ import 'package:essentia_coroutines/src/scheduler/scheduled_task.dart';
 import 'package:essentia_coroutines/src/scheduler/scheduler.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 
-/// Kotlin's time based `Flow` operators for streams.
+/// The time based operators for streams.
 ///
 /// They wait on `Scheduler.current` of the listener, so inside `runTest`
 /// they run on virtual time.
 extension StreamTiming<T> on Stream<T> {
-  /// Emits an element only once [timeout] passed without a newer one,
-  /// Kotlin's `debounce`.
+  /// Emits an element only once [timeout] passed without a newer one.
   ///
   /// The latest element is always emitted: when this stream ends, a
   /// pending element is emitted at once before the result ends. A zero
@@ -82,7 +81,7 @@ extension StreamTiming<T> on Stream<T> {
     }, isBroadcast: isBroadcast);
   }
 
-  /// Emits the latest element of every [period], Kotlin's `sample`.
+  /// Emits the latest element of every [period].
   ///
   /// The periods start when the listener subscribes. At the end of a
   /// period the latest element that arrived in it, if any, is emitted;

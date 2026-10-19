@@ -11,7 +11,7 @@ import 'package:essentia_coroutines/src/deferred/completable_deferred_impl.dart'
 import 'package:essentia_coroutines/src/deferred/deferred.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// A deferred that is completed by hand, Kotlin's `CompletableDeferred`.
+/// A deferred that is completed by hand.
 ///
 /// It is the cancellable, job aware counterpart of a `Completer`.
 ///
@@ -24,13 +24,13 @@ abstract interface class CompletableDeferred<T> implements Deferred<T> {
   /// Creates an active deferred, a child of [parent] if given.
   factory CompletableDeferred([Job? parent]) = CompletableDeferredImpl<T>;
 
-  /// Completes the deferred with [value], Kotlin's `complete`.
+  /// Completes the deferred with [value].
   ///
   /// Returns `true` when this call completed it, `false` when it was
   /// complete or cancelled already.
   bool complete(T value);
 
-  /// Fails the deferred with [exception], Kotlin's `completeExceptionally`.
+  /// Fails the deferred with [exception].
   ///
   /// Returns `true` when this call failed it, `false` when it was complete
   /// or cancelled already.

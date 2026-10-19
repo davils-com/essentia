@@ -11,13 +11,13 @@ import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/selects/select_builder.dart';
 import 'package:essentia_coroutines/src/selects/select_implementation.dart';
 
-/// Waits for the first of several clauses, Kotlin's `select`.
+/// Waits for the first of several clauses.
 ///
-/// [block] registers the clauses with the builder it gets. They register
-/// in that order, and the select is biased like Kotlin's: when several are
-/// ready at once, the first one wins. Exactly one clause wins; its block
-/// runs in the caller's context and its result is the result of the
-/// select. A losing clause takes nothing: an element stays in its channel.
+/// [block] registers the clauses with the builder it gets. They register in
+/// that order, and the select is biased: when several are ready at once, the
+/// first one wins. Exactly one clause wins; its block runs in the caller's
+/// context and its result is the result of the select. A losing clause takes
+/// nothing: an element stays in its channel.
 ///
 /// ```dart
 /// final String text = await select<String>((it) {
@@ -37,8 +37,7 @@ import 'package:essentia_coroutines/src/selects/select_implementation.dart';
 Future<R> select<R>(void Function(SelectBuilder<R> it) block) =>
     SelectImplementation<R>().run(block, unbiased: false);
 
-/// Waits for the first of several clauses without preferring any, Kotlin's
-/// `selectUnbiased`.
+/// Waits for the first of several clauses without preferring any.
 ///
 /// It is [select], except that the clauses register in a random order, so
 /// when several are ready at once each one wins as often as the others.

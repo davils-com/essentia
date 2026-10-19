@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A day of the week, Kotlin's `kotlinx.datetime.DayOfWeek`.
+/// A day of the week.
 ///
 /// The days run from [monday] to [sunday], as ISO 8601 orders them, and
 /// [isoDayNumber] numbers them from 1 to 7.
@@ -33,8 +33,7 @@ enum DayOfWeek {
   /// Sunday, the last day of an ISO week.
   sunday;
 
-  /// The day of [isoDayNumber], from 1 for Monday to 7 for Sunday,
-  /// Kotlin's `DayOfWeek(isoDayNumber)`.
+  /// The day of [isoDayNumber], from 1 for Monday to 7 for Sunday.
   ///
   /// Throws an [ArgumentError] for any other number.
   static DayOfWeek of(int isoDayNumber) {

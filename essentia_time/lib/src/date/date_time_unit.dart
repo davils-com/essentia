@@ -9,7 +9,7 @@
 
 import 'package:meta/meta.dart';
 
-/// A unit to measure time in, Kotlin's `kotlinx.datetime.DateTimeUnit`.
+/// A unit to measure time in.
 ///
 /// A [TimeBasedUnit] is a fixed amount of exact time. A [DateBasedUnit]
 /// counts on a calendar: a [DayBasedUnit] in days, which can last 23 or 25
@@ -56,7 +56,7 @@ sealed class DateTimeUnit {
   /// One century, a hundred years.
   static const century = MonthBasedUnit._(1200);
 
-  /// The unit [scalar] times as long, Kotlin's `times`.
+  /// The unit [scalar] times as long.
   ///
   /// Throws an [ArgumentError] unless [scalar] is positive.
   DateTimeUnit times(int scalar);
@@ -73,8 +73,7 @@ sealed class DateTimeUnit {
       count == 1 ? name : '$count-$name';
 }
 
-/// A unit of exact time, a number of [nanoseconds], Kotlin's
-/// `DateTimeUnit.TimeBased`.
+/// A unit of exact time, a number of [nanoseconds].
 final class TimeBasedUnit extends DateTimeUnit {
   /// The unit of [nanoseconds] nanoseconds.
   ///
@@ -109,7 +108,7 @@ final class TimeBasedUnit extends DateTimeUnit {
   @override
   int get hashCode => nanoseconds.hashCode;
 
-  /// Names the unit like Kotlin: `HOUR`, `2-MINUTE`, `NANOSECOND`.
+  /// Names the unit: `HOUR`, `2-MINUTE`, `NANOSECOND`.
   @override
   String toString() {
     for (final (int length, String name) in _names) {
@@ -130,7 +129,7 @@ final class TimeBasedUnit extends DateTimeUnit {
   ];
 }
 
-/// A unit that counts on a calendar, Kotlin's `DateTimeUnit.DateBased`.
+/// A unit that counts on a calendar.
 sealed class DateBasedUnit extends DateTimeUnit {
   /// Creates a calendar unit.
   const DateBasedUnit();
@@ -140,7 +139,7 @@ sealed class DateBasedUnit extends DateTimeUnit {
   DateBasedUnit times(int scalar);
 }
 
-/// A unit of [days] calendar days, Kotlin's `DateTimeUnit.DayBased`.
+/// A unit of [days] calendar days.
 final class DayBasedUnit extends DateBasedUnit {
   /// The unit of [days] days.
   ///
@@ -171,14 +170,14 @@ final class DayBasedUnit extends DateBasedUnit {
   @override
   int get hashCode => days.hashCode;
 
-  /// Names the unit like Kotlin: `DAY`, `WEEK`, `3-DAY`.
+  /// Names the unit: `DAY`, `WEEK`, `3-DAY`.
   @override
   String toString() => days % 7 == 0
       ? DateTimeUnit._describe(days ~/ 7, 'WEEK')
       : DateTimeUnit._describe(days, 'DAY');
 }
 
-/// A unit of [months] months, Kotlin's `DateTimeUnit.MonthBased`.
+/// A unit of [months] months.
 final class MonthBasedUnit extends DateBasedUnit {
   /// The unit of [months] months.
   ///
@@ -210,7 +209,7 @@ final class MonthBasedUnit extends DateBasedUnit {
   @override
   int get hashCode => months.hashCode;
 
-  /// Names the unit like Kotlin: `MONTH`, `QUARTER`, `YEAR`, `CENTURY`.
+  /// Names the unit: `MONTH`, `QUARTER`, `YEAR`, `CENTURY`.
   @override
   String toString() {
     if (months % 1200 == 0) {

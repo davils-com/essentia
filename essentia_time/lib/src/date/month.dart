@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A month of the year, Kotlin's `kotlinx.datetime.Month`.
+/// A month of the year.
 ///
 /// [number] counts the months from 1 for [january] to 12 for [december].
 enum Month {
@@ -47,8 +47,7 @@ enum Month {
   /// December.
   december;
 
-  /// The month of [number], from 1 for January to 12 for December, Kotlin's
-  /// `Month(number)`.
+  /// The month of [number], from 1 for January to 12 for December.
   ///
   /// Throws an [ArgumentError] for any other number.
   static Month of(int number) {

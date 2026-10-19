@@ -9,13 +9,13 @@
 
 import 'package:essentia_coroutines/src/flow/shared_flow.dart';
 
-/// A shared flow that holds one current [value], Kotlin's `StateFlow`.
+/// A shared flow that holds one current [value].
 ///
 /// A new listener gets the current value first and then every change.
 /// Changes are conflated: a listener that is slow, or paused, skips the
 /// values it missed and gets only the latest one, and a value equal (`==`)
 /// to the one it got before is never delivered again.
 abstract interface class StateFlow<T> implements SharedFlow<T> {
-  /// The current value, Kotlin's `value`.
+  /// The current value.
   T get value;
 }

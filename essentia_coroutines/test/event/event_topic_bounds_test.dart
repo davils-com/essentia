@@ -23,9 +23,8 @@ const _largestReplay = 1048576;
 /// The most partitions a topic may have.
 const _mostPartitions = 1024;
 
-/// The largest value of a Kotlin `Int`, which Arc refuses because a channel
-/// reads it as unbounded, and which is simply over every ceiling here.
-const _kotlinIntMax = 2147483647;
+/// The largest signed 32-bit integer, which is over every ceiling here.
+const _int32Max = 2147483647;
 
 /// Declares a bus carrying the user topic configured by [block], without
 /// starting it.
@@ -37,10 +36,10 @@ EventBusBuilder _declare(
 
 /// Tests the ceilings on what a topic may be declared to hold.
 void main() {
-  test('a buffer of the largest Kotlin Int is refused, because it is over '
-      'the ceiling', () {
+  test('a buffer of the largest signed 32-bit integer is refused, because '
+      'it is over the ceiling', () {
     final ValidationReport report = _declare(
-      (it) => it.bufferCapacity = _kotlinIntMax,
+      (it) => it.bufferCapacity = _int32Max,
     ).validate();
 
     expect(report.isValid, isFalse);
@@ -87,9 +86,9 @@ void main() {
   test('every dimension over its ceiling is reported at once', () {
     final ValidationReport report = _declare((it) {
       it
-        ..replay = _kotlinIntMax
-        ..bufferCapacity = _kotlinIntMax
-        ..partitions = _kotlinIntMax;
+        ..replay = _int32Max
+        ..bufferCapacity = _int32Max
+        ..partitions = _int32Max;
     }).validate();
 
     expect(report.errors.map((error) => error.path.toString()), <String>[

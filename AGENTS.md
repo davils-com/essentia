@@ -1,7 +1,7 @@
 # AGENTS.md
 
-Binding rules for every agent and every person working in this repository. Essentia is the Dart
-port of Arc, the Davils application runtime core, and it is held to the standard Inspectra checks.
+Binding rules for every agent and every person working in this repository. Essentia is the Davils
+application runtime core for Dart, and it is held to the standard Inspectra checks.
 
 ## How to work here
 
@@ -10,7 +10,7 @@ port of Arc, the Davils application runtime core, and it is held to the standard
 - Prefer quality, simplicity and long term maintainability over development cost.
 - Essentia is a library. Every declaration carries a `///` comment, and every behaviour change ships
   with its tests in the same change.
-- Keep the Kotlin lambda pattern of Arc: a configuration block is a `void Function(B it)` that
+- Keep the configuration block pattern: a configuration block is a `void Function(B it)` that
   receives the builder it configures, and a builder is finished by a function taking that block.
 
 ## Repository
@@ -20,22 +20,22 @@ Essentia is a Dart pub workspace. The root holds no library of its own; each pac
 
 | Path | Purpose |
 |---|---|
-| `essentia_core/` | Validation, DSL, program parameters, identity, versions, principals, bytes, architecture, platform, scope functions, result, lazy, ranges, decimals, `Duration` and the Kotlin stdlib extensions. Depends on `meta` only. `tool/brotli/` holds the vendored Brotli dictionary of google/brotli and `generate_dictionary.dart`, which compiles it into `lib/src/bytes/compression/brotli/brotli_dictionary_data.dart`; `test/fixtures/brotli/` holds its test vectors |
+| `essentia_core/` | Validation, DSL, program parameters, identity, versions, principals, bytes, architecture, platform, scope functions, result, lazy, ranges, decimals, `Duration` and the extensions on Dart's own classes. Depends on `meta` only |
+| `essentia_compression/` | gzip, zlib and raw deflate on the zlib of `dart:io` and the `CompressionStream` of the browser, the Brotli decoder, `Crc32` and `Adler32`. Depends on `meta` only. `tool/brotli/` holds the vendored Brotli dictionary and `generate_dictionary.dart`, which compiles it into `lib/src/brotli/brotli_dictionary_data.dart`; `test/fixtures/brotli/` holds the Brotli test vectors |
 | `essentia_time/` | Time sources, clocks, dates, times, time zones, formats (`essentia_time.dart`), RFC 5545 recurrence (`recurrence.dart`), `TestTimeSource` (`testing.dart`). `IANA/tzdata/` is the vendored time zone database, `tool/generate_tzdata.dart` compiles it into `lib/src/internal/tzdata.dart` |
 | `essentia_coroutines/` | Coroutines, channels, select, flows, stream operators, locks, the event bus, principals in the coroutine context (`essentia_coroutines.dart`), testing on virtual time: `runTest`, `TestScope`, `TestScheduler` and the test dispatchers (`testing.dart`). `test/support/` holds the shared fixtures of the event tests |
-| `essentia_io/` | Byte input and output ported from ktor-io: `Buffer`, `ByteReadChannel`, `ByteWriteChannel`, `ByteChannel`, the channel operations, the `writer` and `reader` coroutines and the bridges to streams |
+| `essentia_io/` | Byte input and output: `Buffer`, `ByteReadChannel`, `ByteWriteChannel`, `ByteChannel`, the channel operations, the `writer` and `reader` coroutines and the bridges to streams |
 | `inspectra.base.yaml` | The gates every package extends. Its `policy` locks them |
-| `pubspec.yaml` | The workspace and the workspace policy with its layers: `core`, `time` on `core`, `coroutines` on both, `io` on all three |
+| `pubspec.yaml` | The workspace and the workspace policy with its layers: `core`, `compression` on `core`, `time` on `core`, `coroutines` on both, `io` on all three |
 | `CONTRIBUTING.md`, `TESTING.md` | What a change and a test have to clear; this file wins where they disagree |
 | `SECURITY.md`, `CODE_OF_CONDUCT.md`, `THIRDPARTY.md` | Reporting vulnerabilities, the Code of Conduct, the third-party software |
 | `trivy-secret.yaml` | The rules of the Trivy secret scan, Markdown included |
-| `trivy.yaml`, `.trivyignore.yaml` | Point Trivy at the one accepted notice: the MIT text of google/brotli in `THIRDPARTY.md`, and nothing else |
+| `trivy.yaml`, `.trivyignore.yaml` | Point Trivy at the one accepted notice: the MIT notice of the vendored Brotli data in `THIRDPARTY.md`, and nothing else |
 | `.gitlab/CODEOWNERS` | The paths that need a maintainer's review |
 | `tool/` | `verify.dart` and `license_header.txt`, the header template of the style check |
 
 Every package keeps its test support in its own `lib/testing.dart`; a package without test support
-has none. Locales, authorization and iCalendar live in Noria (`noria_locale`, `noria_authorization`,
-`noria_icalendar`).
+has none.
 
 ## Verify
 
@@ -85,10 +85,10 @@ or ignore comments.
   needs `dart:io` is marked `@TestOn('vm')`. On the web an integer is a double, exact up to 2^53,
   and bit operations are 32-bit: write `0x100000000`, never `1 << 32`.
 
-## Porting rules
+## Design rules
 
-- Arc is the reference. A behaviour that exists in Arc exists here with the same contract, unless
-  Dart cannot express it; the README lists every deliberate difference.
+- The README's design notes list every decision a reader would not expect; a change to one updates
+  that list in the same commit.
 - Validation never throws at the first mistake: rules report through `ValidationScope` and return.
 - A value marked sensitive never reaches rendered output.
 - Programming mistakes are `ArgumentError` or `StateError`; expected failures are `Exception`s

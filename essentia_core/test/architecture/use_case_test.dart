@@ -27,7 +27,7 @@ import 'workspace_repository.dart';
 WorkspaceRepository _repository(List<WorkspaceDto> stored) =>
     WorkspaceRepository(InMemoryWorkspaceDataSource(stored));
 
-/// Ports `UseCaseTest`.
+/// Covers use cases with and without input.
 void main() {
   test('a use case is called like the function it is', () async {
     final WorkspaceRepository workspaces = _repository(const <WorkspaceDto>[

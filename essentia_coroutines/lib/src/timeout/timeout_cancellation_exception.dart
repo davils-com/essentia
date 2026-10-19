@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:meta/meta.dart';
 
-/// Reports that `withTimeout` ran out of time, Kotlin's
-/// `TimeoutCancellationException`.
+/// Reports that `withTimeout` ran out of time.
 ///
 /// Inside the timed out block it is the cancellation of its job; thrown out
 /// of `withTimeout` it tells the caller that the limit passed.

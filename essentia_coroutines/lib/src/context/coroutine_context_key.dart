@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/context/coroutine_context_element.dart';
 import 'package:meta/meta.dart';
 
-/// The key an element of a coroutine context is stored under, Kotlin's
-/// `CoroutineContext.Key`.
+/// The key an element of a coroutine context is stored under.
 ///
 /// Every kind of element declares one constant key, `Job.key`,
 /// `CoroutineName.key` and so on, and a context holds at most one element

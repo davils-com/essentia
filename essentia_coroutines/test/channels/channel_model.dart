@@ -11,8 +11,8 @@ import 'dart:collection';
 
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 
-/// A pure reference of a channel: a queue, the waiting senders and
-/// receivers, and the fate of every element, following Kotlin's contract.
+/// A pure reference of a channel: a queue, the waiting senders and receivers,
+/// and the fate of every element, following the channel contract.
 final class ChannelModel {
   /// Creates the model of a channel buffering [capacity] elements with
   /// [overflow] beyond.
@@ -42,8 +42,8 @@ final class ChannelModel {
   /// Every element reported as undelivered, in order.
   final undelivered = <int>[];
 
-  /// Every element `trySend` dropped without a report, as Kotlin's
-  /// `DROP_LATEST` does.
+  /// Every element `trySend` dropped without a report, as
+  /// [BufferOverflow.dropLatest] does.
   final dropped = <int>[];
 
   /// The receivers that learned the channel is closed.

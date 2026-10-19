@@ -20,12 +20,11 @@ import 'probe_stream.dart';
 /// Returns the duration.
 Duration _ms(int milliseconds) => Duration(milliseconds: milliseconds);
 
-/// Covers `debounce` and `sample` on virtual time, with the examples of
-/// their Kotlin documentation.
+/// Covers `debounce` and `sample` on virtual time.
 void main() {
   group('debounce', () {
     test(
-      'emits what Kotlin documents',
+      'emits the last element of every burst and the final one',
       () => runTest((it) async {
         Stream<int> numbers() async* {
           yield 1;
@@ -123,7 +122,7 @@ void main() {
 
   group('sample', () {
     test(
-      'emits what Kotlin documents',
+      'emits the latest element of every period',
       () => runTest((it) async {
         Stream<int> numbers() async* {
           for (var value = 0; value < 10; value++) {

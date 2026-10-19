@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_io/src/channel/byte_write_channel.dart';
 
-/// The scope of a writer coroutine, Ktor's `WriterScope`: it writes to
-/// [channel].
+/// The scope of a writer coroutine: it writes to [channel].
 final class WriterScope implements CoroutineScope {
   /// Creates the scope that writes to [channel] in [coroutineContext].
   WriterScope(this.channel, this.coroutineContext);

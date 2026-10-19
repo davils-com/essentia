@@ -1,8 +1,8 @@
 name: essentia_coroutines
 description: >-
-  Kotlin's coroutines for Dart, ported from kotlinx-coroutines: structured
-  concurrency, channels, select, hot flows on Dart's Stream, fair locks,
-  an in-process event bus and a virtual event loop for tests.
+  Coroutines for Dart: structured concurrency, channels, select, hot flows
+  on Dart's Stream, fair locks, an in-process event bus and a virtual event
+  loop for tests.
 version: 1.0.0
 publish_to: none
 resolution: workspace

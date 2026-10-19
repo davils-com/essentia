@@ -9,7 +9,7 @@
 
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 
-/// An event bus as Kotlin's documentation of `SharedFlow` shows it.
+/// An event bus that broadcasts its events through a `SharedFlow`.
 final class GuideEventBus {
   /// The private mutable flow.
   final _events = MutableSharedFlow<String>();

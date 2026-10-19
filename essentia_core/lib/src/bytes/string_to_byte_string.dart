@@ -14,15 +14,16 @@ import 'package:essentia_core/src/bytes/hex_format.dart';
 import 'package:essentia_core/src/bytes/hex_parsing.dart';
 import 'package:meta/meta.dart';
 
-/// Kotlin's `String.encodeToByteString` and `String.hexToByteString`.
+/// Turns text into a [ByteString], from its UTF-8 encoding or from
+/// hexadecimal digits.
 extension StringToByteString on String {
-  /// Encodes the text as UTF-8, Kotlin's `encodeToByteString`.
+  /// Encodes the text as UTF-8.
   ///
   /// Returns the byte string.
   @useResult
   ByteString encodeToByteString() => ByteString(utf8.encode(this));
 
-  /// Reads the bytes [format] wrote, Kotlin's `hexToByteString`.
+  /// Reads the bytes [format] wrote.
   ///
   /// Returns the byte string.
   ///

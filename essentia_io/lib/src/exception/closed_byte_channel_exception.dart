@@ -9,8 +9,8 @@
 
 import 'package:essentia_io/src/exception/io_exception.dart';
 
-/// Thrown when a byte channel is used after it was cancelled, Ktor's
-/// `ClosedByteChannelException`; [cause] is what it was cancelled with.
+/// Thrown when a byte channel is used after it was cancelled; [cause] is
+/// what it was cancelled with.
 base class ClosedByteChannelException extends IoException {
   /// Creates the exception for a channel cancelled with [cause].
   ClosedByteChannelException([Object? cause, StackTrace? causeStackTrace])

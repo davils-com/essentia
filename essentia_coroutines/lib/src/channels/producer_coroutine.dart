@@ -22,8 +22,8 @@ import 'package:essentia_coroutines/src/job/job_cancellation_exception.dart';
 import 'package:essentia_coroutines/src/selects/select_clause.dart';
 import 'package:meta/meta.dart';
 
-/// The coroutine of `produce`, Kotlin's `ProducerCoroutine`: the scope of
-/// the producer and the channel handed to the consumer in one.
+/// The coroutine of `produce`: the scope of the producer and the channel handed
+/// to the consumer in one.
 ///
 /// It closes the channel once it completes, with its failure as the cause
 /// when it fails; cancelling the channel cancels the coroutine.
@@ -108,8 +108,7 @@ final class ProducerCoroutine<E> extends AbstractCoroutine<void>
   @override
   ChannelResult<E> tryReceive() => _channel.tryReceive();
 
-  /// Cancels the channel, dropping what it holds, and the coroutine,
-  /// Kotlin's `ChannelCoroutine.cancel`.
+  /// Cancels the channel, dropping what it holds, and the coroutine.
   @override
   void cancel([CancellationException? cause]) {
     final CancellationException reason =

@@ -8,12 +8,11 @@
  */
 
 /// The integer quotient of [dividend] by a positive [divisor], rounded
-/// towards negative infinity, as Kotlin's `floorDiv`.
+/// towards negative infinity.
 int floorDiv(int dividend, int divisor) =>
     (dividend - dividend % divisor) ~/ divisor;
 
-/// The remainder of [dividend] by a positive [divisor], never negative, as
-/// Kotlin's `mod`.
+/// The remainder of [dividend] by a positive [divisor], never negative.
 int floorMod(int dividend, int divisor) => dividend % divisor;
 
 /// The number of nanoseconds in a second.

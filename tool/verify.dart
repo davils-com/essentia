@@ -14,6 +14,7 @@ import 'dart:io';
 /// WebAssembly.
 const packages = <String>[
   'essentia_core',
+  'essentia_compression',
   'essentia_time',
   'essentia_coroutines',
   'essentia_io',
@@ -36,7 +37,7 @@ steps() => <(String, String, List<String>)>[
     ('Style $package', package, <String>['run', 'inspectra', 'style']),
   (
     'Generated Brotli dictionary',
-    'essentia_core',
+    'essentia_compression',
     <String>['run', 'tool/brotli/generate_dictionary.dart', '--check'],
   ),
   (

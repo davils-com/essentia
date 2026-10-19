@@ -33,8 +33,8 @@ const _hyphen = '-';
 /// How many tokens a hyphen range has.
 const _hyphenTokens = 3;
 
-/// What separates the comparators of a set: the characters Java's `\s`
-/// matches, as in Arc.
+/// What separates the comparators of a set: a space, a tab, a line feed, a
+/// vertical tab, a form feed or a carriage return.
 final _whitespace = RegExp('[ \t\n\x0B\f\r]+');
 
 /// How every operator is written.

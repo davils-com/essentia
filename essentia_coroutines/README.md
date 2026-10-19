@@ -1,6 +1,6 @@
 # Essentia Coroutines
 
-Kotlin's coroutines for [Essentia](../README.md): structured concurrency with jobs, scopes and
+Coroutines for [Essentia](../README.md): structured concurrency with jobs, scopes and
 dispatchers, channels, `select`, hot flows on Dart's `Stream`, stream operators, fair locks, the
 in-process event bus and the principal in the coroutine context.
 

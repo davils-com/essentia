@@ -27,7 +27,7 @@ void main() {
       expect(() => DateTimeUnit.day.times(0), throwsArgumentError);
     });
 
-    test('names itself like Kotlin', () {
+    test('names itself in upper case', () {
       expect(DateTimeUnit.nanosecond.toString(), 'NANOSECOND');
       expect(DateTimeUnit.microsecond.toString(), 'MICROSECOND');
       expect(DateTimeUnit.millisecond.toString(), 'MILLISECOND');
@@ -54,7 +54,7 @@ void main() {
   });
 
   group('DateTimePeriod', () {
-    test('normalises as Kotlin does', () {
+    test('normalises its parts', () {
       final period = DateTimePeriod(
         years: 1,
         months: 14,
@@ -91,7 +91,7 @@ void main() {
       expect(-DatePeriod(years: 1), DatePeriod(months: -12));
     });
 
-    test('writes ISO 8601 text as Kotlin does', () {
+    test('writes ISO 8601 text', () {
       expect(DateTimePeriod().toString(), 'P0D');
       expect(
         DateTimePeriod(

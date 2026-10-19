@@ -12,8 +12,7 @@ import 'dart:async';
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/sync/semaphore.dart';
 
-/// A lock that one piece of asynchronous work holds at a time, Kotlin's
-/// `kotlinx.coroutines.sync.Mutex`.
+/// A lock that one piece of asynchronous work holds at a time.
 ///
 /// Dart runs one isolate on one thread, but an asynchronous section that
 /// awaits in the middle can still interleave with another one; a mutex keeps
@@ -42,7 +41,7 @@ final class Mutex {
   /// Returns `true` when the lock was taken, `false` when it is held.
   bool tryLock() => _permit.tryAcquire();
 
-  /// Takes the lock, waiting until it is free, Kotlin's `lock()`.
+  /// Takes the lock, waiting until it is free.
   ///
   /// Returns a future that completes once the lock is held.
   ///
@@ -60,7 +59,7 @@ final class Mutex {
     _permit.release();
   }
 
-  /// Runs [action] while holding the lock, Kotlin's `withLock`.
+  /// Runs [action] while holding the lock.
   ///
   /// The lock is given back once [action] completes, whether it succeeds or
   /// fails.

@@ -7,12 +7,10 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Thrown by a send to a channel that was closed without a cause, Kotlin's
-/// `ClosedSendChannelException`.
+/// Thrown by a send to a channel that was closed without a cause.
 ///
-/// Like Kotlin's, it is a programming mistake - an `IllegalStateException`
-/// there, a [StateError] here: a sender that may outlive the channel checks
-/// `isClosedForSend` or uses `trySend`.
+/// It is a programming mistake, so it is a [StateError]: a sender that may
+/// outlive the channel checks `isClosedForSend` or uses `trySend`.
 final class ClosedSendChannelException extends StateError {
   /// Creates the exception with [message].
   ClosedSendChannelException([super.message = 'Channel was closed']);

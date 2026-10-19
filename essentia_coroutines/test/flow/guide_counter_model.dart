@@ -9,7 +9,7 @@
 
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 
-/// A counter as Kotlin's documentation of `StateFlow` shows it.
+/// A counter that publishes its count through a `StateFlow`.
 final class GuideCounterModel {
   /// The private mutable state.
   final MutableStateFlow<int> _counter = MutableStateFlow(0);

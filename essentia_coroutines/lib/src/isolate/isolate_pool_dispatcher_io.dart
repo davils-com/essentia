@@ -18,8 +18,8 @@ import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 import 'package:essentia_coroutines/src/sync/semaphore.dart';
 import 'package:meta/meta.dart';
 
-/// A view of `Dispatchers.isolate` that runs at most [parallelism] bodies
-/// at once on the shared pool, Kotlin's `limitedParallelism`.
+/// A view of `Dispatchers.isolate` that runs at most [parallelism] bodies at
+/// once on the shared pool.
 @internal
 final class IsolatePoolDispatcherIo extends CoroutineDispatcher
     implements RemoteDispatcher {

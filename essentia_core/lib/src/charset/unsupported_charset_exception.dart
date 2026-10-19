@@ -7,8 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Thrown when a charset is asked for by a name no supported charset has,
-/// Java's `UnsupportedCharsetException`.
+/// Thrown when a charset is asked for by a name no supported charset has.
 ///
 /// The name usually comes from outside, such as the `charset` parameter of
 /// a content type, so it is an [Exception], not an error.

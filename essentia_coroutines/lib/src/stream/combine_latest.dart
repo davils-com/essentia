@@ -13,8 +13,7 @@ import 'package:essentia_coroutines/src/stream/emission.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 import 'package:meta/meta.dart';
 
-/// Combines the latest elements of [streams] with [transform], Kotlin's
-/// top level `combine(flows) { values -> ... }`.
+/// Combines the latest elements of [streams] with [transform].
 ///
 /// Once every stream emitted at least once, the result emits what
 /// [transform] makes of the latest element of each stream, in the order of

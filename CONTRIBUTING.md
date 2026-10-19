@@ -1,14 +1,14 @@
 # Contributing to Essentia
 
-Essentia is the Dart port of Arc, the Davils application runtime core. Other Davils projects depend
+Essentia is the Davils application runtime core for Dart. Other Davils projects depend
 on it at startup, on the VM, in Flutter, on the web and in WebAssembly, and its failure report is
 the first thing anyone sees of a program that will not start. That shapes what a contribution has
 to clear.
 
 ## Before you start
 
-- Read [AGENTS.md](AGENTS.md). It carries the code rules, the porting rules and the repository
-  layout. A change that breaks a porting rule is a defect, not a design choice.
+- Read [AGENTS.md](AGENTS.md). It carries the code rules, the design rules and the repository
+  layout. A change that breaks a design rule is a defect, not a design choice.
 - Work happens on `develop`; `main` is the release branch.
 - Dart SDK `^3.13.5`, resolved with `dart pub get`. Chrome is needed for the web and WebAssembly
   test runs.
@@ -86,11 +86,10 @@ local lockfile to match `pubspec.yaml` and to carry a checksum for every hosted 
 keeps the constraints current on `develop`. Third-party software is listed in
 [THIRDPARTY.md](THIRDPARTY.md).
 
-## Porting from Arc
+## Design notes
 
-Arc is the reference. A behaviour that exists in Arc exists here with the same contract, unless
-Dart cannot express it, and the README lists every deliberate difference. A change to such a
-difference updates that list in the same commit.
+The README's design notes explain every decision a reader would not expect. A change to such a
+decision updates that list in the same commit.
 
 ## Commit messages
 
@@ -100,7 +99,7 @@ Conventional commits with the area as scope:
 feat(event): add consumer group metrics
 fix(arguments): refuse a parameter declared by two schemas
 test(validation): cover aggregation across two nesting levels
-docs: describe the porting rules
+docs: describe the design notes
 ```
 
 Never use the em dash; write a plain dash. Do not add an agent name as co-author. Commit or push

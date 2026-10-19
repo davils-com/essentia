@@ -11,11 +11,9 @@ import 'package:essentia_core/src/lazy/initialized_lazy.dart';
 import 'package:essentia_core/src/lazy/initializer_lazy.dart';
 import 'package:essentia_core/src/lazy/lazy.dart';
 
-/// Creates a [Lazy] whose value [initializer] computes on the first read,
-/// Kotlin's `lazy { }`.
+/// Creates a [Lazy] whose value [initializer] computes on the first read.
 ///
-/// The contract is Kotlin's `LazyThreadSafetyMode.SYNCHRONIZED`, the only
-/// one an isolate needs:
+/// The contract is the only one an isolate needs:
 ///
 /// - [initializer] runs at most once when it returns, and is released
 ///   afterwards so that what it captured can be collected.
@@ -31,8 +29,7 @@ import 'package:essentia_core/src/lazy/lazy.dart';
 /// Returns the uncomputed [Lazy].
 Lazy<T> lazy<T>(T Function() initializer) => InitializerLazy<T>(initializer);
 
-/// Creates a [Lazy] that holds the already known [value], Kotlin's
-/// `lazyOf`.
+/// Creates a [Lazy] that holds the already known [value].
 ///
 /// Returns a [Lazy] that is initialised from the start.
 Lazy<T> lazyOf<T>(T value) => InitializedLazy<T>(value);

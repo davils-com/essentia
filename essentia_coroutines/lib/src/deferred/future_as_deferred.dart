@@ -12,9 +12,9 @@ import 'dart:async';
 import 'package:essentia_coroutines/src/deferred/completable_deferred.dart';
 import 'package:essentia_coroutines/src/deferred/deferred.dart';
 
-/// Kotlin's `asDeferred` on a plain `Future`.
+/// Turns a plain `Future` into a `Deferred`.
 extension FutureAsDeferred<T> on Future<T> {
-  /// A deferred that completes with this future, Kotlin's `asDeferred()`.
+  /// A deferred that completes with this future.
   ///
   /// Awaiting a plain future is not cancellable; awaiting the deferred is,
   /// although the work behind the future goes on.

@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Testing coroutines on virtual time, Kotlin's `kotlinx-coroutines-test`.
+/// Testing coroutines on virtual time.
 ///
 /// `runTest` runs a test body as a coroutine on the virtual event loop of a
 /// `TestScheduler`: delays, timers and timeouts take no real time, and the

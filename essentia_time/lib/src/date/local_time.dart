@@ -13,8 +13,8 @@ import 'package:essentia_time/src/internal/iso_text.dart';
 import 'package:essentia_time/src/internal/time_math.dart';
 import 'package:meta/meta.dart';
 
-/// A time of day without a date and without a time zone, Kotlin's
-/// `kotlinx.datetime.LocalTime`: what a wall clock shows.
+/// A time of day without a date and without a time zone: what a wall
+/// clock shows.
 ///
 /// It runs from [midnight] to [max], one nanosecond before the next
 /// midnight, and never knows of a shift of daylight saving time.
@@ -37,8 +37,7 @@ final class LocalTime implements Comparable<LocalTime> {
     return LocalTime._(hour, minute, second, nanosecond);
   }
 
-  /// The time [seconds] seconds after midnight, Kotlin's
-  /// `fromSecondOfDay`.
+  /// The time [seconds] seconds after midnight.
   ///
   /// Throws an [ArgumentError] outside 0 to 86399.
   factory LocalTime.fromSecondOfDay(int seconds) {
@@ -46,8 +45,7 @@ final class LocalTime implements Comparable<LocalTime> {
     return LocalTime._(seconds ~/ 3600, seconds ~/ 60 % 60, seconds % 60, 0);
   }
 
-  /// The time [milliseconds] milliseconds after midnight, Kotlin's
-  /// `fromMillisecondOfDay`.
+  /// The time [milliseconds] milliseconds after midnight.
   ///
   /// Throws an [ArgumentError] outside one day.
   factory LocalTime.fromMillisecondOfDay(int milliseconds) {
@@ -55,8 +53,7 @@ final class LocalTime implements Comparable<LocalTime> {
     return LocalTime.fromNanosecondOfDay(milliseconds * 1000000);
   }
 
-  /// The time [nanoseconds] nanoseconds after midnight, Kotlin's
-  /// `fromNanosecondOfDay`.
+  /// The time [nanoseconds] nanoseconds after midnight.
   ///
   /// Throws an [ArgumentError] outside one day.
   factory LocalTime.fromNanosecondOfDay(int nanoseconds) {
@@ -141,7 +138,7 @@ final class LocalTime implements Comparable<LocalTime> {
   /// How many nanoseconds passed since midnight.
   int toNanosecondOfDay() => toSecondOfDay() * nanosPerSecond + nanosecond;
 
-  /// This time on [date], Kotlin's `atDate`.
+  /// This time on [date].
   LocalDateTime atDate(LocalDate date) => LocalDateTime(date, this);
 
   /// Whether this time comes before [other].

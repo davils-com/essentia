@@ -10,8 +10,7 @@
 import 'package:essentia_io/src/buffer/buffer.dart';
 import 'package:essentia_io/src/channel/byte_read_channel.dart';
 
-/// A channel that counts the bytes read through it from [delegate], Ktor's
-/// `CountedByteReadChannel`.
+/// A channel that counts the bytes read through it from [delegate].
 final class CountedByteReadChannel implements ByteReadChannel {
   /// Creates the channel that reads from [delegate].
   CountedByteReadChannel(this.delegate);

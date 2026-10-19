@@ -12,8 +12,7 @@ import 'package:essentia_coroutines/src/context/coroutine_context.dart';
 import 'package:essentia_coroutines/src/context/coroutine_context_element.dart';
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 
-/// The context contract of a single element, Kotlin's
-/// `AbstractCoroutineContextElement`.
+/// The context contract of a single element.
 ///
 /// An element that mixes this in only has to name its
 /// [CoroutineContextElement.contextKey].

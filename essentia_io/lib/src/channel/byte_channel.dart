@@ -18,7 +18,7 @@ import 'package:essentia_io/src/exception/closed_write_channel_exception.dart';
 import 'package:essentia_io/src/exception/concurrent_io_exception.dart';
 import 'package:essentia_io/src/exception/io_exception.dart';
 
-/// A channel a writer and a reader share, Ktor's `ByteChannel`.
+/// A channel a writer and a reader share.
 ///
 /// The writer writes to [writeBuffer] and flushes the bytes over to the
 /// reader, who reads them from [readBuffer]. Once [maxSize] flushed bytes
@@ -40,7 +40,7 @@ final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
   ByteChannel({this.autoFlush = false});
 
   /// The number of flushed bytes a writer may get ahead of the reader
-  /// before a flush waits, 1 MiB, Ktor's `CHANNEL_MAX_SIZE`.
+  /// before a flush waits, 1 MiB.
   static const int maxSize = 1024 * 1024;
 
   /// Whether every write operation flushes at once.
@@ -150,8 +150,7 @@ final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
     await _sleepWhile('write', () => !hasFreeSpace && _closed == null);
   }
 
-  /// Hands the written bytes to the reader without waiting, Ktor's
-  /// `flushWriteBuffer`.
+  /// Hands the written bytes to the reader without waiting.
   void flushWriteBuffer() {
     if (_writeBuffer.exhausted) {
       return;
@@ -208,7 +207,7 @@ final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
 
   /// Runs [handler] once the channel is closed, with what it was cancelled
   /// with, `null` for a channel closed normally; at once for a channel that
-  /// is closed already, kotlinx.coroutines' `invokeOnClose` of a channel.
+  /// is closed already.
   /// The writer learns this way that its reader gave up while it has
   /// nothing to write.
   ///

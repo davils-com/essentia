@@ -11,7 +11,7 @@ import 'package:essentia_time/src/clock/system_clock.dart';
 import 'package:essentia_time/src/instant.dart';
 import 'package:essentia_time/src/source/time_source.dart';
 
-/// A source of the current calendar time, Kotlin's `kotlin.time.Clock`.
+/// A source of the current calendar time.
 ///
 /// A clock tells what time it is, which a [TimeSource] cannot; it can also
 /// jump, which a time source never does. Use a clock to stamp what happened
@@ -22,7 +22,7 @@ import 'package:essentia_time/src/source/time_source.dart';
 /// `DateTime.now()`, so a test can hand it a fixed one. `todayIn` and
 /// `nowIn` read the date and time a clock in a time zone shows.
 abstract interface class Clock {
-  /// The clock of the system the program runs on, Kotlin's `Clock.System`.
+  /// The clock of the system the program runs on.
   static const Clock system = SystemClock();
 
   /// Reads the current calendar time.

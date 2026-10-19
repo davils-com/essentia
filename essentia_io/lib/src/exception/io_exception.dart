@@ -10,9 +10,8 @@
 import 'package:essentia_core/essentia_core.dart';
 import 'package:meta/meta.dart';
 
-/// A failure of input or output, kotlinx-io's `IOException`: a channel
-/// that was closed or cancelled, data that ended too soon, a line that is
-/// too long.
+/// A failure of input or output: a channel that was closed or cancelled,
+/// data that ended too soon, a line that is too long.
 ///
 /// It is named `IoException`, not `IOException`, so that it does not clash
 /// with the class of `dart:io` in a file that imports both.

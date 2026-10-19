@@ -64,9 +64,9 @@ final List<String> _collidingKeys = _keysWithOneStringHashCode();
   throw StateError('No two blocks after "$prefix" share a hasher state');
 }
 
-/// Builds `2^_collidingPairs` keys sharing one `String.hashCode`, the way
-/// Arc builds them from `Aa` and `BB`: every step finds two blocks that
-/// leave the hasher in the same state and doubles the keys with them.
+/// Builds `2^_collidingPairs` keys sharing one `String.hashCode`: every step
+/// finds two blocks that leave the hasher in the same state and doubles the
+/// keys with them.
 ///
 /// Returns the keys.
 List<String> _keysWithOneStringHashCode() {

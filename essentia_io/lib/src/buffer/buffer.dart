@@ -26,8 +26,8 @@ const _twoTo32 = 0x100000000;
 /// The largest integer a JavaScript number holds exactly, 2^53.
 const _javaScriptLimit = 9007199254740992;
 
-/// A queue of bytes written at its end and read from its front,
-/// kotlinx-io's `Buffer`, which every byte channel is built on.
+/// A queue of bytes written at its end and read from its front, which
+/// every byte channel is built on.
 ///
 /// The bytes lie in segments of [segmentSize] bytes, so that writing and
 /// reading move no more than they must, and moving the bytes of one buffer
@@ -61,7 +61,7 @@ final class Buffer {
   /// The number of bytes in the buffer.
   int get size => _size;
 
-  /// Whether the buffer holds no bytes, kotlinx-io's `exhausted()`.
+  /// Whether the buffer holds no bytes.
   bool get exhausted => _size == 0;
 
   /// The byte at [index] from the front, without reading it.
@@ -167,7 +167,7 @@ final class Buffer {
 
   /// Moves [count] bytes, every byte by default, from the front of
   /// [source] to the end of this buffer, handing over whole segments where
-  /// it can, kotlinx-io's `write(source, byteCount)`.
+  /// it can.
   ///
   /// Returns the number of bytes moved.
   ///
@@ -375,7 +375,7 @@ final class Buffer {
     return result;
   }
 
-  /// Drops [count] bytes from the front, kotlinx-io's `skip`.
+  /// Drops [count] bytes from the front.
   ///
   /// Throws an [EofException] when the buffer holds fewer than [count]
   /// bytes.

@@ -9,7 +9,7 @@
 
 import 'package:meta/meta.dart';
 
-/// The place of one listener of a state flow, Kotlin's `StateFlowSlot`.
+/// The place of one listener of a state flow.
 @internal
 final class StateFlowSlot {
   /// Creates the slot of a new listener, which has the current value

@@ -21,8 +21,7 @@ final class JoinClause implements SelectClause<void> {
   /// The job waited for.
   final Job _job;
 
-  /// Starts a lazily started job, like Kotlin's, and selects once it is
-  /// complete.
+  /// Starts a lazily started job and selects once it is complete.
   @override
   void register(SelectInstance select) {
     _job.start();

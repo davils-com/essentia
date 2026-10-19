@@ -168,8 +168,8 @@ final class CancellableContinuationImpl<T>
     _registration = null;
   }
 
-  /// Hands [value] to the waiting code, unless its job was cancelled after
-  /// the continuation was resumed, Kotlin's prompt cancellation.
+  /// Hands [value] to the waiting code, unless its job was cancelled after the
+  /// continuation was resumed: the cancellation is prompt.
   ///
   /// Returns [value].
   ///

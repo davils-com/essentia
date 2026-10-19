@@ -12,8 +12,7 @@ import 'package:meta/meta.dart';
 /// The failures recorded beside an error, by error.
 final _suppressed = Expando<List<Object>>('suppressed exceptions');
 
-/// The failures that were suppressed in favour of [error], Kotlin's
-/// `Throwable.suppressedExceptions`.
+/// The failures that were suppressed in favour of [error].
 ///
 /// When several children of a job fail, the job ends with the first
 /// failure and records the others beside it.

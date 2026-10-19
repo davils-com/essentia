@@ -18,11 +18,10 @@ import 'package:essentia_coroutines/src/stream/stream_cancellation.dart';
 import 'package:essentia_coroutines/src/stream/subscription_cancel.dart';
 import 'package:essentia_coroutines/src/stream/switch_map.dart';
 
-/// Kotlin's terminal `Flow` operators for streams.
+/// The terminal operators for streams.
 extension StreamCollection<T> on Stream<T> {
   /// Runs [action] for every element and abandons the action of an element
-  /// as soon as the next one arrives, the counterpart of Kotlin's
-  /// `collectLatest`.
+  /// as soon as the next one arrives.
   ///
   /// Every action runs in a job of its own, which is cancelled when the
   /// next element arrives, so its cancellable waits such as `delay` end
@@ -40,14 +39,14 @@ extension StreamCollection<T> on Stream<T> {
       ).drain<void>();
 
   /// Runs [action] for every element, waiting for each to complete before
-  /// taking the next, Kotlin's `collect`.
+  /// taking the next.
   ///
   /// The stream is paused while [action] runs, so a slow action slows a
   /// [Stream] made with `async*` or a shared flow down instead of letting
-  /// values pile up. Without [action] the elements are taken and dropped,
-  /// Kotlin's `collect()`. Collecting is cancellable: once the job of the
-  /// collecting code is cancelled, the subscription is cancelled and no
-  /// further element is handed to [action].
+  /// values pile up. Without [action] the elements are taken and dropped.
+  /// Collecting is cancellable: once the job of the collecting code is
+  /// cancelled, the subscription is cancelled and no further element is
+  /// handed to [action].
   ///
   /// ```dart
   /// scope.launch((it) => counter.collect((value) => print(value)));
@@ -92,8 +91,7 @@ extension StreamCollection<T> on Stream<T> {
     return done.future;
   }
 
-  /// Collects the stream in a coroutine started in [scope], Kotlin's
-  /// `launchIn`.
+  /// Collects the stream in a coroutine started in [scope].
   ///
   /// Elements are dropped, so the stream is used for what it does on the
   /// way, typically with `onEach`:
@@ -106,8 +104,7 @@ extension StreamCollection<T> on Stream<T> {
   /// subscription. An error of the stream fails the job.
   Job launchIn(CoroutineScope scope) => scope.launch((it) => collect());
 
-  /// The first element, or `null` when the stream ends without one,
-  /// Kotlin's `firstOrNull`.
+  /// The first element, or `null` when the stream ends without one.
   ///
   /// Stops listening to the stream once the first element arrived.
   ///
@@ -128,7 +125,7 @@ extension StreamCollection<T> on Stream<T> {
   }
 
   /// The only element, or `null` when the stream ends without one or emits
-  /// more than one, Kotlin's `singleOrNull`.
+  /// more than one.
   ///
   /// Stops listening to the stream once a second element arrived.
   ///
@@ -153,8 +150,7 @@ extension StreamCollection<T> on Stream<T> {
     return single.future;
   }
 
-  /// Finds the first element that satisfies [test], the counterpart of
-  /// Kotlin's `firstOrNull` with a predicate.
+  /// Finds the first element that satisfies [test].
   ///
   /// Stops listening to this stream as soon as an element matches.
   ///
@@ -169,8 +165,7 @@ extension StreamCollection<T> on Stream<T> {
     return null;
   }
 
-  /// Counts the elements that satisfy [test], the counterpart of Kotlin's
-  /// `count` with a predicate.
+  /// Counts the elements that satisfy [test].
   ///
   /// Returns the count once this stream ended; the future fails with the
   /// first error of this stream or of [test].

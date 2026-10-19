@@ -11,9 +11,9 @@ import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/selects/join_clause.dart';
 import 'package:essentia_coroutines/src/selects/select_clause.dart';
 
-/// Kotlin's select clause of `Job`.
+/// The select clause of a `Job`.
 extension JobSelectClauses on Job {
-  /// The select clause that wins once the job is complete, Kotlin's
-  /// `Job.onJoin`; a lazily started job is started.
+  /// The select clause that wins once the job is complete; a lazily started job
+  /// is started.
   SelectClause<void> get onJoin => JoinClause(this);
 }

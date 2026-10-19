@@ -18,7 +18,7 @@ import 'package:essentia_core/src/charset/internal/utf16_encoding.dart';
 import 'package:essentia_core/src/charset/internal/windows1252_decoding.dart';
 import 'package:essentia_core/src/charset/internal/windows1252_encoding.dart';
 
-/// The charsets Essentia supports, Ktor's and Java's `Charsets`.
+/// The charsets Essentia supports.
 abstract final class Charsets {
   /// UTF-8, RFC 3629, the charset of the web: every character, one to four
   /// bytes each.
@@ -83,8 +83,7 @@ abstract final class Charsets {
   );
 
   /// UTF-16 with a byte order mark: decoding follows the mark and reads
-  /// big-endian without one, encoding writes the big-endian mark first,
-  /// as in Java.
+  /// big-endian without one, encoding writes the big-endian mark first.
   static const Charset utf16 = BuiltCharset(
     'UTF-16',
     <String>['UTF_16', 'utf16', 'unicode', 'UnicodeBig'],

@@ -12,8 +12,7 @@ import 'package:essentia_coroutines/src/context/abstract_coroutine_context_eleme
 import 'package:essentia_coroutines/src/context/coroutine_context_key.dart';
 import 'package:meta/meta.dart';
 
-/// The principal a coroutine works for, as an element of its context, the
-/// way Arc carries it in the coroutine context.
+/// The principal a coroutine works for, as an element of its context.
 ///
 /// `runAsPrincipal` lays it over the current context; a coroutine started
 /// in a scope takes the principal of the scope, so work that has to act for

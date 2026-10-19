@@ -14,7 +14,8 @@ import 'package:test/test.dart';
 Principal _user(String id, [Set<String> roles = const <String>{}]) =>
     Principal.of(id, roles: roles);
 
-/// Ports `PrincipalTest`.
+/// Covers the roles of a principal, stating one in a single call, and its
+/// rendering.
 void main() {
   group('roles', () {
     test('answer for a single role', () {

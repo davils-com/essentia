@@ -1,8 +1,9 @@
 # Changelog
 
 Essentia is a workspace of packages, and every package keeps its own changelog:
-[essentia_core](essentia_core/CHANGELOG.md), [essentia_time](essentia_time/CHANGELOG.md),
-[essentia_coroutines](essentia_coroutines/CHANGELOG.md) and [essentia_io](essentia_io/CHANGELOG.md).
+[essentia_core](essentia_core/CHANGELOG.md), [essentia_compression](essentia_compression/CHANGELOG.md),
+[essentia_time](essentia_time/CHANGELOG.md), [essentia_coroutines](essentia_coroutines/CHANGELOG.md)
+and [essentia_io](essentia_io/CHANGELOG.md).
 The history below is that of the single package `essentia` up to 3.3.0, which the first three were
 split from.
 
@@ -54,7 +55,7 @@ split from.
   `CancellationException` and `JobCancellationException`, `CompletionHandlerException`,
   `ConversionException`, the parameter violations `ConversionFailure` and `SourceUnavailable`,
   `ChannelClosed` and `IsolateBodyNotSendableError`.
-- Formats of dates and times, Kotlin's `DateTimeFormat`: `localDateTimeFormat`, `localDateFormat`
+- Formats of dates and times: `localDateTimeFormat`, `localDateFormat`
   and `localTimeFormat` with their builders `DateTimeFormatBuilder`, `DateFormatBuilder` and
   `TimeFormatBuilder`, `localDateTimePattern` for `yyyy`, `MM`, `dd`, `HH`, `mm`, `ss`, `S` to
   `SSSSSSSSS` and quoted text, the fixed-width `DateTimeFormats` `isoDate`, `time`, `dateTime`,
@@ -67,30 +68,29 @@ split from.
 
 ### Added
 
-- `String.toDuration` and `toDurationOrNull`, Kotlin's `Duration.parse`: the readable form
+- `String.toDuration` and `toDurationOrNull`: the readable form
   (`30s`, `1h 30m`, `-(1m 30s)`) and ISO-8601. Program parameters read durations through them.
-- `Duration.toReadableString`, Kotlin's `Duration.toString()`, which `toDuration` reads back.
+- `Duration.toReadableString`, which `toDuration` reads back.
 - `ByteSize`, an amount of bytes written as `512KiB`, `10MB` or `1.5GiB`, with `parse`,
   `tryParse`, ordering, and the units `kibibytes` to `tebibytes` and `kilobytes` to `terabytes` on
   `int`. A size is at most 2^53 - 1 bytes, exact on every platform.
-- `String.toNfc`, `toNfd` and `isNfc`, the Unicode normalization forms NFC and NFD, Kotlin's
-  `Normalizer.normalize` and JavaScript's `String.prototype.normalize`: canonical decomposition,
+- `String.toNfc`, `toNfd` and `isNfc`, the Unicode normalization forms NFC and NFD: canonical decomposition,
   ordering and composition with Hangul syllables, on the character data of Unicode 16.0.0, the same
   on every platform. Text that already is normalized comes back as the same instance.
 
 ## 3.0.0
 
-Kotlin's `kotlinx-datetime` and `kotlin.time.Clock`, ported, with the IANA time zone database built
+Dates, times and clocks, with the IANA time zone database built
 in, and RFC 5545: recurrence rules and the iCalendar format in the new library
 `package:essentia/icalendar.dart`.
 
 ### Breaking
 
-- `Clock.now()` returns an `Instant` instead of a `DateTime`, as `kotlin.time.Clock` does.
+- `Clock.now()` returns an `Instant` instead of a `DateTime`.
   `SystemClock` and `TestScheduler` follow; `TestScheduler(start:)` takes an `Instant`.
 - `LocalDate.dayOfWeek` is a `DayOfWeek` and `LocalDate.month` a `Month`; the number of the month is
   `monthNumber`. `startOfWeek` takes a `DayOfWeek`.
-- `LocalDate.today` takes a `TimeZone` instead of `local`; `clock.todayIn(zone)` is Kotlin's form.
+- `LocalDate.today` takes a `TimeZone` instead of `local`; `clock.todayIn(zone)` reads it from a clock.
 
 ### Migration
 
@@ -105,7 +105,7 @@ in, and RFC 5545: recurrence rules and the iCalendar format in the new library
 - `LocalTime`, `LocalDateTime`, `Instant`, `UtcOffset`, `YearMonth`, `DayOfWeek` and `Month`, with
   ISO 8601 parsing and printing; `LocalDateRange` and `YearMonthRange`, which iterate.
 - `DateTimeUnit` with `TimeBasedUnit`, `DayBasedUnit` and `MonthBasedUnit`, and `DateTimePeriod`
-  and `DatePeriod`, normalised as Kotlin's; arithmetic, `until` and `periodUntil` on `LocalDate`
+  and `DatePeriod`, normalised; arithmetic, `until` and `periodUntil` on `LocalDate`
   and on `Instant` in a time zone, where a day can last 23 or 25 hours.
 - `TimeZone`: every zone of the IANA time zone database 2026e, built in and decoded on first use,
   fixed offsets, `currentSystemDefault` from the environment, `/etc/localtime` or the browser, and
@@ -127,42 +127,40 @@ in, and RFC 5545: recurrence rules and the iCalendar format in the new library
 
 ### Added
 
-- `LocalDate`, Kotlin's `kotlinx.datetime.LocalDate`: a date without a time of day or a time zone,
+- `LocalDate`: a date without a time of day or a time zone,
   with day, month and year arithmetic that never meets daylight saving time, the day of the week
   and of the year, ISO week numbers, the start of a week, `daysUntil` and `monthsUntil`, ISO 8601
   parsing and printing, and `LocalDate.today` from a `Clock`.
-- `ByteString`, Kotlin's `kotlinx.io.bytestring.ByteString`: an immutable sequence of bytes that
+- `ByteString`: an immutable sequence of bytes that
   copies what it is made from, compares and sorts by its bytes and renders as
   `ByteString(size=3 hex=010203)`; `toByteString`, `encodeToByteString` and `hexToByteString`.
-- `HexFormat`, `HexFormatBuilder` and `hexFormat`, Kotlin's `HexFormat` with case, byte
+- `HexFormat`, `HexFormatBuilder` and `hexFormat`, with case, byte
   separator, byte prefix and byte suffix; `toHexString` and `hexToByteArray` on lists of bytes and
   text, whose failures never quote the text.
-- `contentEquals` and `contentHashCode` on lists of bytes, Kotlin's `ByteArray.contentEquals` and
-  `contentHashCode`.
+- `contentEquals` and `contentHashCode` on lists of bytes.
 
 ## 2.0.0
 
-Kotlin's `kotlinx-coroutines-core`, ported: structured concurrency on Dart's futures and zones,
+Coroutines: structured concurrency on Dart's futures and zones,
 channels, `select`, hot flows on Dart's streams, a dispatcher on worker isolates, and a virtual
-event loop for tests. Arc's coroutine contracts hold 1:1 where Dart can express them; the README
-lists every difference.
+event loop for tests. The design notes of the README explain what Dart shapes.
 
 ### Added
 
 - `CoroutineContext`, `CoroutineContextKey`, `CoroutineContextElement`,
   `AbstractCoroutineContextElement` and `currentCoroutineContext()`: the context travels in one
   `Zone` value. `CoroutineName`, `CoroutineExceptionHandler` and `handleCoroutineException`.
-- Kotlin's `Job` contract: new, active, completing, cancelling, cancelled and completed; children;
+- The `Job` contract: new, active, completing, cancelling, cancelled and completed; children;
   a parent completes only after its children; a failing child cancels its parent and siblings.
   `CompletableJob`, `SupervisorJob`, `NonCancellable`, `invokeOnCompletion`, `join`,
   `cancelAndJoin`, `cancelChildren`, `joinAll`, `JobCancellationException`,
   `CompletionHandlerException` and `suppressedExceptionsOf`.
-- `CoroutineScope`, `launch`, `async` with every `CoroutineStart`, `Deferred` - a `Future`, so
-  `await deferred` is Kotlin's `deferred.await()` -, `CompletableDeferred`, `awaitAll`,
+- `CoroutineScope`, `launch`, `async` with every `CoroutineStart`, `Deferred` - a `Future`, awaited
+  with `await deferred` -, `CompletableDeferred`, `awaitAll`,
   `asDeferred`, `coroutineScope`, `supervisorScope`, `withContext`, `withTimeout`,
   `withTimeoutOrNull`, `TimeoutCancellationException`, `mainScope()` and `GlobalScope`.
 - `suspendCancellableCoroutine` and `CancellableContinuation`, the building block of every
-  cancellable wait; `delay`, `yieldNow` (Kotlin's `yield`), `awaitCancellation`, `ensureActive`
+  cancellable wait; `delay`, `yieldNow`, `awaitCancellation`, `ensureActive`
   and `isCurrentCancellation`.
 - `CoroutineDispatcher` and `Dispatchers.main`, `Dispatchers.unconfined` and
   `Dispatchers.isolate`, a pool of worker isolates with `limitedParallelism`, on the web the event
@@ -220,16 +218,15 @@ lists every difference.
 
 ### Added
 
-- `TimeSource`, `TimeMark` and `TestTimeSource`, Kotlin's `TimeSource.WithComparableMarks`,
-  `ComparableTimeMark` and `TestTimeSource`, with `TimeSource.monotonic` on a `Stopwatch`.
-- `Clock` with `Clock.system`, Kotlin's `kotlin.time.Clock`.
+- `TimeSource`, `TimeMark` and `TestTimeSource`, time sources whose marks compare, with `TimeSource.monotonic` on a `Stopwatch`.
+- `Clock` with `Clock.system`.
 - `Scheduler` with `Scheduler.system`: a component's time source, clock and timers in one place,
-  with `delay`, Kotlin's cancellable `delay`.
-- `TestScheduler`, Kotlin's `TestCoroutineScheduler`: virtual time moved on with `advanceTimeBy`,
+  with `delay`, a cancellable wait.
+- `TestScheduler`: virtual time moved on with `advanceTimeBy`,
   `runCurrent` and `advanceUntilIdle`, which is its own time source and clock.
-- `Job`, `CancellationException`, `runInJob`, `currentJob` and `ensureActive`: Kotlin's cooperative
+- `Job`, `CancellationException`, `runInJob`, `currentJob` and `ensureActive`: cooperative
   cancellation, carried through a `Zone`.
-- `Semaphore` and `Mutex`, Kotlin's `kotlinx.coroutines.sync` primitives: fair, cancellable, with
+- `Semaphore` and `Mutex`: fair, cancellable, with
   `tryAcquireWithin` for a bounded wait.
 
 ### Changed
@@ -240,7 +237,7 @@ lists every difference.
 
 ### Added
 
-- `Lazy`, `lazy` and `lazyOf`, Kotlin's `lazy { }` for a field that cannot be `late`: the
+- `Lazy`, `lazy` and `lazyOf`, for a field that cannot be `late`: the
   initializer runs once on the first read, is retried after it throws, and a read from inside it
   is refused with a `StateError`.
 
@@ -253,10 +250,10 @@ lists every difference.
   and its failure is caught as a `ValidationException`.
 - `Violation.of` for a violation that has nothing to add to the shared shape.
 - `DurationParsing`: `toIsoDuration()` and `toIsoDurationOrNull()` read the ISO 8601 form that
-  `toIsoString()` renders, Kotlin's `Duration.parseIsoString`.
+  `toIsoString()` renders.
 - `StringWords`: `words()`, `toSnakeCase()`, `toKebabCase()`, `toScreamingSnakeCase()`,
-  `toCamelCase()` and `toPascalCase()`. Snake and kebab case follow kotlinx serialization's
-  `JsonNamingStrategy` character for character.
+  `toCamelCase()` and `toPascalCase()`. Snake and kebab case lower every capital and put the
+  delimiter before each run of capitals.
 - `StringSimilarity.closestIn`, the bounded "did you mean" search the program parameters use.
 - `Platform.parse` and `Platform.tryParse` read a platform from its identifier.
 
@@ -269,7 +266,7 @@ lists every difference.
   `Severity`, and `validateAs` / `validateOrThrow` for values no builder assembled.
 - Builder DSL: `Builder` and `ValidatingBuilder` with `nested`, `collect` and `adopt`, so nested
   blocks report every problem at once.
-- Kotlin scope functions for configuration blocks: `apply`, `let`, `takeIf` and `takeUnless`.
+- Scope functions for configuration blocks: `apply`, `let`, `takeIf` and `takeUnless`.
 - Program parameters: `Parameters` schemas of final fields declared with `parameter` and `flag`
   and registered as the schema is constructed, with flags, required, defaulted and repeatable
   parameters, conversions, validation, environment fallback, value sources, mutually exclusive
@@ -282,8 +279,8 @@ lists every difference.
 - RFC 9562 identifiers: `UuidV4` and monotonic `UuidV7`.
 - Platform detection: `Platform`, `OperatingSystem` and `Architecture`.
 - Lifecycle contracts: `Disposable` and `DisposableAsync`.
-- Kotlin's standard library extensions on Dart's own classes: `Iterable`, `List`, `Set`, `Map`,
-  `String`, `int`, `double`, `Duration`, `Comparable`, `Comparator`, `Future` and the `Flow`
+- Extensions on Dart's own classes: `Iterable`, `List`, `Set`, `Map`,
+  `String`, `int`, `double`, `Duration`, `Comparable`, `Comparator`, `Future` and stream
   operators on `Stream`, with the ranges `IntRange`, `IntProgression`, `ClosedRange` and
   `OpenEndRange`, `Grouping`, `JoinFormat`, `MapWithDefault` and the comparison functions.
 - `Result` with `Success` and `Failure`, `runCatching` and extensions on futures and iterables of
@@ -320,7 +317,7 @@ lists every difference.
 ### Fixed
 
 - A violation path, parameter signature or parameter name wider than its column is followed by one
-  space instead of running into the message, annotations or value next to it (ARC-44).
+  space instead of running into the message, annotations or value next to it.
 - A converter throwing an exception other than `ConversionException` is reported as a
   `ConversionFailure`.
 - A short bundle with an undeclared letter is refused whole.

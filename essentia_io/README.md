@@ -1,7 +1,6 @@
 # Essentia IO
 
-Byte input and output for [Essentia](../README.md), ported from Ktor's `ktor-io` and the buffer of
-`kotlinx-io`, on the coroutines of `essentia_coroutines`.
+Byte input and output for [Essentia](../README.md) on the coroutines of `essentia_coroutines`.
 
 ```dart
 import 'package:essentia_io/essentia_io.dart';
@@ -22,21 +21,21 @@ import 'package:essentia_io/essentia_io.dart';
 
 It runs on every Dart platform, the web and WebAssembly included.
 
-## Differences to Ktor
+## Design
 
-- Dart has no overloads and no suspending extension lambdas: a coroutine body takes its scope as
-  `it`, `readBuffer(max)` is `readRemaining([max])`, `writePacket` takes a `Buffer`, and `counted()`
-  is `asCountedReadChannel()` on a reader and `asCountedWriteChannel()` on a writer, since
+- A coroutine body takes its scope as `it`, `readRemaining([max])` reads everything that is left or
+  at most `max` bytes, `writePacket` takes a `Buffer`, and the counted channels are
+  `asCountedReadChannel()` on a reader and `asCountedWriteChannel()` on a writer, since
   `ByteChannel` is both.
 - A byte reads as 0 to 255, as Dart's `Uint8List` holds it; the wider numbers are signed. On the web
   compiled to JavaScript a 64-bit number beyond 2^53 is refused rather than rounded.
-- `IOException` and `EOFException` are `IoException` and `EofException`, so that they do not clash
-  with `dart:io`.
-- `cancel()` without a cause cancels with an `IoException` saying so, as Ktor's extension does; a
-  cancelled channel drops the bytes it held.
+- The exceptions are named `IoException` and `EofException`, so that they do not clash with
+  `dart:io`.
+- `cancel()` without a cause cancels with an `IoException` saying so; a cancelled channel drops the
+  bytes it held.
 - `readUntil` flushes what it copied before it returns.
-- What Ktor guards against with atomics and races between threads cannot happen on Dart's single
-  thread; the channel keeps the guard that can, a second reader or writer.
+- Everything runs on Dart's single thread, so no two coroutines touch a channel at the same moment;
+  the one misuse that remains, a second reader or writer, fails with a `ConcurrentIoException`.
 
 ## Quality gates
 

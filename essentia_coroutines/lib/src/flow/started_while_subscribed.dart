@@ -14,8 +14,7 @@ import 'package:essentia_coroutines/src/flow/state_flow.dart';
 import 'package:essentia_coroutines/src/stream/stream_mapping.dart';
 import 'package:meta/meta.dart';
 
-/// The strategy behind `SharingStarted.whileSubscribed`, Kotlin's
-/// `StartedWhileSubscribed`.
+/// The strategy behind `SharingStarted.whileSubscribed`.
 @immutable
 @internal
 final class StartedWhileSubscribed implements SharingStarted {

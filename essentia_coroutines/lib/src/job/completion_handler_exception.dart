@@ -9,8 +9,7 @@
 
 import 'package:essentia_core/essentia_core.dart';
 
-/// Reports that a completion handler of a job threw, Kotlin's
-/// `CompletionHandlerException`.
+/// Reports that a completion handler of a job threw.
 ///
 /// The job and its other handlers are not affected; the failure is reported
 /// where the job reports what nobody handles.

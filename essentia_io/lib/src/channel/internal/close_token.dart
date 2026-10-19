@@ -11,8 +11,8 @@ import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_io/src/exception/closed_byte_channel_exception.dart';
 import 'package:meta/meta.dart';
 
-/// How a byte channel was closed, Ktor's `CloseToken`: normally, without
-/// an [origin], or cancelled with one.
+/// How a byte channel was closed: normally, without an [origin], or
+/// cancelled with one.
 @internal
 final class CloseToken {
   /// Creates the token of a channel closed with [origin], thrown at

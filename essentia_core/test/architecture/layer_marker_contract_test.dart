@@ -16,8 +16,8 @@ import 'layered_destination.dart';
 import 'workspace.dart';
 import 'workspace_repository.dart';
 
-/// Ports what `LayerMarkerContractTest` checks by reflection, as far as
-/// the type system of Dart can state it.
+/// Covers the layer markers, as far as the type system of Dart can state
+/// their contract.
 void main() {
   test('the markers declare nothing, so a type implements them with an '
       'empty body', () {

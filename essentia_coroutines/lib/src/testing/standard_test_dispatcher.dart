@@ -15,7 +15,7 @@ import 'package:essentia_coroutines/src/dispatcher/parallelism.dart';
 import 'package:essentia_coroutines/src/testing/test_dispatcher.dart';
 import 'package:essentia_coroutines/src/testing/test_scheduler.dart';
 
-/// The dispatcher of `runTest`, Kotlin's `StandardTestDispatcher`.
+/// The dispatcher of `runTest`.
 ///
 /// A body it dispatches is queued as a task due now on the virtual time of
 /// its [scheduler]; it runs once the test waits, or on `runCurrent`.

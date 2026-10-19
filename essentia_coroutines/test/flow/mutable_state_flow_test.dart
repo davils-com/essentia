@@ -18,7 +18,7 @@ import 'guide_counter_model.dart';
 /// Covers `MutableStateFlow`: the current value, conflation, equality,
 /// compare-and-set, the update extensions and the read-only view.
 void main() {
-  group('kotlin documentation', () {
+  group('counter model', () {
     test(
       'sums two counters with combine',
       () => runTest((it) {

@@ -19,8 +19,8 @@ String _describe(ChannelResult<int> result) => switch (result) {
   ChannelFailure() => 'failed',
 };
 
-/// Covers the outcome of channel operations that do not wait: success,
-/// failure and closure, with Kotlin's accessors.
+/// Covers the outcome of channel operations that do not wait: success, failure
+/// and closure, with their accessors.
 void main() {
   test('a success carries its value', () {
     const ChannelResult<int> result = ChannelSuccess(7);

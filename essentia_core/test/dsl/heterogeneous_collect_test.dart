@@ -28,7 +28,7 @@ Matcher _throwsMentioning(List<String> parts) => throwsA(
   ),
 );
 
-/// Ports `HeterogeneousCollectTest`.
+/// Covers builders of different subtypes collected into one list.
 void main() {
   test('builders producing different subtypes fill one list of the '
       'supertype', () {

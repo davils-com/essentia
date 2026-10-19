@@ -10,8 +10,7 @@
 import 'package:essentia_time/src/source/monotonic_time_source.dart';
 import 'package:essentia_time/src/source/time_mark.dart';
 
-/// A source of time readings that measures how much time has passed,
-/// Kotlin's `TimeSource.WithComparableMarks`.
+/// A source of time readings that measures how much time has passed.
 ///
 /// A reading says nothing about the time of day: it is the time passed
 /// since an origin of the source's choosing, and only two readings of the
@@ -32,8 +31,7 @@ abstract class TimeSource {
   /// Creates a time source.
   const TimeSource();
 
-  /// The time source of the running program, which never goes backwards,
-  /// Kotlin's `TimeSource.Monotonic`.
+  /// The time source of the running program, which never goes backwards.
   static final TimeSource monotonic = MonotonicTimeSource();
 
   /// Reads the time passed since the origin of this source.

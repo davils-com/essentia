@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/continuation/cancellable_continuation.dart';
 import 'package:meta/meta.dart';
 
-/// An emitter waiting in the queue of a full shared flow, Kotlin's
-/// `SharedFlowImpl.Emitter`.
+/// An emitter waiting in the queue of a full shared flow.
 @internal
 final class SharedFlowEmitter {
   /// Creates the emitter of [value] queued at [index], resumed through

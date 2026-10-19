@@ -31,10 +31,9 @@ List<int> _drain(ReceiveChannel<int> channel) {
   }
 }
 
-/// Covers how `Channel()` resolves its capacity and overflow policy, like
-/// Kotlin's factory.
+/// Covers how `Channel()` resolves its capacity and overflow policy.
 void main() {
-  test('names the capacities with the values Kotlin uses', () {
+  test('names the capacities with their fixed values', () {
     expect(Channel.rendezvous, 0);
     expect(Channel.conflated, -1);
     expect(Channel.buffered, -2);

@@ -24,7 +24,7 @@ const _isoUnits = <int>[
 ];
 
 /// Reads text as an ISO-8601 duration, the counterpart of
-/// `Duration.toIsoString`. Kotlin's `Duration.parseIsoString`.
+/// `Duration.toIsoString`.
 ///
 /// ```dart
 /// final Duration timeout = 'PT1H30M'.toIsoDuration();

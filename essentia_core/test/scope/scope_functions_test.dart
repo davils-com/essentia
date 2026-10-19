@@ -10,7 +10,7 @@
 import 'package:essentia_core/essentia_core.dart';
 import 'package:test/test.dart';
 
-/// Covers the Kotlin scope functions `apply`, `let`, `takeIf` and
+/// Covers the scope functions `apply`, `let`, `takeIf` and
 /// `takeUnless`.
 void main() {
   group('apply', () {
@@ -145,7 +145,7 @@ void main() {
     });
   });
 
-  test('the functions chain the way Kotlin scope functions do', () {
+  test('the functions chain into one expression', () {
     final int? port = '8080'
         .takeUnless((it) => it.isEmpty)
         ?.let(int.tryParse)

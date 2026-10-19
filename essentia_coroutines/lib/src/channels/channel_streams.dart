@@ -21,10 +21,10 @@ import 'package:essentia_coroutines/src/scope/context_scope.dart';
 import 'package:essentia_coroutines/src/selects/select.dart';
 import 'package:essentia_coroutines/src/selects/select_builder_clauses.dart';
 
-/// Kotlin's ways of working through a `ReceiveChannel`: as a stream, the
-/// Dart counterpart of a `Flow`, or element by element.
+/// Ways of working through a `ReceiveChannel`: as a stream or element by
+/// element.
 extension ChannelStreams<E> on ReceiveChannel<E> {
-  /// The elements of the channel as a stream, Kotlin's `receiveAsFlow()`.
+  /// The elements of the channel as a stream.
   ///
   /// Every listener receives on its own, so several listeners share the
   /// elements like several receivers do (fan-out); the stream may be
@@ -41,8 +41,8 @@ extension ChannelStreams<E> on ReceiveChannel<E> {
   Stream<E> receiveAsStream() =>
       Stream<E>.multi((controller) => _pump(controller, consume: false));
 
-  /// The elements of the channel as a stream that may be listened to once
-  /// and cancels the channel when it ends, Kotlin's `consumeAsFlow()`.
+  /// The elements of the channel as a stream that may be listened to once and
+  /// cancels the channel when it ends.
   ///
   /// It is [receiveAsStream], except that the channel is cancelled once the
   /// stream ends or its listener cancels, and a second listener gets a
@@ -65,8 +65,8 @@ extension ChannelStreams<E> on ReceiveChannel<E> {
     });
   }
 
-  /// Runs [action] for every element until the channel is closed, then
-  /// cancels it, Kotlin's `consumeEach`.
+  /// Runs [action] for every element until the channel is closed, then cancels
+  /// it.
   ///
   /// Returns a future that completes once the channel is closed and
   /// empty.
@@ -89,8 +89,8 @@ extension ChannelStreams<E> on ReceiveChannel<E> {
         }
       });
 
-  /// Runs [block] with the channel and cancels the channel afterwards,
-  /// whatever [block] did, Kotlin's `consume`.
+  /// Runs [block] with the channel and cancels the channel afterwards, whatever
+  /// [block] did.
   ///
   /// When [block] fails, the channel is cancelled with a
   /// [CancellationException] caused by the failure.
@@ -110,8 +110,8 @@ extension ChannelStreams<E> on ReceiveChannel<E> {
     }
   }
 
-  /// Cancels the channel after it was consumed, with a cancellation caused
-  /// by [failure] if the consumer failed, Kotlin's `cancelConsumed`.
+  /// Cancels the channel after it was consumed, with a cancellation caused by
+  /// [failure] if the consumer failed.
   void _cancelConsumed(Object? failure) {
     if (failure == null) {
       cancel();

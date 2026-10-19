@@ -20,7 +20,7 @@ import 'package:essentia_coroutines/src/flow/state_flow.dart';
 import 'package:essentia_coroutines/src/flow/state_flow_slot.dart';
 import 'package:meta/meta.dart';
 
-/// The state flow behind `MutableStateFlow`, Kotlin's `StateFlowImpl`.
+/// The state flow behind `MutableStateFlow`.
 ///
 /// Every listener has a pending flag that a change sets; its pump then
 /// delivers the value current at that moment, unless it equals the value
@@ -114,7 +114,7 @@ final class StateFlowImpl<T> extends Stream<T> implements MutableStateFlow<T> {
   String toString() => 'MutableStateFlow($_value)';
 
   /// Sets the value to [newValue] if the current one equals [expected],
-  /// or in any case without one, Kotlin's `updateState`.
+  /// or in any case without one.
   ///
   /// Returns whether the current value matched.
   bool _updateState(({T value})? expected, T newValue) {

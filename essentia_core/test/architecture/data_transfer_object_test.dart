@@ -17,7 +17,7 @@ import 'workspace.dart';
 import 'workspace_dto.dart';
 import 'workspace_id.dart';
 
-/// Ports `DataTransferObjectTest`.
+/// Covers data transfer objects and their mapping to the domain.
 void main() {
   test('toDomain maps the transport shape onto the domain value', () {
     final Console console = const ConsoleDto(

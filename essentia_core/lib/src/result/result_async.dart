@@ -13,7 +13,7 @@ import 'package:essentia_core/src/result/result.dart';
 /// asynchronous steps reads like the synchronous one.
 ///
 /// Every member awaits the result and calls the member of [Result] with the
-/// same name, which mirrors the Kotlin function of that name.
+/// same name.
 extension ResultAsync<T> on Future<Result<T>> {
   /// Awaits the result and transforms its value, [Result.map].
   ///
@@ -61,8 +61,7 @@ extension ResultAsync<T> on Future<Result<T>> {
     Object Function(Object error, StackTrace stackTrace) transform,
   ) async => (await this).mapError(transform);
 
-  /// Awaits the result and turns a failure into a success, Kotlin's
-  /// `recover`.
+  /// Awaits the result and turns a failure into a success.
   ///
   /// Returns the success, or a success carrying what [transform] returns.
   ///
@@ -71,8 +70,7 @@ extension ResultAsync<T> on Future<Result<T>> {
     T Function(Object error, StackTrace stackTrace) transform,
   ) async => (await this).recover(transform);
 
-  /// Awaits the result and runs [action] on the value of a success,
-  /// Kotlin's `onSuccess`.
+  /// Awaits the result and runs [action] on the value of a success.
   ///
   /// Returns the awaited result.
   ///
@@ -80,8 +78,7 @@ extension ResultAsync<T> on Future<Result<T>> {
   Future<Result<T>> onSuccess(void Function(T value) action) async =>
       (await this).onSuccess(action);
 
-  /// Awaits the result and runs [action] on the error of a failure,
-  /// Kotlin's `onFailure`.
+  /// Awaits the result and runs [action] on the error of a failure.
   ///
   /// Returns the awaited result.
   ///
@@ -90,7 +87,7 @@ extension ResultAsync<T> on Future<Result<T>> {
     void Function(Object error, StackTrace stackTrace) action,
   ) async => (await this).onFailure(action);
 
-  /// Awaits the result and turns it into one value, Kotlin's `fold`.
+  /// Awaits the result and turns it into one value.
   ///
   /// Returns what the matching branch returns.
   ///
@@ -100,8 +97,7 @@ extension ResultAsync<T> on Future<Result<T>> {
     required R Function(Object error, StackTrace stackTrace) onFailure,
   }) async => (await this).fold(onSuccess: onSuccess, onFailure: onFailure);
 
-  /// Awaits the result and unwraps its value or builds a fallback, Kotlin's
-  /// `getOrElse`.
+  /// Awaits the result and unwraps its value or builds a fallback.
   ///
   /// Returns the value of a success, or what [onFailure] returns.
   ///
@@ -110,7 +106,7 @@ extension ResultAsync<T> on Future<Result<T>> {
     T Function(Object error, StackTrace stackTrace) onFailure,
   ) async => (await this).getOrElse(onFailure);
 
-  /// Awaits the result and unwraps its value, Kotlin's `getOrThrow`.
+  /// Awaits the result and unwraps its value.
   ///
   /// Returns the value of a success.
   ///

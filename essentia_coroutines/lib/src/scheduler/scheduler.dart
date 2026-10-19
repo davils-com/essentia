@@ -21,12 +21,11 @@ import 'package:essentia_time/essentia_time.dart';
 /// Where time comes from and where delayed work waits: the time source, the
 /// clock and the timers of a component, in one place.
 ///
-/// This is what Kotlin spreads over a dispatcher's `Delay`, its
-/// `TimeSource` and its `Clock`. A scheduler is an element of a coroutine
-/// context: `delay`, `withTimeout` and `Scheduler.current` use the one of
-/// the current context. A component that waits, measures or stamps takes a
-/// scheduler, defaulting to [system], and a test hands it a `TestScheduler`
-/// or runs inside `runTest`, and time moves on without waiting.
+/// A scheduler is an element of a coroutine context: `delay`, `withTimeout` and
+/// `Scheduler.current` use the one of the current context. A component that
+/// waits, measures or stamps takes a scheduler, defaulting to [system], and a
+/// test hands it a `TestScheduler` or runs inside `runTest`, and time moves on
+/// without waiting.
 ///
 /// ```dart
 /// Future<void> poll(Scheduler scheduler) async {
@@ -69,11 +68,11 @@ abstract class Scheduler with AbstractCoroutineContextElement {
   /// Returns the task, whose `cancel` calls the action off.
   ScheduledTask schedule(Duration delay, void Function() action);
 
-  /// Waits for [duration], Kotlin's `delay`.
+  /// Waits for [duration].
   ///
-  /// Like Kotlin's, the wait is cancellable: inside a cancelled job it ends
-  /// with the job's [CancellationException], and its timer is called off. A
-  /// zero or negative [duration] does not wait at all.
+  /// The wait is cancellable: inside a cancelled job it ends with the job's
+  /// [CancellationException], and its timer is called off. A zero or negative
+  /// [duration] does not wait at all.
   ///
   /// Returns a future that completes once [duration] has passed.
   Future<void> delay(Duration duration) {

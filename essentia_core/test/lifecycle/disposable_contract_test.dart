@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import 'counting_resource.dart';
 import 'draining_resource.dart';
 
-/// Ports `DisposableContractTest`.
+/// Covers the contract of `Disposable` and `DisposableAsync`.
 void main() {
   group('Disposable', () {
     test('disposing releases what the object held', () {

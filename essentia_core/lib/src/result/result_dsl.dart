@@ -9,10 +9,9 @@
 
 import 'package:essentia_core/src/result/result.dart';
 
-/// Runs [block] and captures its outcome, Kotlin's `runCatching`.
+/// Runs [block] and captures its outcome.
 ///
-/// Everything [block] throws is caught, errors included, the same way
-/// Kotlin catches every `Throwable`.
+/// Everything [block] throws is caught, errors included.
 ///
 /// Returns a [Success] carrying what [block] returns, or a [Failure]
 /// carrying what it threw and the stack trace it was thrown with.
@@ -24,8 +23,8 @@ Result<T> runCatching<T>(T Function() block) {
   }
 }
 
-/// Awaits [block] and captures its outcome, Kotlin's `runCatching` with a
-/// suspending block.
+/// Awaits [block] and captures its outcome, the [runCatching] of an
+/// asynchronous block.
 ///
 /// Everything [block] throws or completes with as an error is caught.
 ///

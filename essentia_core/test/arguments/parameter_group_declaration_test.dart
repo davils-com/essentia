@@ -50,7 +50,7 @@ void main() {
     expect(
       () => StrayGroupParameters.dependent().load(<String>[
         '--user',
-        'arc',
+        'essentia',
       ], environment: _nothing),
       _argumentErrorContaining('"--password"'),
     );

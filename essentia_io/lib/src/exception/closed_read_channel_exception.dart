@@ -9,8 +9,7 @@
 
 import 'package:essentia_io/src/exception/closed_byte_channel_exception.dart';
 
-/// Thrown when a byte channel is read after it was cancelled, Ktor's
-/// `ClosedReadChannelException`.
+/// Thrown when a byte channel is read after it was cancelled.
 final class ClosedReadChannelException extends ClosedByteChannelException {
   /// Creates the exception for a channel cancelled with [cause].
   ClosedReadChannelException([super.cause, super.causeStackTrace]);

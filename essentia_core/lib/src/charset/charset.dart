@@ -12,17 +12,16 @@ import 'dart:convert';
 import 'package:essentia_core/src/charset/charsets.dart';
 import 'package:essentia_core/src/charset/unsupported_charset_exception.dart';
 
-/// A character set: how text becomes bytes and bytes become text, Ktor's
-/// and Java's `Charset`.
+/// A character set: how text becomes bytes and bytes become text.
 ///
 /// A charset is a Dart [Encoding], so it encodes and decodes whole values
 /// and transforms streams chunk by chunk. Its [name] and [aliases] are
-/// those of the IANA registry, as in Java: `ISO-8859-1` is Latin-1 and
+/// those of the IANA registry: `ISO-8859-1` is Latin-1 and
 /// `US-ASCII` is ASCII, not the windows-1252 the WHATWG encoding standard
 /// of browsers maps them to.
 ///
 /// Decoding never fails: a byte sequence the charset does not define
-/// becomes U+FFFD, the replacement character, as in Java and the browser.
+/// becomes U+FFFD, the replacement character, as in the browser.
 /// Encoding fails with an [ArgumentError] for a character the charset
 /// cannot represent, as the encoders of `dart:convert` do.
 ///

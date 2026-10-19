@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_io/src/channel/byte_read_channel.dart';
 
-/// The scope of a reader coroutine, Ktor's `ReaderScope`: it reads from
-/// [channel].
+/// The scope of a reader coroutine: it reads from [channel].
 final class ReaderScope implements CoroutineScope {
   /// Creates the scope that reads from [channel] in [coroutineContext].
   ReaderScope(this.channel, this.coroutineContext);

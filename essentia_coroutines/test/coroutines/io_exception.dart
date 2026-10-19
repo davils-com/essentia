@@ -7,7 +7,7 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// A failure standing in for Kotlin's `IOException`.
+/// A failure standing in for an input or output error.
 final class IoException implements Exception {
   /// Creates the failure.
   IoException();

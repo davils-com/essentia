@@ -16,8 +16,7 @@ import 'package:essentia_coroutines/src/job/completion_handler.dart';
 import 'package:essentia_coroutines/src/job/disposable_action.dart';
 import 'package:essentia_coroutines/src/job/job.dart';
 
-/// A job that is always active and never cancelled, Kotlin's
-/// `NonCancellable`.
+/// A job that is always active and never cancelled.
 ///
 /// Work run with `withContext(NonCancellable.instance, ...)` is not
 /// cancelled with its caller, which suits clean-up that has to finish, such

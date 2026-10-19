@@ -15,12 +15,11 @@ import 'package:essentia_coroutines/src/principal/principal_missing_exception.da
 /// Runs [body] as [principal], so that [currentPrincipal] answers it
 /// anywhere inside, however deep in its asynchronous work.
 ///
-/// This is Arc's `withContext(principal) { ... }`. The principal is laid
-/// over the coroutine context as a `PrincipalElement`, which travels in a
-/// forked `Zone`, so it reaches every `await`, `Future`, `Timer`, microtask
-/// and stream listener started inside [body], and nothing outside it. An
-/// inner call replaces the principal for its own body only; the outer one
-/// is current again once that body is done.
+/// The principal is laid over the coroutine context as a `PrincipalElement`,
+/// which travels in a forked `Zone`, so it reaches every `await`, `Future`,
+/// `Timer`, microtask and stream listener started inside [body], and nothing
+/// outside it. An inner call replaces the principal for its own body only; the
+/// outer one is current again once that body is done.
 ///
 /// Call it at exactly one place: the edge that verified who the caller is.
 /// Everything below that edge reads the principal; nothing below it creates
@@ -45,8 +44,7 @@ R runAsPrincipal<R>(Principal principal, R Function() body) =>
 
 /// The principal the current code is working for.
 ///
-/// This is Arc's `currentPrincipal()`: it reads the coroutine context and
-/// never has to wait.
+/// It reads the coroutine context and never has to wait.
 ///
 /// Returns the principal of the innermost enclosing [runAsPrincipal], or
 /// `null` when nobody put one there - which a caller has to treat as

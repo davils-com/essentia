@@ -7,8 +7,8 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// Reports that the test body of `runTest`, or a coroutine it waits for,
-/// did not complete in time, Kotlin's `UncompletedCoroutinesError`.
+/// Reports that the test body of `runTest`, or a coroutine it waits for, did
+/// not complete in time.
 final class UncompletedCoroutinesError extends AssertionError {
   /// Creates the error with [message].
   UncompletedCoroutinesError(String super.message);

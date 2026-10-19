@@ -60,9 +60,8 @@ Future<int> _failedConcurrentSum(List<String> log) =>
       return await one + await two;
     });
 
-/// Covers the examples of the kotlinx.coroutines guide "Composing
-/// suspending functions", ported line by line, with the output they print
-/// and the virtual time they take as a golden log.
+/// Covers the worked examples of composing asynchronous functions, with the
+/// output they print and the virtual time they take as a golden log.
 void main() {
   test(
     'sequential by default',

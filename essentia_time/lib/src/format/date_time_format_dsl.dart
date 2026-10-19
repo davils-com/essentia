@@ -16,8 +16,7 @@ import 'package:essentia_time/src/format/date_time_format.dart';
 import 'package:essentia_time/src/format/date_time_format_builder.dart';
 import 'package:essentia_time/src/format/time_format_builder.dart';
 
-/// Builds a format of a [LocalDateTime] from a configuration block,
-/// Kotlin's `LocalDateTime.Format { }`.
+/// Builds a format of a [LocalDateTime] from a configuration block.
 ///
 /// ```dart
 /// final DateTimeFormat<LocalDateTime> stamp = localDateTimeFormat(
@@ -36,16 +35,14 @@ DateTimeFormat<LocalDateTime> localDateTimeFormat(
   void Function(DateTimeFormatBuilder it) block,
 ) => DateTimeFormatBuilder().apply(block).build();
 
-/// Builds a format of a [LocalDate] from a configuration block, Kotlin's
-/// `LocalDate.Format { }`.
+/// Builds a format of a [LocalDate] from a configuration block.
 ///
 /// Returns the format.
 DateTimeFormat<LocalDate> localDateFormat(
   void Function(DateFormatBuilder it) block,
 ) => DateFormatBuilder().apply(block).build();
 
-/// Builds a format of a [LocalTime] from a configuration block, Kotlin's
-/// `LocalTime.Format { }`.
+/// Builds a format of a [LocalTime] from a configuration block.
 ///
 /// Returns the format.
 DateTimeFormat<LocalTime> localTimeFormat(

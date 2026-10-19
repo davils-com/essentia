@@ -1,13 +1,11 @@
 name: essentia_core
 description: >-
-  The core of Essentia, the Davils application runtime for Dart, ported
-  from Arc: validation that reports every problem at once, validating
-  configuration builders, program parameters, layering contracts, RFC 9562
-  identifiers, semantic versions, principals, platform detection, byte
-  strings and hexadecimal formats, gzip, deflate, CRC-32 and Adler-32,
-  charsets, typed attributes, a case insensitive map, decimals, ranges, a
-  Result type and Kotlin's standard library extensions on Dart's own
-  classes.
+  The core of Essentia, the Davils application runtime for Dart: validation
+  that reports every problem at once, validating configuration builders,
+  program parameters, layering contracts, RFC 9562 identifiers, semantic
+  versions, principals, platform detection, byte strings and hexadecimal
+  formats, charsets, typed attributes, a case insensitive map, decimals,
+  ranges, a Result type and extensions on Dart's own classes.
 version: 1.0.0
 publish_to: none
 resolution: workspace

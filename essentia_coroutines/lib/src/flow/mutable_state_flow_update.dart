@@ -9,19 +9,17 @@
 
 import 'package:essentia_coroutines/src/flow/mutable_state_flow.dart';
 
-/// Kotlin's updating extensions on `MutableStateFlow`.
+/// The updating extensions on `MutableStateFlow`.
 extension MutableStateFlowUpdate<T> on MutableStateFlow<T> {
-  /// Sets the value to what [function] makes of the current one, Kotlin's
-  /// `update`.
+  /// Sets the value to what [function] makes of the current one.
   ///
-  /// [function] runs again whenever the value changed while it ran, as
-  /// Kotlin's compare-and-set loop does; on one isolate it runs once.
+  /// [function] runs again whenever the value changed while it ran, in a
+  /// compare-and-set loop; on one isolate it runs once.
   void update(T Function(T value) function) {
     updateAndGet(function);
   }
 
-  /// Sets the value to what [function] makes of the current one, Kotlin's
-  /// `updateAndGet`.
+  /// Sets the value to what [function] makes of the current one.
   ///
   /// Returns the new value.
   T updateAndGet(T Function(T value) function) {
@@ -34,8 +32,7 @@ extension MutableStateFlowUpdate<T> on MutableStateFlow<T> {
     }
   }
 
-  /// Sets the value to what [function] makes of the current one, Kotlin's
-  /// `getAndUpdate`.
+  /// Sets the value to what [function] makes of the current one.
   ///
   /// Returns the previous value.
   T getAndUpdate(T Function(T value) function) {

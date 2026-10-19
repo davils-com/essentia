@@ -1,0 +1,26 @@
+name: essentia_compression
+description: >-
+  Compression for Essentia, the Davils application runtime for Dart: gzip,
+  zlib and raw deflate with their frames checked, a Brotli decoder written
+  in Dart, and the running checks CRC-32 and Adler-32, on every Dart
+  platform.
+version: 1.0.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  inspectra:
+    path: ../../inspectra
+  test: ^1.30.0
+
+# The gates of inspectra.base.yaml.
+inspectra:
+  extends: ../inspectra.base.yaml
+  changelog:
+    tag_prefix: essentia_compression-v

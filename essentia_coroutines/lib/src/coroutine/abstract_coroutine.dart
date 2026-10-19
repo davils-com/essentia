@@ -23,8 +23,7 @@ import 'package:essentia_coroutines/src/job/job_support.dart';
 import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
 import 'package:meta/meta.dart';
 
-/// A job with a body that runs in a zone of its own carrying its context,
-/// Kotlin's `AbstractCoroutine`.
+/// A job with a body that runs in a zone of its own carrying its context.
 ///
 /// The body is a function returning a value or a `Future`; the coroutine
 /// is done with its body once that future completes, and complete once its

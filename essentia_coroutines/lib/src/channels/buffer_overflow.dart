@@ -7,17 +7,15 @@
  * in whole or in part, is strictly prohibited without prior written permission.
  */
 
-/// What a channel does with an element sent while its buffer is full,
-/// Kotlin's `BufferOverflow`.
+/// What a channel does with an element sent while its buffer is full.
 enum BufferOverflow {
-  /// The sender waits until there is room, Kotlin's `SUSPEND`.
+  /// The sender waits until there is room.
   suspend,
 
-  /// The oldest buffered element is dropped to make room, Kotlin's
-  /// `DROP_OLDEST`; the sender never waits.
+  /// The oldest buffered element is dropped to make room; the sender never
+  /// waits.
   dropOldest,
 
-  /// The element being sent is dropped, Kotlin's `DROP_LATEST`; the sender
-  /// never waits.
+  /// The element being sent is dropped; the sender never waits.
   dropLatest,
 }

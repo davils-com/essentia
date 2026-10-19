@@ -50,7 +50,7 @@ final class _ComparableOpenEndRange<T extends Comparable<Object>>
   @override
   int get hashCode => Object.hash(start, endExclusive);
 
-  /// Describes the range as `start..<endExclusive`, like Kotlin.
+  /// Describes the range as `start..<endExclusive`.
   ///
   /// Returns the description.
   @override

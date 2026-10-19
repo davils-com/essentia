@@ -14,8 +14,7 @@ import 'package:essentia_coroutines/src/flow/shared_flow.dart';
 import 'package:essentia_coroutines/src/flow/shared_flow_impl.dart';
 import 'package:essentia_coroutines/src/flow/state_flow.dart';
 
-/// A shared flow that values are emitted into, Kotlin's
-/// `MutableSharedFlow`.
+/// A shared flow that values are emitted into.
 ///
 /// Values go into one buffer shared by every listener: the last `replay`
 /// values are kept for new listeners, and `extraBufferCapacity` more make
@@ -39,7 +38,7 @@ abstract interface class MutableSharedFlow<T>
     implements SharedFlow<T>, FlowCollector<T> {
   /// Creates a shared flow keeping [replay] values for new listeners and
   /// buffering [extraBufferCapacity] more, with [onBufferOverflow] deciding
-  /// what happens when the buffer is full, Kotlin's `MutableSharedFlow()`.
+  /// what happens when the buffer is full.
   ///
   /// Throws an [ArgumentError] if [replay] or [extraBufferCapacity] is
   /// negative, or if [onBufferOverflow] is not [BufferOverflow.suspend]
@@ -78,12 +77,12 @@ abstract interface class MutableSharedFlow<T>
     );
   }
 
-  /// How many listeners the flow has, Kotlin's `subscriptionCount`.
+  /// How many listeners the flow has.
   ///
   /// It changes as soon as a listener subscribes or cancels.
   StateFlow<int> get subscriptionCount;
 
-  /// Emits [value] to every listener, Kotlin's `emit`.
+  /// Emits [value] to every listener.
   ///
   /// It does not look at the job of the emitting code unless it has to
   /// wait.
@@ -96,20 +95,20 @@ abstract interface class MutableSharedFlow<T>
   @override
   Future<void> emit(T value);
 
-  /// Emits [value] without waiting, Kotlin's `tryEmit`.
+  /// Emits [value] without waiting.
   ///
   /// Returns `true` when the value was emitted or dropped by the overflow
   /// policy, `false` when the buffer is full and the policy is
   /// [BufferOverflow.suspend].
   bool tryEmit(T value);
 
-  /// Forgets the replay values, Kotlin's `resetReplayCache`; new listeners
-  /// start with the next emitted value.
+  /// Forgets the replay values; new listeners start with the next emitted
+  /// value.
   ///
   /// Values a current listener has not taken yet are still delivered to it.
   void resetReplayCache();
 
-  /// A read-only view of this flow, Kotlin's `asSharedFlow`.
+  /// A read-only view of this flow.
   ///
   /// Returns the view, which cannot be cast back to emit.
   SharedFlow<T> asSharedFlow();

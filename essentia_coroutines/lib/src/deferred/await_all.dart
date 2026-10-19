@@ -13,9 +13,9 @@ import 'package:essentia_coroutines/src/deferred/deferred.dart';
 import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
 import 'package:essentia_coroutines/src/job/job_support.dart';
 
-/// Kotlin's `awaitAll` on a collection of deferred values.
+/// Waiting for a collection of deferred values.
 extension AwaitAll<T> on Iterable<Deferred<T>> {
-  /// Waits for every deferred value, Kotlin's `awaitAll()`.
+  /// Waits for every deferred value.
   ///
   /// It fails as soon as one of them fails, without waiting for the others,
   /// and starts every lazily started one.

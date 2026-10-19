@@ -9,8 +9,7 @@
 
 import 'package:essentia_io/src/exception/io_exception.dart';
 
-/// Thrown when data ends before what was asked for is complete,
-/// kotlinx-io's `EOFException`.
+/// Thrown when data ends before what was asked for is complete.
 final class EofException extends IoException {
   /// Creates the exception with [message].
   const EofException(super.message);

@@ -11,7 +11,7 @@ import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_io/src/channel/byte_read_channel.dart';
 import 'package:essentia_io/src/job/channel_job.dart';
 
-/// A writer coroutine and the channel it writes, Ktor's `WriterJob`:
+/// A writer coroutine and the channel it writes:
 /// [channel] is the side to read what it writes.
 final class WriterJob implements ChannelJob {
   /// Creates the writer of [job] that writes into [channel].

@@ -10,8 +10,7 @@
 import 'package:essentia_coroutines/src/job/job.dart';
 import 'package:essentia_coroutines/src/job/job_impl.dart';
 
-/// A job without a body that is completed by hand, Kotlin's
-/// `CompletableJob`.
+/// A job without a body that is completed by hand.
 ///
 /// ```dart
 /// final job = CompletableJob();
@@ -24,13 +23,13 @@ abstract interface class CompletableJob implements Job {
   /// Creates an active job, a child of [parent] if given.
   factory CompletableJob([Job? parent]) = JobImpl;
 
-  /// Completes the job once its children did, Kotlin's `complete()`.
+  /// Completes the job once its children did.
   ///
   /// Returns `true` when this call moved the job towards completion,
   /// `false` when it was completing, cancelling or complete already.
   bool complete();
 
-  /// Fails the job with [exception], Kotlin's `completeExceptionally`.
+  /// Fails the job with [exception].
   ///
   /// Returns `true` when this call failed the job, `false` when it was
   /// complete already.

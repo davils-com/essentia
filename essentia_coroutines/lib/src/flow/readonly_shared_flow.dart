@@ -12,7 +12,7 @@ import 'dart:async';
 import 'package:essentia_coroutines/src/flow/shared_flow.dart';
 import 'package:meta/meta.dart';
 
-/// A read-only view of a shared flow, Kotlin's `ReadonlySharedFlow`.
+/// A read-only view of a shared flow.
 @internal
 final class ReadonlySharedFlow<T> extends Stream<T> implements SharedFlow<T> {
   /// Creates the view of [_flow].

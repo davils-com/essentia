@@ -13,7 +13,7 @@ import 'package:essentia_coroutines/essentia_coroutines.dart';
 import 'package:essentia_coroutines/testing.dart';
 import 'package:test/test.dart';
 
-/// Sends [text] every [period], like `fizz` and `buzz` of the guide.
+/// Sends [text] every [period].
 ///
 /// Returns the channel of texts.
 ReceiveChannel<String> _every(
@@ -27,8 +27,7 @@ ReceiveChannel<String> _every(
   }
 });
 
-/// Receives from [a] or [b], telling which one is closed, like
-/// `selectAorB` of the guide.
+/// Receives from [a] or [b], telling which one is closed.
 ///
 /// Returns what was received.
 Future<String> _selectAorB(
@@ -46,7 +45,7 @@ Future<String> _selectAorB(
     });
 });
 
-/// Waits [time], then answers [text], like `asyncString` of the guide.
+/// Waits [time], then answers [text].
 ///
 /// Returns the deferred answer.
 Deferred<String> _asyncString(CoroutineScope scope, String text, int time) =>
@@ -55,8 +54,8 @@ Deferred<String> _asyncString(CoroutineScope scope, String text, int time) =>
       return text;
     });
 
-/// Sends the value of the newest deferred of [input], dropping a deferred
-/// once a newer one arrives, like `switchMapDeferreds` of the guide.
+/// Sends the value of the newest deferred of [input], dropping a deferred once
+/// a newer one arrives.
 ///
 /// Returns the channel of values.
 ReceiveChannel<String> _switchMapDeferreds(
@@ -82,16 +81,13 @@ ReceiveChannel<String> _switchMapDeferreds(
   }
 });
 
-/// Covers the examples of the "Select expression" chapter of the
-/// kotlinx.coroutines guide, ported to Dart; each asserts the whole output
-/// of its example.
+/// Covers the worked examples of select expressions; each asserts the whole
+/// output of its example.
 ///
-/// "Selecting on close" lets the producers run between two selects: how
-/// many microtasks a producer needs to close its channel after its last
-/// send differs between the VM, JavaScript and WebAssembly, and Kotlin's
-/// own output depends on its dispatcher in the same way. Like Kotlin's,
-/// the select is biased, so `a` wins while it has elements and its
-/// closure wins afterwards.
+/// "Selecting on close" lets the producers run between two selects: how many
+/// microtasks a producer needs to close its channel after its last send differs
+/// between the VM, JavaScript and WebAssembly. The select is biased, so `a`
+/// wins while it has elements and its closure wins afterwards.
 void main() {
   test(
     'selecting from channels',

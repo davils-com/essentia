@@ -9,14 +9,12 @@
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's `ByteArray.contentEquals` and `contentHashCode` on any list of
-/// bytes.
+/// Compares and hashes any list of bytes by its content.
 extension ByteListContent on List<int> {
   /// Whether [other] holds the same elements in the same order.
   ///
   /// It stops at the first difference, so the time it takes tells how long
-  /// the common prefix is: never compare secrets with it. Kotlin's
-  /// `ByteArray.contentEquals`.
+  /// the common prefix is: never compare secrets with it.
   ///
   /// Returns `true` when both lists are equal element by element, `false`
   /// when they differ or [other] is `null`.
@@ -35,8 +33,6 @@ extension ByteListContent on List<int> {
 
   /// A hash code of the elements, equal for lists that are
   /// [contentEquals].
-  ///
-  /// Kotlin's `ByteArray.contentHashCode`.
   ///
   /// Returns the hash code.
   @useResult
