@@ -1,0 +1,33 @@
+# Code owners for Essentia.
+#
+# GitLab resolves the last matching pattern, so the specific rules below override the
+# default. A path that decides the published surface, what the build trusts, or what
+# leaves the build always needs a maintainer's review, even when the rest is routine.
+
+# Default owner for everything in the repository.
+*                                   @davils/maintainers
+
+# The package definition, the dependencies and every quality gate.
+/pubspec.yaml                       @davils/maintainers
+/*/pubspec.yaml                     @davils/maintainers
+/inspectra.base.yaml                @davils/maintainers
+/analysis_options.yaml              @davils/maintainers
+/*/dart_test.yaml                   @davils/maintainers
+/tool/                              @davils/maintainers
+
+/TESTING.md                         @davils/maintainers
+
+# The published API surface. A change here changes what consumers compile against.
+[Published API]
+/*/api/                             @davils/maintainers
+/*/lib/*.dart                       @davils/maintainers
+
+# Anything that decides what CI trusts or what leaves the build.
+/.gitlab/                           @davils/maintainers
+/trivy-secret.yaml                  @davils/maintainers
+/renovate.json                      @davils/maintainers
+
+# Security policy and licensing.
+/SECURITY.md                        @davils/maintainers
+/LICENSE                            @davils/maintainers
+/THIRDPARTY.md                      @davils/maintainers

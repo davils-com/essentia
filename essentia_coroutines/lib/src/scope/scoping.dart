@@ -1,0 +1,119 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'dart:async';
+
+import 'package:essentia_coroutines/src/context/coroutine_context.dart';
+import 'package:essentia_coroutines/src/context/coroutine_context_access.dart';
+import 'package:essentia_coroutines/src/context/coroutine_context_zone.dart';
+import 'package:essentia_coroutines/src/coroutine/coroutine_start.dart';
+import 'package:essentia_coroutines/src/coroutine/scope_coroutine.dart';
+import 'package:essentia_coroutines/src/coroutine/supervisor_coroutine.dart';
+import 'package:essentia_coroutines/src/dispatcher/coroutine_dispatcher.dart';
+import 'package:essentia_coroutines/src/dispatcher/dispatchers.dart';
+import 'package:essentia_coroutines/src/exception/cancellation_exception.dart';
+import 'package:essentia_coroutines/src/job/job.dart';
+import 'package:essentia_coroutines/src/job/supervisor_job.dart';
+import 'package:essentia_coroutines/src/scope/coroutine_scope.dart';
+
+/// Runs [block] in a scope that completes once the block and every coroutine it
+/// started did.
+///
+/// The scope is a child of the current job. A failure of the block or of a
+/// child cancels the rest and is thrown here, after every child stopped.
+///
+/// ```dart
+/// final (User user, List<Order> orders) = await coroutineScope((it) async {
+///   final Deferred<User> user = it.async((it) => loadUser(id));
+///   final Deferred<List<Order>> orders = it.async((it) => loadOrders(id));
+///   return (await user, await orders);
+/// });
+/// ```
+///
+/// Returns what [block] returns.
+///
+/// Throws the first failure of the block or a child.
+Future<R> coroutineScope<R>(FutureOr<R> Function(CoroutineScope it) block) {
+  final coroutine = ScopeCoroutine<R>(currentCoroutineContext())
+    ..startCoroutine(CoroutineStart.undispatched, block);
+  return coroutine.result;
+}
+
+/// Runs [block] in a scope whose children fail on their own.
+///
+/// A failing child does not cancel the scope or its siblings. The scope
+/// completes once the block and every child did.
+///
+/// Returns what [block] returns.
+///
+/// Throws the failure of the block itself.
+Future<R> supervisorScope<R>(FutureOr<R> Function(CoroutineScope it) block) {
+  final coroutine = SupervisorCoroutine<R>(currentCoroutineContext())
+    ..startCoroutine(CoroutineStart.undispatched, block);
+  return coroutine.result;
+}
+
+/// Runs [block] with [context] laid over the current context and waits for it
+/// and every coroutine it started.
+///
+/// A dispatcher in [context] that differs from the current one dispatches
+/// the block; a job in [context] replaces the parent, so
+/// `withContext(NonCancellable.instance, ...)` is not cancelled with the
+/// caller. Otherwise a cancelled caller does not get the result of the
+/// block, but its cancellation.
+///
+/// Returns what [block] returns.
+///
+/// Throws the failure of the block or a child, and a
+/// [CancellationException] if the caller is cancelled.
+Future<R> withContext<R>(
+  CoroutineContext context,
+  FutureOr<R> Function(CoroutineScope it) block,
+) {
+  final CoroutineContext caller = currentCoroutineContext();
+  final CoroutineContext merged = caller + context;
+  try {
+    merged.ensureActive();
+  } on CancellationException catch (cause, stackTrace) {
+    return Future<R>.error(cause, stackTrace);
+  }
+  final CoroutineDispatcher from =
+      caller.get(CoroutineDispatcher.key) ?? Dispatchers.main;
+  final CoroutineDispatcher to =
+      merged.get(CoroutineDispatcher.key) ?? Dispatchers.main;
+  final coroutine = ScopeCoroutine<R>(merged)
+    ..startCoroutine(
+      from == to ? CoroutineStart.undispatched : CoroutineStart.defaultStart,
+      block,
+    );
+  final Job? callerJob = caller.get(Job.key);
+  if (callerJob == null || context.get(Job.key) != null) {
+    return coroutine.result;
+  }
+  return coroutine.result.then((value) {
+    if (callerJob.isCancelled) {
+      throw callerJob.getCancellationException();
+    }
+    return value;
+  });
+}
+
+/// A scope for the main work of a program or a user interface: a supervisor on
+/// the event loop.
+///
+/// Returns the scope.
+CoroutineScope mainScope() =>
+    CoroutineScope(SupervisorJob() + Dispatchers.main);

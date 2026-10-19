@@ -1,52 +1,144 @@
-name: essentia
+name: essentia_workspace
 description: >-
-  The Davils application runtime core for Dart, ported from Arc: validation
-  that reports every problem at once, validating configuration builders,
-  program parameters, an in-process event bus, layering contracts, RFC 9562
-  identifiers, platform detection, a Result type and Kotlin's standard
-  library extensions on Dart's own classes.
-version: 1.0.0
+  Essentia for Dart: validation, configuration, compression, time,
+  coroutines and byte channels.
 publish_to: none
 
 environment:
   sdk: ^3.13.5
 
-dependencies:
-  meta: ^1.16.0
+workspace:
+  - essentia_compression
+  - essentia_core
+  - essentia_coroutines
+  - essentia_io
+  - essentia_time
 
 dev_dependencies:
-  build_runner: ^2.16.1
-  inspectra: ^1.0.0
-  test: ^1.30.0
+  inspectra: ^2.1.0
 
-# Essentia is checked by Inspectra 1.0.0 with every package gate it ships:
-# `dart run inspectra check` runs them all, `dart run build_runner build`
-# runs the ones marked run_on_build.
+# The workspace root holds no library of its own. Every package runs the
+# gates of inspectra.base.yaml with `dart run inspectra -C <package>
+# check`; the root checks what only the whole workspace can answer - the
+# membership, aligned versions, one SDK, no cycles, the layers - and scans
+# and formats the files outside the packages.
 inspectra:
+  fail_on: unknown
+  min_severity: unknown
+  policy:
+    locked:
+      - fail_on
+      - min_severity
+      - baseline.enabled
+      - format.enabled
+      - format.fail_on_findings
+      - style.enabled
+      - style.fail_on_findings
+      - style.preset
+      - style.license_header
+      - style.custom_rules
+      - style.rules.no_late
+      - trivy.enabled
+      - trivy.mode
+      - trivy.version
+      - dependency_policy.enabled
+      - workspace_policy.enabled
+      - workspace_policy.align_versions
+      - workspace_policy.require_membership
+      - workspace_policy.same_sdk
+      - workspace_policy.forbid_cycles
+      - workspace_policy.include_dev_dependencies
+    forbid_ignore_of: [critical, high, medium, low, unknown]
+  baseline:
+    enabled: false
+    fail_on_stale: true
+  hook:
+    checks: [audit, typosquat, deps, format, style]
   format:
     enabled: true
-    run_on_build: true
+    fail_on_findings: true
+    exclude+: ['essentia*/**']
   lint:
-    enabled: true
-    run_on_build: true
+    enabled: false
   style:
     enabled: true
-    run_on_build: true
+    fail_on_findings: true
     preset: strict
     license_header: tool/license_header.txt
+    rules:
+      no_late: true
+    exclude+: ['essentia*/**']
   api:
+    enabled: false
+  coverage:
+    enabled: false
+  changelog:
+    enabled: false
+  dependency_policy:
     enabled: true
+    require_upper_bound: true
+    min_sdk: 3.13.5
+    dev_only: [inspectra]
+    require_publish_to: true
+    required_metadata: [description]
+    check_imports: true
+    unused_allow: []
+    constraint_style: caret
+    allowed_git_hosts: [gitlab.davils.com]
+    overrides:
+      require_reason: true
+    lockfile_policy: ignored
+    libyear_scope: all
   trivy:
     enabled: true
+    mode: required
+    version: 0.75.0
+    use_installed: false
+    secret:
+      enabled: true
+      config: trivy-secret.yaml
+      fail_on_findings: true
+      severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
     license:
-      run_on_build: true
+      enabled: true
+      fail_on_findings: true
+      severity: [CRITICAL, HIGH, MEDIUM, UNKNOWN]
+      ignored_licenses: [bzip2]
+      include_dev_dependencies: true
     vulnerability:
-      run_on_build: true
+      enabled: true
+      fail_on_findings: true
+      severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
+      include_dev_dependencies: true
+      ignore_unfixed: false
     filesystem:
       enabled: true
-      scanners: [vuln, secret, misconfig]
-  coverage:
+      fail_on_findings: true
+      severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
+      scanners: [vuln, secret, misconfig, license]
+  # The layers, from the bottom: essentia_core and essentia_compression,
+  # time on top of essentia_core, the coroutines above both and io above
+  # all three.
+  workspace_policy:
     enabled: true
-    min_line_coverage: 90
-  changelog:
-    enabled: true
+    align_versions: exact
+    require_membership: true
+    same_sdk: true
+    forbid_cycles: true
+    include_dev_dependencies: true
+    layers:
+      - name: core
+        packages: [essentia_core]
+        may_depend_on: []
+      - name: compression
+        packages: [essentia_compression]
+        may_depend_on: [core]
+      - name: time
+        packages: [essentia_time]
+        may_depend_on: [core]
+      - name: coroutines
+        packages: [essentia_coroutines]
+        may_depend_on: [core, time]
+      - name: io
+        packages: [essentia_io]
+        may_depend_on: [core, time, coroutines]

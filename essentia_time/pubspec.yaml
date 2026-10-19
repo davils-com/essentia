@@ -1,0 +1,31 @@
+name: essentia_time
+description: >-
+  Clocks, dates, times, IANA time zones and RFC 5545 recurrence for Dart.
+version: 1.0.0
+repository: https://github.com/davils-com/essentia/tree/main/essentia_time
+issue_tracker: https://github.com/davils-com/essentia/issues
+homepage: https://www.davils.com
+topics:
+  - time
+  - date
+  - timezone
+  - calendar
+  - recurrence
+resolution: workspace
+
+environment:
+  sdk: ^3.13.5
+
+dependencies:
+  essentia_core: ^1.0.0
+  meta: ^1.16.0
+
+dev_dependencies:
+  inspectra: ^2.1.0
+  test: ^1.30.0
+
+# The gates of inspectra.base.yaml.
+inspectra:
+  extends: ../inspectra.base.yaml
+  changelog:
+    tag_prefix: essentia_time-v

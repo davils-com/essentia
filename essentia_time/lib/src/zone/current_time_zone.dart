@@ -1,0 +1,24 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/// Where the time zone of the system is read: from the environment and
+/// the file system where `dart:io` is, from the browser on the web, and
+/// nowhere else.
+library;
+
+export 'package:essentia_time/src/zone/current_time_zone_stub.dart'
+    if (dart.library.io) 'package:essentia_time/src/zone/current_time_zone_io.dart'
+    if (dart.library.js_interop) 'package:essentia_time/src/zone/current_time_zone_web.dart';

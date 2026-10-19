@@ -1,0 +1,174 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'package:essentia_core/essentia_core.dart';
+import 'package:essentia_coroutines/essentia_coroutines.dart';
+import 'package:essentia_coroutines/testing.dart';
+import 'package:essentia_time/essentia_time.dart';
+import 'package:test/test.dart';
+
+import 'arithmetic_exception.dart';
+
+/// Pretends to do something useful for a second.
+///
+/// Returns 13.
+Future<int> _doSomethingUsefulOne() async {
+  await delay(1.seconds);
+  return 13;
+}
+
+/// Pretends to do something useful for a second, too.
+///
+/// Returns 29.
+Future<int> _doSomethingUsefulTwo() async {
+  await delay(1.seconds);
+  return 29;
+}
+
+/// Sums both useful things concurrently in a scope of its own.
+///
+/// Returns the sum.
+Future<int> _concurrentSum() => coroutineScope((it) async {
+  final Deferred<int> one = it.async((it) => _doSomethingUsefulOne());
+  final Deferred<int> two = it.async((it) => _doSomethingUsefulTwo());
+  return await one + await two;
+});
+
+/// Sums two values of which the second fails, logging into [log].
+///
+/// Returns the sum, never.
+Future<int> _failedConcurrentSum(List<String> log) =>
+    coroutineScope((it) async {
+      final Deferred<int> one = it.async((it) async {
+        try {
+          await delay(const Duration(days: 365));
+          return 42;
+        } finally {
+          log.add('First child was cancelled');
+        }
+      });
+      final Deferred<int> two = it.async<int>((it) {
+        log.add('Second child throws an exception');
+        throw ArithmeticException();
+      });
+      return await one + await two;
+    });
+
+/// Covers the worked examples of composing asynchronous functions, with the
+/// output they print and the virtual time they take as a golden log.
+void main() {
+  test(
+    'sequential by default',
+    () => runTest((it) async {
+      final log = <String>[];
+      final TimeMark start = it.testTimeSource.markNow();
+      final int one = await _doSomethingUsefulOne();
+      final int two = await _doSomethingUsefulTwo();
+      log
+        ..add('The answer is ${one + two}')
+        ..add('Completed in ${start.elapsedNow().inMilliseconds} ms');
+
+      expect(log, <String>['The answer is 42', 'Completed in 2000 ms']);
+    }),
+  );
+
+  test(
+    'concurrent using async',
+    () => runTest((it) async {
+      final log = <String>[];
+      final TimeMark start = it.testTimeSource.markNow();
+      final Deferred<int> one = it.async((it) => _doSomethingUsefulOne());
+      final Deferred<int> two = it.async((it) => _doSomethingUsefulTwo());
+      log
+        ..add('The answer is ${await one + await two}')
+        ..add('Completed in ${start.elapsedNow().inMilliseconds} ms');
+
+      expect(log, <String>['The answer is 42', 'Completed in 1000 ms']);
+    }),
+  );
+
+  test(
+    'lazily started async',
+    () => runTest((it) async {
+      final log = <String>[];
+      final TimeMark start = it.testTimeSource.markNow();
+      final Deferred<int> one = it.async(
+        (it) => _doSomethingUsefulOne(),
+        start: CoroutineStart.lazy,
+      );
+      final Deferred<int> two = it.async(
+        (it) => _doSomethingUsefulTwo(),
+        start: CoroutineStart.lazy,
+      );
+      one.start();
+      two.start();
+      log
+        ..add('The answer is ${await one + await two}')
+        ..add('Completed in ${start.elapsedNow().inMilliseconds} ms');
+
+      expect(log, <String>['The answer is 42', 'Completed in 1000 ms']);
+    }),
+  );
+
+  test(
+    'lazily started async awaited one after another',
+    () => runTest((it) async {
+      final TimeMark start = it.testTimeSource.markNow();
+      final Deferred<int> one = it.async(
+        (it) => _doSomethingUsefulOne(),
+        start: CoroutineStart.lazy,
+      );
+      final Deferred<int> two = it.async(
+        (it) => _doSomethingUsefulTwo(),
+        start: CoroutineStart.lazy,
+      );
+
+      expect(await one + await two, 42);
+      expect(start.elapsedNow(), 2.seconds);
+    }),
+  );
+
+  test(
+    'structured concurrency with async',
+    () => runTest((it) async {
+      final log = <String>[];
+      final TimeMark start = it.testTimeSource.markNow();
+      log
+        ..add('The answer is ${await _concurrentSum()}')
+        ..add('Completed in ${start.elapsedNow().inMilliseconds} ms');
+
+      expect(log, <String>['The answer is 42', 'Completed in 1000 ms']);
+    }),
+  );
+
+  test(
+    'cancellation is always propagated through coroutines hierarchy',
+    () => runTest((it) async {
+      final log = <String>[];
+      try {
+        await _failedConcurrentSum(log);
+      } on ArithmeticException {
+        log.add('Computation failed with ArithmeticException');
+      }
+
+      expect(log, <String>[
+        'Second child throws an exception',
+        'First child was cancelled',
+        'Computation failed with ArithmeticException',
+      ]);
+    }),
+  );
+}

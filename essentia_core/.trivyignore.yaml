@@ -1,0 +1,7 @@
+# Essentia is licensed under Apache-2.0, and Trivy reports its text
+# wherever it finds it. Every other license and file still fails.
+licenses:
+  - id: Apache-2.0
+    paths:
+      - LICENSE
+      - tool/unicode/generate_normalization.py

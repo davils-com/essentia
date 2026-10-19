@@ -1,0 +1,23 @@
+# The notices Essentia must reproduce. THIRDPARTY.md carries the MIT notice
+# of google/brotli, whose static dictionary and test vectors
+# essentia_compression vendors; Trivy reports any MIT text it finds, so
+# THIRDPARTY.md and the copy essentia_compression publishes are accepted
+# for MIT alone. Essentia itself is licensed under Apache-2.0: the license
+# of the workspace and of every package, the header template and the one
+# source file Trivy classifies, the Unicode generator, carry its text. Every
+# other license and file still fails.
+licenses:
+  - id: MIT
+    paths:
+      - THIRDPARTY.md
+      - essentia_compression/THIRDPARTY.md
+  - id: Apache-2.0
+    paths:
+      - LICENSE
+      - tool/license_header.txt
+      - essentia_core/tool/unicode/generate_normalization.py
+      - essentia_compression/LICENSE
+      - essentia_core/LICENSE
+      - essentia_coroutines/LICENSE
+      - essentia_io/LICENSE
+      - essentia_time/LICENSE

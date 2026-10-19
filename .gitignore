@@ -6,8 +6,12 @@ build/
 # https://dart.dev/tools/pub/private-files#pubspec-lock.
 pubspec.lock
 
+# A local override, such as a path to an unreleased Inspectra. It never
+# leaves the machine it was written on.
+pubspec_overrides.yaml
+
 # Inspectra coverage output
-/coverage/
+coverage/
 
 .idea/
 .vscode/

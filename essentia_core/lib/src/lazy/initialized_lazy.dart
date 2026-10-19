@@ -1,0 +1,38 @@
+/*
+ * Copyright 2026 Davils
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import 'package:essentia_core/src/lazy/lazy.dart';
+import 'package:meta/meta.dart';
+
+/// The [Lazy] that `lazyOf` creates around a value that is already known.
+@immutable
+@internal
+final class InitializedLazy<T> implements Lazy<T> {
+  /// Creates the [Lazy] holding [value].
+  const InitializedLazy(this.value);
+
+  /// The value, known from the start.
+  @override
+  final T value;
+
+  /// Always `true`: the value never needed computing.
+  @override
+  bool get isInitialized => true;
+
+  /// Renders the value.
+  @override
+  String toString() => '$value';
+}

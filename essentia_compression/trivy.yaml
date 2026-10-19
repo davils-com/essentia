@@ -1,0 +1,2 @@
+# Read by Trivy from the directory Inspectra runs it in.
+ignorefile: .trivyignore.yaml
