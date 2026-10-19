@@ -1,6 +1,6 @@
 # Essentia Compression
 
-Compression for [Essentia](../README.md), the Davils application runtime for Dart: gzip, zlib
+Compression for [Essentia](https://github.com/davils-com/essentia#readme), the Davils application runtime for Dart: gzip, zlib
 streams and raw deflate data with their frames checked, a decoder of Brotli, and the running checks
 CRC-32 and Adler-32.
 
@@ -63,3 +63,8 @@ Adler32.of(ascii.encode('Wikipedia')); // 0x11E60398
 
 `Crc32`, the check gzip, zip and PNG store beside their data, and `Adler32`, the check behind a
 zlib stream, take bytes chunk by chunk and give the same answer on every platform.
+
+## License
+
+Apache 2.0 - see [LICENSE](LICENSE). The vendored Brotli data carries its own notice in
+[THIRDPARTY.md](THIRDPARTY.md).

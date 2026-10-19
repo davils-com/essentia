@@ -1,0 +1,10 @@
+# Essentia is licensed under Apache-2.0, and THIRDPARTY.md carries the
+# MIT notice of the vendored Brotli data; Trivy reports both texts
+# wherever it finds them. Every other license and file still fails.
+licenses:
+  - id: Apache-2.0
+    paths:
+      - LICENSE
+  - id: MIT
+    paths:
+      - THIRDPARTY.md

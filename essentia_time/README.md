@@ -1,6 +1,6 @@
 # Essentia Time
 
-Time for [Essentia](../README.md): time sources and clocks, instants, dates, times and periods,
+Time for [Essentia](https://github.com/davils-com/essentia#readme): time sources and clocks, instants, dates, times and periods,
 every IANA time zone with its rules and transitions, the formats of dates and times, and the
 recurrence of RFC 5545.
 
@@ -12,3 +12,7 @@ recurrence of RFC 5545.
 
 The time zone database lies in `IANA/tzdata`; `dart run tool/generate_tzdata.dart` compiles it into
 `lib/src/internal/tzdata.dart`, and `--check` tells whether that file is current.
+
+## License
+
+Apache 2.0 - see [LICENSE](LICENSE).

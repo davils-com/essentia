@@ -1,6 +1,6 @@
 # Essentia
 
-Essentia is the Davils application runtime core for Dart. It
+Essentia is the Davils application runtime for Dart. It
 validates configuration through one model that reports every problem at once, turns the parameters
 a program is started with into typed immutable values, carries events between the parts of one
 program, and holds the small building blocks the rest is made of: layering contracts, RFC 9562

@@ -1,6 +1,6 @@
 # Contributing to Essentia
 
-Essentia is the Davils application runtime core for Dart. Other Davils projects depend
+Essentia is the Davils application runtime for Dart. Other Davils projects depend
 on it at startup, on the VM, in Flutter, on the web and in WebAssembly, and its failure report is
 the first thing anyone sees of a program that will not start. That shapes what a contribution has
 to clear.
@@ -90,6 +90,23 @@ keeps the constraints current on `develop`. Third-party software is listed in
 
 The README's design notes explain every decision a reader would not expect. A change to such a
 decision updates that list in the same commit.
+
+## Publishing
+
+Every package is published to [pub.dev](https://pub.dev) from a clean `main`, after
+`dart run tool/verify.dart` and the Inspectra gates of every package are green. A package depends
+on its siblings with a caret constraint, so they go up in the order of the layers:
+`essentia_core`, `essentia_compression`, `essentia_time`, `essentia_coroutines`, `essentia_io`.
+
+```bash
+cd essentia_core
+dart pub publish --dry-run
+dart pub publish
+```
+
+A package carries its own `LICENSE`, `CHANGELOG.md`, `README.md` and `example/`; its `.pubignore`
+keeps the coverage, the API dump, the generators and the gate configuration out of the archive.
+Links in a package's README and CHANGELOG are absolute, since pub.dev shows them on their own.
 
 ## Commit messages
 

@@ -1,13 +1,17 @@
 name: essentia_core
 description: >-
-  The core of Essentia, the Davils application runtime for Dart: validation
-  that reports every problem at once, validating configuration builders,
-  program parameters, layering contracts, RFC 9562 identifiers, semantic
-  versions, principals, platform detection, byte strings and hexadecimal
-  formats, charsets, typed attributes, a case insensitive map, decimals,
-  ranges, a Result type and extensions on Dart's own classes.
+  Validation, configuration builders, program parameters, identifiers,
+  versions and extensions on Dart's own classes.
 version: 1.0.0
-publish_to: none
+repository: https://github.com/davils-com/essentia/tree/main/essentia_core
+issue_tracker: https://github.com/davils-com/essentia/issues
+homepage: https://www.davils.com
+topics:
+  - validation
+  - configuration
+  - cli
+  - semver
+  - extensions
 resolution: workspace
 
 environment:
@@ -17,8 +21,7 @@ dependencies:
   meta: ^1.16.0
 
 dev_dependencies:
-  inspectra:
-    path: ../../inspectra
+  inspectra: ^2.1.0
   test: ^1.30.0
 
 # The gates of inspectra.base.yaml.

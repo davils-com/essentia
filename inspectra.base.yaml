@@ -46,7 +46,13 @@ dependency_policy:
   min_sdk: 3.13.5
   dev_only: [inspectra, test]
   require_publish_to: true
-  required_metadata: [description]
+  published_packages:
+    - essentia_compression
+    - essentia_core
+    - essentia_coroutines
+    - essentia_io
+    - essentia_time
+  required_metadata: [description, repository, issue_tracker]
   lockfile_in_sync: true
   lockfile_checksums: true
   check_imports: true

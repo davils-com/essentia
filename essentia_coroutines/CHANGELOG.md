@@ -6,7 +6,7 @@ All notable changes to this package are documented in this file. The format foll
 
 ## 1.0.0
 
-Split out of `essentia` 3.3.0, whose history is in the [workspace changelog](../CHANGELOG.md).
+Split out of `essentia` 3.3.0, whose history is in the [workspace changelog](https://github.com/davils-com/essentia/blob/main/CHANGELOG.md).
 
 ### Added
 

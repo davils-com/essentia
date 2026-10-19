@@ -1,25 +1,29 @@
 name: essentia_coroutines
 description: >-
-  Coroutines for Dart: structured concurrency, channels, select, hot flows
-  on Dart's Stream, fair locks, an in-process event bus and a virtual event
-  loop for tests.
+  Structured concurrency for Dart: coroutines, channels, select, hot flows
+  and an event bus.
 version: 1.0.0
-publish_to: none
+repository: https://github.com/davils-com/essentia/tree/main/essentia_coroutines
+issue_tracker: https://github.com/davils-com/essentia/issues
+homepage: https://www.davils.com
+topics:
+  - coroutines
+  - concurrency
+  - channels
+  - streams
+  - event-bus
 resolution: workspace
 
 environment:
   sdk: ^3.13.5
 
 dependencies:
-  essentia_core:
-    path: ../essentia_core
-  essentia_time:
-    path: ../essentia_time
+  essentia_core: ^1.0.0
+  essentia_time: ^1.0.0
   meta: ^1.16.0
 
 dev_dependencies:
-  inspectra:
-    path: ../../inspectra
+  inspectra: ^2.1.0
   test: ^1.30.0
 
 # The gates of inspectra.base.yaml.

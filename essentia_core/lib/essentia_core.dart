@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/// The core of Essentia, the Davils application runtime for Dart.
+/// The building blocks of Essentia.
 ///
 /// Validation that reports every problem at once, validating configuration
 /// builders, program parameters, layering contracts, RFC 9562 identifiers,

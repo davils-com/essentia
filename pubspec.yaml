@@ -1,14 +1,7 @@
 name: essentia_workspace
 description: >-
-  The workspace of Essentia, the Davils application runtime core for Dart:
-  essentia_core - validation, configuration builders, program parameters,
-  identifiers, versions, principals, platform detection, byte strings, a
-  Result type and extensions on Dart's own classes -, essentia_compression
-  - gzip, deflate, a Brotli decoder, CRC-32 and Adler-32 -, essentia_time -
-  time sources, dates, times, every IANA time zone and RFC 5545 recurrence
-  -, essentia_coroutines - coroutines, channels, select, hot flows, fair
-  locks and an in-process event bus - and essentia_io - byte channels on a
-  segmented buffer -, each with its test support.
+  Essentia for Dart: validation, configuration, compression, time,
+  coroutines and byte channels.
 publish_to: none
 
 environment:
@@ -22,8 +15,7 @@ workspace:
   - essentia_time
 
 dev_dependencies:
-  inspectra:
-    path: ../inspectra
+  inspectra: ^2.1.0
 
 # The workspace root holds no library of its own. Every package runs the
 # gates of inspectra.base.yaml with `dart run inspectra -C <package>
@@ -124,8 +116,9 @@ inspectra:
       fail_on_findings: true
       severity: [CRITICAL, HIGH, MEDIUM, LOW, UNKNOWN]
       scanners: [vuln, secret, misconfig, license]
-  # The layers, from the bottom: the core and compression, time on top of
-  # the core, the coroutines above both and io above all three.
+  # The layers, from the bottom: essentia_core and essentia_compression,
+  # time on top of essentia_core, the coroutines above both and io above
+  # all three.
   workspace_policy:
     enabled: true
     align_versions: exact

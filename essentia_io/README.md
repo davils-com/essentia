@@ -1,6 +1,6 @@
 # Essentia IO
 
-Byte input and output for [Essentia](../README.md) on the coroutines of `essentia_coroutines`.
+Byte input and output for [Essentia](https://github.com/davils-com/essentia#readme) on the coroutines of `essentia_coroutines`.
 
 ```dart
 import 'package:essentia_io/essentia_io.dart';
@@ -45,4 +45,4 @@ dart run inspectra -C essentia_io check
 
 ## License
 
-Apache 2.0 - see [LICENSE](../LICENSE).
+Apache 2.0 - see [LICENSE](LICENSE).

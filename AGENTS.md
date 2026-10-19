@@ -1,7 +1,7 @@
 # AGENTS.md
 
 Binding rules for every agent and every person working in this repository. Essentia is the Davils
-application runtime core for Dart, and it is held to the standard Inspectra checks.
+application runtime for Dart, and it is held to the standard Inspectra checks.
 
 ## How to work here
 
@@ -16,7 +16,9 @@ application runtime core for Dart, and it is held to the standard Inspectra chec
 ## Repository
 
 Essentia is a Dart pub workspace. The root holds no library of its own; each package has its own
-`lib/`, `test/`, `api/<package>.api`, `CHANGELOG.md`, `README.md` and `dart_test.yaml`.
+`lib/`, `test/`, `example/`, `api/<package>.api`, `CHANGELOG.md`, `README.md`, `LICENSE`,
+`dart_test.yaml`, `.pubignore` and the Trivy ignore file of its own license text. Every package is
+published to pub.dev; [CONTRIBUTING.md](CONTRIBUTING.md) describes how.
 
 | Path | Purpose |
 |---|---|

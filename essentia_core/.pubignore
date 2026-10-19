@@ -1,0 +1,11 @@
+# What stays in the repository and out of the published package: the
+# coverage output, the API dump, the generators and their sources, and
+# the configuration of the quality gates.
+.dart_tool/
+coverage/
+api/
+tool/
+trivy.yaml
+.trivyignore.yaml
+pubspec.lock
+pubspec_overrides.yaml

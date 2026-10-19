@@ -1,6 +1,6 @@
 # Essentia Core
 
-The core of [Essentia](../README.md), the Davils application runtime for Dart: validation that
+The building blocks of [Essentia](https://github.com/davils-com/essentia#readme): validation that
 reports every problem at once, validating configuration builders, program parameters, layering
 contracts, RFC 9562 identifiers, semantic versions, principals, platform detection, byte strings
 and hexadecimal formats, charsets, typed attributes, a case insensitive map, decimals, ranges,
@@ -28,3 +28,7 @@ ECMAScript in its unicode mode and refuses, with a `LinearRegExpException` namin
 the offset, a backreference, a lookahead or lookbehind, and a pattern that compiles to more than
 `maxInstructions` instructions. It has no flags and answers only whether the pattern matches
 somewhere in a text. It is here for the patterns of documents nobody trusts.
+
+## License
+
+Apache 2.0 - see [LICENSE](LICENSE).
