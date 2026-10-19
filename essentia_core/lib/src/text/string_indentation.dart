@@ -1,32 +1,37 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:essentia_core/src/text/runes.dart';
 import 'package:meta/meta.dart';
 
-/// Every kind of line break Kotlin's `lines` splits at.
+/// Every kind of line break [StringIndentation.lines] splits at.
 final _lineBreak = RegExp('\r\n|\n|\r');
 
-/// The indent [StringIndentation.prependIndent] uses by default, the same
-/// four spaces as Kotlin.
+/// The indent [StringIndentation.prependIndent] uses by default, four
+/// spaces.
 const _defaultIndent = '    ';
 
-/// The margin prefix [StringIndentation.trimMargin] uses by default, the
-/// same `|` as Kotlin.
+/// The margin prefix [StringIndentation.trimMargin] uses by default, a
+/// `|`.
 const _defaultMarginPrefix = '|';
 
-/// Kotlin's line and indentation operations: `lines`, `trimIndent`,
+/// Line and indentation operations on text: `lines`, `trimIndent`,
 /// `replaceIndent`, `trimMargin` and `prependIndent`.
 extension StringIndentation on String {
   /// Splits the text at every `\r\n`, `\n` and `\r`.
-  ///
-  /// Kotlin's `CharSequence.lines()`.
   ///
   /// Returns the lines as an unmodifiable list, an empty last line included.
   @useResult
@@ -34,7 +39,7 @@ extension StringIndentation on String {
 
   /// Removes the indent all lines that are not blank share.
   ///
-  /// A blank first and last line is dropped. Kotlin's `String.trimIndent()`.
+  /// A blank first and last line is dropped.
   ///
   /// Returns the text without its common indent.
   @useResult
@@ -42,8 +47,7 @@ extension StringIndentation on String {
 
   /// Replaces the indent all lines that are not blank share by [newIndent].
   ///
-  /// A blank first and last line is dropped. Kotlin's
-  /// `String.replaceIndent`.
+  /// A blank first and last line is dropped.
   ///
   /// Returns the reindented text.
   @useResult
@@ -70,7 +74,7 @@ extension StringIndentation on String {
   /// that starts with it after its white space.
   ///
   /// Lines without the prefix are kept as they are; a blank first and last
-  /// line is dropped. Kotlin's `String.trimMargin`.
+  /// line is dropped.
   ///
   /// Returns the text without its margins.
   ///
@@ -91,7 +95,7 @@ extension StringIndentation on String {
   /// Puts [indent] in front of every line that is not blank.
   ///
   /// A blank line shorter than [indent] becomes [indent], a longer one is
-  /// kept. Kotlin's `String.prependIndent`.
+  /// kept.
   ///
   /// Returns the indented text, its lines joined by `\n`.
   @useResult

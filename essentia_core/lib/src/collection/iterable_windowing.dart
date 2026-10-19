@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'dart:collection';
@@ -13,15 +20,14 @@ import 'package:essentia_core/src/collection/window_remainder.dart';
 import 'package:essentia_core/src/collection/windows.dart';
 import 'package:meta/meta.dart';
 
-/// Kotlin's windowing functions: sliding windows, neighbouring pairs, and
+/// Windows over an iterable: sliding windows, neighbouring pairs, and
 /// taking or dropping elements from the end.
 extension IterableWindowing<T> on Iterable<T> {
   /// Slides a window of [size] elements over the elements, moving it on by
   /// [step] elements each time; [remainder] decides whether the partial
   /// windows at the end are kept.
   ///
-  /// Kotlin's `windowed` of a sequence: the source is read once, and only
-  /// as the windows are requested.
+  /// The source is read once, and only as the windows are requested.
   ///
   /// Returns the windows as unmodifiable lists, lazily.
   ///
@@ -37,8 +43,6 @@ extension IterableWindowing<T> on Iterable<T> {
   );
 
   /// Pairs every element with the one after it.
-  ///
-  /// Kotlin's `zipWithNext`.
   ///
   /// Returns the pairs, lazily; none for fewer than two elements.
   @useResult
@@ -56,8 +60,6 @@ extension IterableWindowing<T> on Iterable<T> {
   }
 
   /// Takes the last [count] elements, or all of them if there are fewer.
-  ///
-  /// Kotlin's `takeLast`.
   ///
   /// Returns them as an unmodifiable list.
   ///
@@ -78,7 +80,7 @@ extension IterableWindowing<T> on Iterable<T> {
   /// Leaves out the last [count] elements, or all of them if there are
   /// fewer.
   ///
-  /// Kotlin's `dropLast`; an endless source is passed on lazily.
+  /// An endless source is passed on lazily.
   ///
   /// Returns the remaining elements, lazily.
   ///
@@ -104,8 +106,6 @@ extension IterableWindowing<T> on Iterable<T> {
 
   /// Takes the trailing elements that [predicate] accepts.
   ///
-  /// Kotlin's `takeLastWhile`.
-  ///
   /// Returns them as an unmodifiable list, empty if the last element is
   /// not accepted.
   @useResult
@@ -123,8 +123,8 @@ extension IterableWindowing<T> on Iterable<T> {
 
   /// Leaves out the trailing elements that [predicate] accepts.
   ///
-  /// Kotlin's `dropLastWhile`; elements are passed on as soon as one after
-  /// them is rejected, so an endless source is read lazily.
+  /// Elements are passed on as soon as one after them is rejected, so an
+  /// endless source is read lazily.
   ///
   /// Returns the remaining elements, lazily.
   @useResult

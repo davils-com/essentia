@@ -1,22 +1,27 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:essentia_core/src/collection/grouping.dart';
 import 'package:meta/meta.dart';
 
-/// Kotlin's association functions: turning the elements of an iterable
-/// into maps, partitions and groupings.
+/// Associates the elements of an iterable: turns them into maps,
+/// partitions and groupings.
 extension IterableAssociation<T> on Iterable<T> {
   /// Builds a map from the key and value pairs [transform] makes of every
   /// element; a later pair replaces an earlier one with the same key.
-  ///
-  /// Kotlin's `associate`.
   ///
   /// Returns an unmodifiable map in the order of the elements.
   @useResult
@@ -28,8 +33,6 @@ extension IterableAssociation<T> on Iterable<T> {
   /// Builds a map from every element to the value [valueOf] computes for
   /// it.
   ///
-  /// Kotlin's `associateWith`.
-  ///
   /// Returns an unmodifiable map in the order of the elements.
   @useResult
   Map<T, V> associateWith<V>(V Function(T element) valueOf) =>
@@ -38,8 +41,6 @@ extension IterableAssociation<T> on Iterable<T> {
       });
 
   /// Splits the elements into those [predicate] accepts and the rest.
-  ///
-  /// Kotlin's `partition`.
   ///
   /// Returns both parts as unmodifiable lists in the order of the
   /// elements.
@@ -60,8 +61,6 @@ extension IterableAssociation<T> on Iterable<T> {
 
   /// Groups the elements by the key [keyOf] computes for each, for an
   /// operation that combines every group at once.
-  ///
-  /// Kotlin's `groupingBy`.
   ///
   /// Returns the [Grouping] of these elements.
   @useResult

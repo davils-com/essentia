@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'dart:math';
@@ -14,7 +21,7 @@ import 'package:essentia_core/src/collection/windows.dart';
 import 'package:essentia_core/src/text/runes.dart';
 import 'package:meta/meta.dart';
 
-/// Kotlin's slicing operations on text: the `substringBefore` and
+/// Slicing operations on text: the `substringBefore` and
 /// `substringAfter` family, `take`, `drop` and their variants, `chunked`,
 /// `windowed` and `removeRange`.
 ///
@@ -22,8 +29,6 @@ import 'package:meta/meta.dart';
 /// characters and never split a surrogate pair.
 extension StringSlicing on String {
   /// The text before the first occurrence of [delimiter].
-  ///
-  /// Kotlin's `String.substringBefore(delimiter, missingDelimiterValue)`.
   ///
   /// Returns the text before [delimiter], or [whenMissing], by default the
   /// whole text, when [delimiter] does not occur.
@@ -33,8 +38,6 @@ extension StringSlicing on String {
 
   /// The text after the first occurrence of [delimiter].
   ///
-  /// Kotlin's `String.substringAfter(delimiter, missingDelimiterValue)`.
-  ///
   /// Returns the text after [delimiter], or [whenMissing], by default the
   /// whole text, when [delimiter] does not occur.
   @useResult
@@ -43,8 +46,6 @@ extension StringSlicing on String {
 
   /// The text before the last occurrence of [delimiter].
   ///
-  /// Kotlin's `String.substringBeforeLast(delimiter, missingDelimiterValue)`.
-  ///
   /// Returns the text before [delimiter], or [whenMissing], by default the
   /// whole text, when [delimiter] does not occur.
   @useResult
@@ -52,8 +53,6 @@ extension StringSlicing on String {
       _before(lastIndexOf(delimiter), whenMissing);
 
   /// The text after the last occurrence of [delimiter].
-  ///
-  /// Kotlin's `String.substringAfterLast(delimiter, missingDelimiterValue)`.
   ///
   /// Returns the text after [delimiter], or [whenMissing], by default the
   /// whole text, when [delimiter] does not occur.
@@ -77,8 +76,6 @@ extension StringSlicing on String {
 
   /// The first [count] code units.
   ///
-  /// Kotlin's `String.take`.
-  ///
   /// Returns the first [count] code units, or the whole text when it is
   /// shorter.
   ///
@@ -89,8 +86,6 @@ extension StringSlicing on String {
 
   /// The text without its first [count] code units.
   ///
-  /// Kotlin's `String.drop`.
-  ///
   /// Returns the rest, or empty text when the text is shorter.
   ///
   /// Throws a [RangeError] if [count] is negative.
@@ -99,8 +94,6 @@ extension StringSlicing on String {
       substring(min(RangeError.checkNotNegative(count, 'count'), length));
 
   /// The last [count] code units.
-  ///
-  /// Kotlin's `String.takeLast`.
   ///
   /// Returns the last [count] code units, or the whole text when it is
   /// shorter.
@@ -113,8 +106,6 @@ extension StringSlicing on String {
 
   /// The text without its last [count] code units.
   ///
-  /// Kotlin's `String.dropLast`.
-  ///
   /// Returns the rest, or empty text when the text is shorter.
   ///
   /// Throws a [RangeError] if [count] is negative.
@@ -126,16 +117,12 @@ extension StringSlicing on String {
 
   /// The leading characters that satisfy [predicate].
   ///
-  /// Kotlin's `String.takeWhile`.
-  ///
   /// Returns the text up to the first character that does not match.
   @useResult
   String takeWhile(bool Function(String character) predicate) =>
       substring(0, _firstMismatch(predicate));
 
   /// The text without the leading characters that satisfy [predicate].
-  ///
-  /// Kotlin's `String.dropWhile`.
   ///
   /// Returns the text from the first character that does not match.
   @useResult
@@ -144,16 +131,12 @@ extension StringSlicing on String {
 
   /// The trailing characters that satisfy [predicate].
   ///
-  /// Kotlin's `String.takeLastWhile`.
-  ///
   /// Returns the text after the last character that does not match.
   @useResult
   String takeLastWhile(bool Function(String character) predicate) =>
       substring(_endOfLastMismatch(predicate));
 
   /// The text without the trailing characters that satisfy [predicate].
-  ///
-  /// Kotlin's `String.dropLastWhile`.
   ///
   /// Returns the text up to and including the last character that does not
   /// match.
@@ -192,8 +175,6 @@ extension StringSlicing on String {
   /// Cuts the text into pieces of [size] code units, the last one possibly
   /// shorter.
   ///
-  /// Kotlin's `CharSequence.chunked(size)`.
-  ///
   /// Returns the pieces as an unmodifiable list.
   ///
   /// Throws a [RangeError] if [size] is smaller than one.
@@ -205,7 +186,6 @@ extension StringSlicing on String {
   /// code units at a time.
   ///
   /// [remainder] decides whether the shorter windows at the end are kept.
-  /// Kotlin's `CharSequence.windowed(size, step, partialWindows)`.
   ///
   /// Returns the windows as an unmodifiable list.
   ///
@@ -230,8 +210,6 @@ extension StringSlicing on String {
   }
 
   /// Removes the code units from [start] up to, not including, [end].
-  ///
-  /// Kotlin's `String.removeRange(startIndex, endIndex)`.
   ///
   /// Returns the text without that range.
   ///

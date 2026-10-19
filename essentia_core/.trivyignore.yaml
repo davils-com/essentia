@@ -1,0 +1,7 @@
+# Essentia is licensed under Apache-2.0, and the Unicode generator, the one
+# source file of this package Trivy classifies, carries its header. Every
+# other license and file still fails.
+licenses:
+  - id: Apache-2.0
+    paths:
+      - tool/unicode/generate_normalization.py

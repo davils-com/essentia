@@ -1,22 +1,27 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'dart:math';
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's slices from the end of a list, which copy by index instead of
-/// reading every element.
+/// Slices from the end of a list, which copy by index instead of reading
+/// every element.
 extension ListSlicing<T> on List<T> {
   /// Takes the last [count] elements, or all of them if there are fewer.
-  ///
-  /// Kotlin's `takeLast`.
   ///
   /// Returns them as an unmodifiable list.
   ///
@@ -30,8 +35,6 @@ extension ListSlicing<T> on List<T> {
   /// Leaves out the last [count] elements, or all of them if there are
   /// fewer.
   ///
-  /// Kotlin's `dropLast`.
-  ///
   /// Returns the remaining elements as an unmodifiable list.
   ///
   /// Throws a [RangeError] if [count] is negative.
@@ -43,16 +46,12 @@ extension ListSlicing<T> on List<T> {
 
   /// Takes the trailing elements that [predicate] accepts.
   ///
-  /// Kotlin's `takeLastWhile`.
-  ///
   /// Returns them as an unmodifiable list.
   @useResult
   List<T> takeLastWhile(bool Function(T element) predicate) =>
       List<T>.unmodifiable(sublist(_trailingStart(predicate)));
 
   /// Leaves out the trailing elements that [predicate] accepts.
-  ///
-  /// Kotlin's `dropLastWhile`.
   ///
   /// Returns the remaining elements as an unmodifiable list.
   @useResult

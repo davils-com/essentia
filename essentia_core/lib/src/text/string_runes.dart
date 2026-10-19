@@ -1,15 +1,22 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's character predicates on text: `count`, `filter`, `filterNot`,
+/// Character predicates on text: `count`, `filter`, `filterNot`,
 /// `all`, `any`, `none` and `reversed`.
 ///
 /// They work on whole characters, so a surrogate pair is handed to a
@@ -20,16 +27,12 @@ extension StringRunes on String {
 
   /// Counts the characters that satisfy [predicate].
   ///
-  /// Kotlin's `CharSequence.count(predicate)`.
-  ///
   /// Returns the number of matching characters.
   @useResult
   int countWhere(bool Function(String character) predicate) =>
       _characters.where(predicate).length;
 
   /// Keeps the characters that satisfy [predicate].
-  ///
-  /// Kotlin's `String.filter`.
   ///
   /// Returns the matching characters in their order.
   @useResult
@@ -38,16 +41,12 @@ extension StringRunes on String {
 
   /// Keeps the characters that do not satisfy [predicate].
   ///
-  /// Kotlin's `String.filterNot`.
-  ///
   /// Returns the other characters in their order.
   @useResult
   String whereNot(bool Function(String character) predicate) =>
       where((character) => !predicate(character));
 
   /// Whether every character satisfies [predicate].
-  ///
-  /// Kotlin's `CharSequence.all`.
   ///
   /// Returns `true` when all do, and for empty text.
   @useResult
@@ -56,8 +55,6 @@ extension StringRunes on String {
 
   /// Whether any character satisfies [predicate].
   ///
-  /// Kotlin's `CharSequence.any(predicate)`.
-  ///
   /// Returns `true` when at least one does.
   @useResult
   bool any(bool Function(String character) predicate) =>
@@ -65,15 +62,13 @@ extension StringRunes on String {
 
   /// Whether no character satisfies [predicate].
   ///
-  /// Kotlin's `CharSequence.none(predicate)`.
-  ///
   /// Returns `true` when none does, and for empty text.
   @useResult
   bool none(bool Function(String character) predicate) => !any(predicate);
 
   /// The characters of the text in reverse order.
   ///
-  /// Unlike Kotlin's `String.reversed`, a surrogate pair stays whole.
+  /// A surrogate pair stays whole.
   ///
   /// Returns the reversed text.
   @useResult

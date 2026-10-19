@@ -1,20 +1,25 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's running folds and reductions, and the reductions that tolerate
-/// a source without elements.
+/// Running folds and reductions, and the reductions that tolerate a source
+/// without elements.
 extension IterableAccumulation<T> on Iterable<T> {
   /// Folds the elements step by step, starting with [initial].
-  ///
-  /// Kotlin's `runningFold`.
   ///
   /// Returns [initial] followed by every intermediate value, lazily.
   @useResult
@@ -28,8 +33,6 @@ extension IterableAccumulation<T> on Iterable<T> {
 
   /// Folds the elements step by step, starting with [initial] and handing
   /// [combine] the index of every element.
-  ///
-  /// Kotlin's `runningFoldIndexed`.
   ///
   /// Returns [initial] followed by every intermediate value, lazily.
   @useResult
@@ -48,8 +51,6 @@ extension IterableAccumulation<T> on Iterable<T> {
 
   /// Reduces the elements step by step, starting with the first one.
   ///
-  /// Kotlin's `runningReduce`.
-  ///
   /// Returns every intermediate value, lazily; none for no elements.
   @useResult
   Iterable<T> runningReduce(T Function(T accumulator, T element) combine) =>
@@ -59,8 +60,6 @@ extension IterableAccumulation<T> on Iterable<T> {
 
   /// Reduces the elements step by step, starting with the first one and
   /// handing [combine] the index of every further element.
-  ///
-  /// Kotlin's `runningReduceIndexed`.
   ///
   /// Returns every intermediate value, lazily; none for no elements.
   @useResult
@@ -81,8 +80,6 @@ extension IterableAccumulation<T> on Iterable<T> {
 
   /// Reduces the elements, starting with the first one.
   ///
-  /// Kotlin's `reduceOrNull`.
-  ///
   /// Returns the reduced value, or `null` if there are no elements.
   @useResult
   T? reduceOrNull(T Function(T accumulator, T element) combine) =>
@@ -90,8 +87,6 @@ extension IterableAccumulation<T> on Iterable<T> {
 
   /// Reduces the elements, starting with the first one and handing
   /// [combine] the index of every further element.
-  ///
-  /// Kotlin's `reduceIndexedOrNull`.
   ///
   /// Returns the reduced value, or `null` if there are no elements.
   @useResult

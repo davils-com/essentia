@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:essentia_core/src/collection/iterable_windowing.dart';
@@ -14,8 +21,8 @@ import 'package:test/test.dart';
 /// Numbers that end in a run of even ones.
 const _numbers = <int>[2, 1, 4, 6];
 
-/// Covers Kotlin's `takeLast`, `dropLast`, `takeLastWhile` and
-/// `dropLastWhile` for lists.
+/// Covers `takeLast`, `dropLast`, `takeLastWhile` and `dropLastWhile` for
+/// lists.
 void main() {
   test('takes the last elements', () {
     final List<int> tail = _numbers.takeLast(2);

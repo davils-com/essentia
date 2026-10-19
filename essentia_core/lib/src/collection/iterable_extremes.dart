@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
@@ -33,15 +40,13 @@ Never _noElement() => throw StateError('No element');
 Comparator<T> _reversed<T>(Comparator<T> comparator) =>
     (left, right) => comparator(right, left);
 
-/// Kotlin's selector functions: the element with the largest or smallest
-/// key, the largest or smallest selected value, and the largest or
+/// Selects extremes of an iterable: the element with the largest or
+/// smallest key, the largest or smallest selected value, and the largest or
 /// smallest element by a comparator.
 ///
 /// Of several elements that tie, the first one wins.
 extension IterableExtremes<T> on Iterable<T> {
   /// Finds the first element with the largest key [keyOf] computes.
-  ///
-  /// Kotlin's `maxBy`.
   ///
   /// Returns that element.
   ///
@@ -52,16 +57,12 @@ extension IterableExtremes<T> on Iterable<T> {
 
   /// Finds the first element with the largest key [keyOf] computes.
   ///
-  /// Kotlin's `maxByOrNull`.
-  ///
   /// Returns that element, or `null` if there are no elements.
   @useResult
   T? maxByOrNull<K extends Comparable<Object>>(K Function(T element) keyOf) =>
       _extreme(keyOf, _ascending)?.element;
 
   /// Finds the first element with the smallest key [keyOf] computes.
-  ///
-  /// Kotlin's `minBy`.
   ///
   /// Returns that element.
   ///
@@ -72,16 +73,12 @@ extension IterableExtremes<T> on Iterable<T> {
 
   /// Finds the first element with the smallest key [keyOf] computes.
   ///
-  /// Kotlin's `minByOrNull`.
-  ///
   /// Returns that element, or `null` if there are no elements.
   @useResult
   T? minByOrNull<K extends Comparable<Object>>(K Function(T element) keyOf) =>
       _extreme(keyOf, _descending)?.element;
 
   /// Finds the largest value [selector] computes for an element.
-  ///
-  /// Kotlin's `maxOf`.
   ///
   /// Returns that value.
   ///
@@ -92,8 +89,6 @@ extension IterableExtremes<T> on Iterable<T> {
 
   /// Finds the largest value [selector] computes for an element.
   ///
-  /// Kotlin's `maxOfOrNull`.
-  ///
   /// Returns that value, or `null` if there are no elements.
   @useResult
   K? maxOfOrNull<K extends Comparable<Object>>(
@@ -101,8 +96,6 @@ extension IterableExtremes<T> on Iterable<T> {
   ) => _extreme(selector, _ascending)?.key;
 
   /// Finds the smallest value [selector] computes for an element.
-  ///
-  /// Kotlin's `minOf`.
   ///
   /// Returns that value.
   ///
@@ -113,8 +106,6 @@ extension IterableExtremes<T> on Iterable<T> {
 
   /// Finds the smallest value [selector] computes for an element.
   ///
-  /// Kotlin's `minOfOrNull`.
-  ///
   /// Returns that value, or `null` if there are no elements.
   @useResult
   K? minOfOrNull<K extends Comparable<Object>>(
@@ -122,8 +113,6 @@ extension IterableExtremes<T> on Iterable<T> {
   ) => _extreme(selector, _descending)?.key;
 
   /// Finds the first element that [comparator] orders after every other.
-  ///
-  /// Kotlin's `maxWith`.
   ///
   /// Returns that element.
   ///
@@ -134,16 +123,12 @@ extension IterableExtremes<T> on Iterable<T> {
 
   /// Finds the first element that [comparator] orders after every other.
   ///
-  /// Kotlin's `maxWithOrNull`.
-  ///
   /// Returns that element, or `null` if there are no elements.
   @useResult
   T? maxWithOrNull(Comparator<T> comparator) =>
       _extreme((element) => element, comparator)?.element;
 
   /// Finds the first element that [comparator] orders before every other.
-  ///
-  /// Kotlin's `minWith`.
   ///
   /// Returns that element.
   ///
@@ -152,8 +137,6 @@ extension IterableExtremes<T> on Iterable<T> {
   T minWith(Comparator<T> comparator) => maxWith(_reversed(comparator));
 
   /// Finds the first element that [comparator] orders before every other.
-  ///
-  /// Kotlin's `minWithOrNull`.
   ///
   /// Returns that element, or `null` if there are no elements.
   @useResult

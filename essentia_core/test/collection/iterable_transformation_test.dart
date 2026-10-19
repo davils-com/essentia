@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:essentia_core/src/collection/iterable_transformation.dart';
@@ -12,8 +19,8 @@ import 'package:test/test.dart';
 
 import 'probe_iterable.dart';
 
-/// Covers Kotlin's `mapNotNull`, `distinct`, `onEach`, `zip`, `plus`,
-/// `minus` and `ifEmpty` for iterables.
+/// Covers `mapNotNull`, `distinct`, `onEach`, `zip`, `plusElement`,
+/// `minusElement`, `minusAll` and `ifEmpty` for iterables.
 void main() {
   test('maps and keeps only the present results', () {
     const texts = <String>['1', 'x', '3'];

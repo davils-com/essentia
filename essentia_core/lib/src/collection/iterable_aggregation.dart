@@ -1,20 +1,25 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's aggregate functions: sums, counts, indexes and the first value
-/// a transformation produces.
+/// Aggregates the elements of an iterable: sums, counts, indexes and the
+/// first value a transformation produces.
 extension IterableAggregation<T> on Iterable<T> {
   /// Adds up the integer [selector] computes for every element.
-  ///
-  /// Kotlin's `sumOf` for `Int`.
   ///
   /// Returns the sum, zero for no elements.
   @useResult
@@ -23,16 +28,12 @@ extension IterableAggregation<T> on Iterable<T> {
 
   /// Adds up the double [selector] computes for every element.
   ///
-  /// Kotlin's `sumOf` for `Double`.
-  ///
   /// Returns the sum, zero for no elements.
   @useResult
   double sumOfDouble(double Function(T element) selector) =>
       fold(0, (sum, element) => sum + selector(element));
 
   /// Adds up the duration [selector] computes for every element.
-  ///
-  /// Kotlin's `sumOf` for `Duration`.
   ///
   /// Returns the sum, [Duration.zero] for no elements.
   @useResult
@@ -41,16 +42,12 @@ extension IterableAggregation<T> on Iterable<T> {
 
   /// Counts the elements [predicate] accepts.
   ///
-  /// Kotlin's `count` with a predicate.
-  ///
   /// Returns the number of accepted elements.
   @useResult
   int countWhere(bool Function(T element) predicate) =>
       fold(0, (count, element) => predicate(element) ? count + 1 : count);
 
   /// Finds the first element [predicate] accepts.
-  ///
-  /// Kotlin's `indexOfFirst`.
   ///
   /// Returns its index, or `-1` when no element is accepted.
   @useResult
@@ -64,8 +61,6 @@ extension IterableAggregation<T> on Iterable<T> {
   }
 
   /// Finds the last element [predicate] accepts.
-  ///
-  /// Kotlin's `indexOfLast`.
   ///
   /// Returns its index, or `-1` when no element is accepted.
   @useResult
@@ -81,8 +76,6 @@ extension IterableAggregation<T> on Iterable<T> {
 
   /// Transforms the elements in order until [transform] returns a value.
   ///
-  /// Kotlin's `firstNotNullOf`.
-  ///
   /// Returns the first value that is not `null`.
   ///
   /// Throws a [StateError] if every element is transformed into `null`.
@@ -92,8 +85,6 @@ extension IterableAggregation<T> on Iterable<T> {
       (throw StateError('No element was transformed into a value.'));
 
   /// Transforms the elements in order until [transform] returns a value.
-  ///
-  /// Kotlin's `firstNotNullOfOrNull`.
   ///
   /// Returns the first value that is not `null`, or `null` if there is
   /// none.

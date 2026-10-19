@@ -1,20 +1,25 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's searches over several candidates, `indexOfAny` and
-/// `lastIndexOfAny`, and `split` with a limit.
+/// Searches text for several candidates at once, and splits it with a
+/// limit.
 extension StringSearch on String {
   /// The first index at or after [start] where any of [candidates] occurs.
-  ///
-  /// Kotlin's `CharSequence.indexOfAny(strings, startIndex)`.
   ///
   /// Returns the smallest index found, or `-1` when no candidate occurs.
   @useResult
@@ -31,8 +36,7 @@ extension StringSearch on String {
 
   /// The last index at or before [start] where any of [candidates] occurs.
   ///
-  /// Without [start] the whole text is searched. Kotlin's
-  /// `CharSequence.lastIndexOfAny(strings, startIndex)`.
+  /// Without [start] the whole text is searched.
   ///
   /// Returns the largest index found, or `-1` when no candidate occurs.
   @useResult
@@ -50,8 +54,7 @@ extension StringSearch on String {
   /// Splits the text at [delimiter] into at most [limit] parts.
   ///
   /// The last part holds the rest of the text, delimiters included. A
-  /// [limit] of `0` splits at every delimiter. Kotlin's
-  /// `CharSequence.split(delimiter, limit = limit)`.
+  /// [limit] of `0` splits at every delimiter.
   ///
   /// Returns the parts as an unmodifiable list.
   ///

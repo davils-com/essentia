@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
@@ -12,8 +19,8 @@ import 'package:meta/meta.dart';
 /// The elements of a source together with the key of the group each one
 /// belongs to, waiting for an operation that combines every group at once.
 ///
-/// Kotlin's `Grouping`, as returned by `groupingBy`. The source is read
-/// again by every operation, and only when the operation runs.
+/// A grouping is returned by `groupingBy`. The source is read again by every
+/// operation, and only when the operation runs.
 @immutable
 final class Grouping<T, K> {
   /// Groups the elements of [source] by the key [keyOf] computes for each.
@@ -25,16 +32,12 @@ final class Grouping<T, K> {
 
   /// Counts the elements of every group.
   ///
-  /// Kotlin's `Grouping.eachCount`.
-  ///
   /// Returns an unmodifiable map from every key to the size of its group.
   @useResult
   Map<K, int> eachCount() => fold(0, (count, _) => count + 1);
 
   /// Folds the elements of every group, starting each group with
   /// [initial] and combining it with every element in turn.
-  ///
-  /// Kotlin's `Grouping.fold`.
   ///
   /// Returns an unmodifiable map from every key to its folded value.
   @useResult
@@ -52,8 +55,6 @@ final class Grouping<T, K> {
   /// Reduces the elements of every group, starting each group with its
   /// first element and combining it with every element after it.
   ///
-  /// Kotlin's `Grouping.reduce`.
-  ///
   /// Returns an unmodifiable map from every key to its reduced value.
   @useResult
   Map<K, T> reduce(T Function(K key, T accumulator, T element) combine) {
@@ -69,8 +70,6 @@ final class Grouping<T, K> {
   /// Aggregates the elements of every group with [operation], which
   /// receives the key, the value so far, `null` for the first element of a
   /// group, and the element.
-  ///
-  /// Kotlin's `Grouping.aggregate`.
   ///
   /// Returns an unmodifiable map from every key to its aggregated value.
   @useResult

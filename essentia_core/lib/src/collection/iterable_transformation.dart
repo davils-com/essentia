@@ -1,20 +1,25 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:meta/meta.dart';
 
-/// Kotlin's transformations of a sequence: every one is lazy and reads the
-/// source only as its own elements are requested.
+/// Transforms the elements of an iterable: every transformation is lazy
+/// and reads the source only as its own elements are requested.
 extension IterableTransformation<T> on Iterable<T> {
   /// Transforms every element and leaves out the `null` results.
-  ///
-  /// Kotlin's `mapNotNull`.
   ///
   /// Returns the results that are present, lazily.
   @useResult
@@ -24,8 +29,6 @@ extension IterableTransformation<T> on Iterable<T> {
   /// Transforms every element together with its index and leaves out the
   /// `null` results.
   ///
-  /// Kotlin's `mapIndexedNotNull`.
-  ///
   /// Returns the results that are present, lazily.
   @useResult
   Iterable<R> mapIndexedNotNull<R extends Object>(
@@ -34,16 +37,13 @@ extension IterableTransformation<T> on Iterable<T> {
 
   /// Keeps the first occurrence of every element.
   ///
-  /// Kotlin's `distinct`.
-  ///
   /// Returns the distinct elements, lazily.
   @useResult
   Iterable<T> distinct() => distinctBy<T>((element) => element);
 
   /// Keeps the first element of every key [keyOf] computes.
   ///
-  /// Kotlin's `distinctBy`. The keys seen are forgotten each time the
-  /// result is iterated again.
+  /// The keys seen are forgotten each time the result is iterated again.
   ///
   /// Returns the kept elements, lazily.
   @useResult
@@ -58,8 +58,7 @@ extension IterableTransformation<T> on Iterable<T> {
 
   /// Runs [action] on every element as it is passed on.
   ///
-  /// Kotlin's `onEach` of a sequence: nothing runs before the elements
-  /// are requested.
+  /// Nothing runs before the elements are requested.
   ///
   /// Returns the elements, unchanged and lazily.
   @useResult
@@ -69,8 +68,6 @@ extension IterableTransformation<T> on Iterable<T> {
   });
 
   /// Runs [action] on every element and its index as it is passed on.
-  ///
-  /// Kotlin's `onEachIndexed` of a sequence.
   ///
   /// Returns the elements, unchanged and lazily.
   @useResult
@@ -82,8 +79,6 @@ extension IterableTransformation<T> on Iterable<T> {
 
   /// Pairs every element with the element of [other] at the same
   /// position, up to the end of the shorter one.
-  ///
-  /// Kotlin's `zip`.
   ///
   /// Returns the pairs, lazily.
   @useResult
@@ -99,15 +94,11 @@ extension IterableTransformation<T> on Iterable<T> {
 
   /// Appends [element] after the last element.
   ///
-  /// Kotlin's `plusElement`.
-  ///
   /// Returns the extended elements, lazily.
   @useResult
   Iterable<T> plusElement(T element) => followedBy(<T>[element]);
 
   /// Leaves out the first occurrence of [element].
-  ///
-  /// Kotlin's `minusElement`.
   ///
   /// Returns the remaining elements, lazily.
   @useResult
@@ -124,8 +115,6 @@ extension IterableTransformation<T> on Iterable<T> {
 
   /// Leaves out every occurrence of each of [elements].
   ///
-  /// Kotlin's `minus` with a collection of elements.
-  ///
   /// Returns the remaining elements, lazily.
   @useResult
   Iterable<T> minusAll(Iterable<T> elements) sync* {
@@ -134,8 +123,6 @@ extension IterableTransformation<T> on Iterable<T> {
   }
 
   /// Falls back to the elements [fallback] supplies when there are none.
-  ///
-  /// Kotlin's `ifEmpty` of a sequence.
   ///
   /// Returns these elements, or those of [fallback] if there are none,
   /// lazily.

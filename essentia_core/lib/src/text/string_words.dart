@@ -1,10 +1,17 @@
 /*
- * Copyright (c) 2026 Davils GmbH
- * All rights reserved.
+ * Copyright 2026 Davils
  *
- * This software is the property of Davils GmbH.
- * Unauthorized copying, modification, distribution, or use of this code,
- * in whole or in part, is strictly prohibited without prior written permission.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 import 'package:essentia_core/src/text/string_case.dart';
@@ -32,11 +39,8 @@ final _letterOrDigit = RegExp(r'^[\p{L}\p{N}]$', unicode: true);
 /// 'lease_duration'.toCamelCase(); // leaseDuration
 /// ```
 ///
-/// [toSnakeCase] and [toKebabCase] are the algorithm of kotlinx
-/// serialization's `JsonNamingStrategy.SnakeCase` and `KebabCase`, character
-/// for character, so a key renamed on one side of a wire is renamed the
-/// same way on the other. That includes its one surprise: a run of capitals
-/// keeps its last capital for the word that follows, so `URLs` becomes
+/// [toSnakeCase] and [toKebabCase] treat only capitals as boundaries. A run of
+/// capitals keeps its last capital for the word that follows, so `URLs` becomes
 /// `ur_ls`.
 extension StringWords on String {
   /// Splits the text into its words.
@@ -77,9 +81,8 @@ extension StringWords on String {
   /// Spells the text in `snake_case`: `retryAfterSeconds` becomes
   /// `retry_after_seconds`.
   ///
-  /// Kotlin's `JsonNamingStrategy.SnakeCase`. Only capitals are
-  /// boundaries; every other character, an `_` or a digit included, is
-  /// kept where it is.
+  /// Only capitals are boundaries; every other character, an `_` or a digit
+  /// included, is kept where it is.
   ///
   /// Returns the text in snake case.
   @useResult
@@ -88,8 +91,7 @@ extension StringWords on String {
   /// Spells the text in `kebab-case`: `retryAfterSeconds` becomes
   /// `retry-after-seconds`.
   ///
-  /// Kotlin's `JsonNamingStrategy.KebabCase`, the same algorithm as
-  /// [toSnakeCase] with a `-`.
+  /// The same algorithm as [toSnakeCase] with a `-`.
   ///
   /// Returns the text in kebab case.
   @useResult
@@ -129,7 +131,7 @@ void _flush(StringBuffer current, List<String> words) {
 }
 
 /// Lowers every capital of [text] and puts [delimiter] before each run of
-/// capitals, the way kotlinx serialization's naming strategies do.
+/// capitals.
 ///
 /// Returns the delimited text.
 String _delimited(String text, String delimiter) {
