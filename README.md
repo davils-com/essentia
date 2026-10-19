@@ -190,15 +190,16 @@ await bus.topic(users).publish(const UserRegistered('u-42'), key: 'u-42');
 
 ## Semantic versions
 
-`SemanticVersion` and `SemanticVersionRange` follow semver.org 2.0.0. Ranges are read in npm and
-Cargo syntax, combine with `intersect` and `union`, and select from a list:
+`SemanticVersion` and `SemanticVersionRange` follow semver.org 2.0.0. Ranges are written with
+comparators, `x` wildcards, `~` and `^`, or as intervals such as `[1.2,2)`, joined with `||`; they
+combine with `intersect` and `union`, and select from a list:
 
 ```dart
 final SemanticVersion version = SemanticVersion.parse('1.4.0-rc.1');
 final range = SemanticVersionRange.parse('^1.2 || >=2.0.0 <2.1.0');
 
 range.contains(version);                       // true, by precedence
-range.contains(version, PreReleasePolicy.sameCoreOnly); // false, npm's rule
+range.contains(version, PreReleasePolicy.sameCoreOnly); // false, no pre-release asked for
 version.nextMinor();                           // 1.4.0
 '1.2.3'.toSemanticVersionOrNull();
 ```
@@ -552,4 +553,4 @@ taking part follows the [Code of Conduct](CODE_OF_CONDUCT.md). Third-party softw
 
 ## License
 
-Copyright (c) 2026 Davils GmbH. All rights reserved. See [LICENSE](LICENSE).
+Apache 2.0 - see [LICENSE](LICENSE). Third-party software: [THIRDPARTY.md](THIRDPARTY.md).

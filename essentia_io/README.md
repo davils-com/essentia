@@ -45,4 +45,4 @@ dart run inspectra -C essentia_io check
 
 ## License
 
-Copyright (c) 2026 Davils GmbH. All rights reserved. See [LICENSE](../LICENSE).
+Apache 2.0 - see [LICENSE](../LICENSE).
