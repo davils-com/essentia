@@ -17,7 +17,6 @@ import 'package:essentia_io/src/exception/closed_read_channel_exception.dart';
 import 'package:essentia_io/src/exception/closed_write_channel_exception.dart';
 import 'package:essentia_io/src/exception/concurrent_io_exception.dart';
 import 'package:essentia_io/src/exception/io_exception.dart';
-import 'package:meta/meta.dart';
 
 /// A channel a writer and a reader share, Ktor's `ByteChannel`.
 ///
@@ -209,10 +208,11 @@ final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
 
   /// Runs [handler] once the channel is closed, with what it was cancelled
   /// with, `null` for a channel closed normally; at once for a channel that
-  /// is closed already.
+  /// is closed already, kotlinx.coroutines' `invokeOnClose` of a channel.
+  /// The writer learns this way that its reader gave up while it has
+  /// nothing to write.
   ///
   /// Throws a [StateError] when a handler is registered already.
-  @internal
   void invokeOnClose(void Function(Object? cause) handler) {
     final CloseToken? closed = _closed;
     if (closed != null) {

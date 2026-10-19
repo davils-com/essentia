@@ -56,6 +56,7 @@ final class ByteChannel implements ByteReadChannel, ByteWriteChannel {
   Future<void> flush();
   Future<void> flushAndClose();
   void flushWriteBuffer();
+  void invokeOnClose(void Function(Object?) handler);
   String toString();
 }
 

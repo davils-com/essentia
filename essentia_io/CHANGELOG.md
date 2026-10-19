@@ -13,7 +13,8 @@ All notable changes to this package are documented in this file. The format foll
   copying them.
 - `ByteReadChannel`, `ByteWriteChannel` and `ByteChannel`, Ktor's byte channels with back pressure
   and cancellable waits, `ByteReadChannel.fromBytes`, `fromText`, `fromBuffer`, `fromStream` and
-  `empty`, and `CountedByteReadChannel` and `CountedByteWriteChannel`.
+  `empty`, `ByteChannel.invokeOnClose`, and `CountedByteReadChannel` and
+  `CountedByteWriteChannel`.
 - `ByteReadChannelOperations` and `ByteWriteChannelOperations`, Ktor's operations on the channels,
   among them `readLine`, `readLineStrict` with `LineEnding`, and `readUntil`.
 - `writer` and `reader` on a `CoroutineScope`, with `WriterJob`, `ReaderJob`, `WriterScope`,
