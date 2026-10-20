@@ -28,8 +28,7 @@ inspectra:
   install: auto
   check:
     root: true
-  scan:
-    fail-on: high
+  # The scan fails at fail_on of inspectra.base.yaml, which its policy locks.
 
 writerside:
   instances: [docs/e]

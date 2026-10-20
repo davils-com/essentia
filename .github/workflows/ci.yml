@@ -31,7 +31,7 @@ permissions: {}
 jobs:
   pipeline:
     name: Pipeline
-    uses: davils-com/workflows/.github/workflows/pipeline.yml@83c9ea9d6fdaa0d66082ee04a0d8e54e245315a0 # develop
+    uses: davils-com/workflows/.github/workflows/pipeline.yml@93b5e5f6ce8784c7073b96f8c3f5ac05c5e1f9be # develop
     # GitHub checks the permissions of every job the pipeline could run before it starts, so it
     # gets all of them; every job inside takes only what it needs.
     permissions:
