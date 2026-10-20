@@ -80,6 +80,13 @@ inspectra:
     min_sdk: 3.13.5
     dev_only: [inspectra]
     require_publish_to: true
+    # The members published to pub.dev; inspectra scan -r reads this list at the root.
+    published_packages:
+      - essentia_compression
+      - essentia_core
+      - essentia_coroutines
+      - essentia_io
+      - essentia_time
     required_metadata: [description]
     check_imports: true
     unused_allow: []
