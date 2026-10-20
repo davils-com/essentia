@@ -1,0 +1,120 @@
+name: Documentation
+
+on:
+  # Every push to main publishes: a release merge that does not
+  # touch docs/ still has to redeploy the site.
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main, develop]
+    paths: ['docs/**', '.github/workflows/writerside.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: documentation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  # The Writerside module directory and the instance id from docs/e.tree.
+  INSTANCE: docs/e
+  DOCKER_VERSION: '2026.04.8711'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    permissions:
+      contents: read
+
+    outputs:
+      artifact: ${{ steps.define-ids.outputs.artifact }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Define the artifact name
+        id: define-ids
+        run: |
+          INSTANCE_ID_UPPER=$(echo "${INSTANCE#*/}" | tr '[:lower:]' '[:upper:]')
+          echo "artifact=webHelp${INSTANCE_ID_UPPER}2-all.zip" >> "$GITHUB_OUTPUT"
+
+      - name: Build the documentation
+        uses: JetBrains/writerside-github-action@738910d7cf197d67188300d0e0f84b2e708db3cf # v4
+        with:
+          instance: ${{ env.INSTANCE }}
+          docker-version: ${{ env.DOCKER_VERSION }}
+
+      - name: Upload the build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: docs
+          path: |
+            artifacts/${{ steps.define-ids.outputs.artifact }}
+            artifacts/report.json
+          retention-days: 7
+
+  # Fails on broken links, unknown topics and the other errors the build
+  # reports instead of rendering a page with a hole in it.
+  test:
+    name: Check
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions: {}
+
+    steps:
+      - name: Download the build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docs
+          path: artifacts
+
+      - name: Check the documentation
+        uses: JetBrains/writerside-checker-action@79ff89902dcd3d5c5a3f26a79bc35830377f38c5 # v1
+        with:
+          instance: ${{ env.INSTANCE }}
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [build, test]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      id-token: write
+      pages: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download the build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: docs
+          path: artifacts
+
+      - name: Unzip the build
+        run: unzip -O UTF-8 -qq "artifacts/${{ needs.build.outputs.artifact }}" -d dir
+
+      - name: Set up Pages
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: dir
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

@@ -93,16 +93,32 @@ decision updates that list in the same commit.
 
 ## Publishing
 
-Every package is published to [pub.dev](https://pub.dev) from a clean `main`, after
-`dart run tool/verify.dart` and the Inspectra gates of every package are green. A package depends
-on its siblings with a caret constraint, so they go up in the order of the layers:
-`essentia_core`, `essentia_compression`, `essentia_time`, `essentia_coroutines`, `essentia_io`.
+Every package is published to [pub.dev](https://pub.dev) from `main` by the `Release` workflow
+of GitHub Actions, never from a machine. A tag `<package>-v<version>` on `main` publishes that
+package:
 
 ```bash
-cd essentia_core
-dart pub publish --dry-run
-dart pub publish
+git tag essentia_core-v1.0.0
+git push origin essentia_core-v1.0.0
 ```
+
+The workflow checks that the tag names a package of the workspace, that the version is the one of
+its `pubspec.yaml` and that the commit is on `main`. It then runs `dart run tool/verify.dart`, the
+Inspectra gates of the package and of the workspace, and `dart pub publish --dry-run`, and
+uploads with the OpenID Connect token of the job; no pub.dev credential is stored anywhere.
+Finally it creates a GitHub release whose description is the section of that version in the
+package's `CHANGELOG.md`.
+
+A package depends on its siblings with a caret constraint, so they go up in the order of the
+layers: `essentia_core`, `essentia_compression`, `essentia_time`, `essentia_coroutines`,
+`essentia_io`. The tags of several packages can be pushed together; a package waits until the
+siblings it depends on are on pub.dev.
+
+pub.dev accepts an upload from GitHub Actions only for a package that exists, so the first
+version of a new package is published by a maintainer with `dart pub publish`. Afterwards the
+package's admin page on pub.dev enables automated publishing from GitHub Actions with the
+repository `davils-com/essentia`, the tag pattern `<package>-v{{version}}` and the environment
+`pub.dev`, which the repository's settings protect.
 
 A package carries its own `LICENSE`, `CHANGELOG.md`, `README.md` and `example/`; its `.pubignore`
 keeps the coverage, the API dump, the generators and the gate configuration out of the archive.
