@@ -1,0 +1,43 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/davils-com/workflows/develop/schemas/davils-ci.schema.json
+#
+# What essentia's CI does differently from the defaults of davils-com/workflows. The packages come
+# from the workspace list of pubspec.yaml. Every option is in the configuration reference of
+# davils-com/workflows.
+version: 1
+
+dart:
+  # The newest SDK and the lowest one the workspace allows (3.13.5); macOS and Windows run the
+  # newest SDK only.
+  sdks: [stable, lowest]
+  os: [ubuntu, macos, windows]
+  test:
+    # Every package runs on every platform: the VM, Chrome compiled to JavaScript and Chrome
+    # compiled to WebAssembly. macOS and Windows test the VM.
+    platforms: [vm, chrome, chrome:dart2wasm]
+    other-os-platforms: [vm]
+  # The generated sources of tool/verify.dart are current.
+  verify:
+    command: |
+      (cd essentia_compression && dart run tool/brotli/generate_dictionary.dart --check)
+      (cd essentia_time && dart run tool/generate_tzdata.dart --check)
+
+inspectra:
+  # The dev dependency of the workspace root; inspectra check runs for every package and the root,
+  # where the workspace policy lives. The coverage gates of the packages run the tests with
+  # coverage there.
+  install: auto
+  check:
+    root: true
+  scan:
+    fail-on: high
+
+writerside:
+  instances: [docs/e]
+
+release:
+  tag-patterns:
+    single: ''
+    package: '{package}-v{version}'
+  pub:
+    environment: pub.dev
+    wait-for-siblings: true

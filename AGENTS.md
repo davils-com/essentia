@@ -34,7 +34,7 @@ published to pub.dev; [CONTRIBUTING.md](CONTRIBUTING.md) describes how.
 | `trivy-secret.yaml` | The rules of the Trivy secret scan, Markdown included |
 | `trivy.yaml`, `.trivyignore.yaml` | Point Trivy at the one accepted notice: the MIT notice of the vendored Brotli data in `THIRDPARTY.md`, and nothing else |
 | `.gitlab/CODEOWNERS` | The paths that need a maintainer's review |
-| `.github/workflows/` | `ci.yml` runs `tool/verify.dart` on the stable and the lowest SDK, the VM tests on macOS and Windows and `inspectra check` of every package and the root; `release.yml` publishes a package to pub.dev on a tag `<package>-v<version>`; `writerside.yml` builds and checks the Writerside documentation in `docs/` and deploys it to GitHub Pages from `main` |
+| `.github/workflows/` | `ci.yml` calls the pipeline of davils-com/workflows, configured in `.github/davils-ci.yaml`: format, analyze and the tests of every package (VM, Chrome, WebAssembly) on the stable and the lowest SDK, the VM tests on macOS and Windows, the generated sources, `inspectra check` of every package and the root, `inspectra scan`, the Writerside documentation and the API reference on GitHub Pages from `main`, and on a tag `<package>-v<version>` the publication to pub.dev and the GitHub release |
 | `tool/` | `verify.dart` and `license_header.txt`, the header template of the style check |
 
 Every package keeps its test support in its own `lib/testing.dart`; a package without test support

@@ -1,158 +1,47 @@
 name: CI
 
+# Everything runs through the pipeline of davils-com/workflows: format, analyze and the tests of
+# every package on the VM, in Chrome and as WebAssembly (stable and the lowest SDK), the VM tests
+# on macOS and Windows, inspectra check of every package and of the workspace root, inspectra scan
+# with code scanning, the Writerside documentation and the API reference on GitHub Pages and, on a
+# tag <package>-v<version>, the publication of that package to pub.dev and its GitHub release.
+# .github/davils-ci.yaml holds what differs from the defaults.
+#
+# GitHub starts no workflow when more than three tags arrive in one push; push the tags of a
+# release of several packages three at a time (tools/push-tags.sh of davils-com/workflows).
 on:
   push:
     branches: ['**']
+    tags: ['*-v*']
   pull_request:
     branches: [main, develop]
+    types: [opened, edited, synchronize, reopened]
+  merge_group:
   schedule:
+    # New vulnerabilities are published for dependencies nobody touched.
     - cron: '0 4 * * 1'
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 permissions: {}
 
 jobs:
-  # Format, analyze, style, the generated sources and every package's tests on
-  # the VM, in Chrome compiled to JavaScript and in Chrome compiled to
-  # WebAssembly: exactly what `dart run tool/verify.dart` runs locally. The
-  # lowest SDK the workspace allows runs it as well.
-  verify:
-    name: Verify (Dart ${{ matrix.sdk }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-
+  pipeline:
+    name: Pipeline
+    uses: davils-com/workflows/.github/workflows/pipeline.yml@83c9ea9d6fdaa0d66082ee04a0d8e54e245315a0 # develop
+    # GitHub checks the permissions of every job the pipeline could run before it starts, so it
+    # gets all of them; every job inside takes only what it needs.
     permissions:
-      contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        sdk: [stable, '3.13.5']
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-        with:
-          sdk: ${{ matrix.sdk }}
-
-      - name: Resolve dependencies
-        run: dart pub get
-
-      - name: Verify (format, analyze, style, generated sources, tests)
-        run: dart run tool/verify.dart
-
-  # The host access behind the conditional imports - the environment, the
-  # file system, the platform and the local time zone - differs per operating
-  # system, so the VM tests run on macOS and Windows too.
-  vm:
-    name: VM tests (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 30
-
-    permissions:
-      contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [macos-latest, windows-latest]
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-
-      - name: Resolve dependencies
-        run: dart pub get
-
-      - name: Test
-        shell: bash
-        run: |
-          for package in essentia_core essentia_compression essentia_time essentia_coroutines essentia_io; do
-            echo "==> Test $package (VM)"
-            (cd "$package" && dart test)
-          done
-
-  # Every gate of inspectra.base.yaml in every package, and the workspace
-  # policy and the scans of the files outside the packages at the root. The
-  # whole history is fetched: the API check compares with the dump at the
-  # last release tag of the package.
-  inspectra:
-    name: Inspectra (${{ matrix.package }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    permissions:
-      contents: read
-
-    strategy:
-      fail-fast: false
-      matrix:
-        package:
-          - essentia_core
-          - essentia_compression
-          - essentia_time
-          - essentia_coroutines
-          - essentia_io
-          - .
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
-
-      - name: Cache the Trivy database
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/trivy
-          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
-          restore-keys: trivy-db-${{ runner.os }}-
-
-      - name: Resolve dependencies
-        run: dart pub get
-
-      # Format, lint, style, API, the dependency policy, the changelog, the
-      # Trivy scans (Trivy is downloaded and verified by Inspectra itself) and
-      # the 97 % coverage gate.
-      - name: inspectra check
-        run: dart run inspectra -C "${{ matrix.package }}" check
-
-      - name: Name the reports
-        if: always()
-        id: name
-        shell: bash
-        run: |
-          name="${{ matrix.package }}"
-          if [ "$name" = "." ]; then name=workspace; fi
-          echo "name=$name" >> "$GITHUB_OUTPUT"
-
-      - name: Upload the coverage report
-        if: always() && matrix.package != '.'
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: coverage-${{ steps.name.outputs.name }}
-          path: ${{ matrix.package }}/coverage/lcov.info
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: Upload the Trivy reports
-        if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
-        with:
-          name: trivy-reports-${{ steps.name.outputs.name }}
-          path: ${{ matrix.package }}/.dart_tool/inspectra/trivy/
-          retention-days: 30
-          if-no-files-found: warn
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+      checks: write
+      security-events: write
+      pages: write
+      id-token: write
+      attestations: write
+    secrets: inherit
