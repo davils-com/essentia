@@ -6,8 +6,6 @@ All notable changes to this package are documented in this file. The format foll
 
 ## 1.0.0
 
-Split out of `essentia_core`.
-
 ### Added
 
 - `package:essentia_compression/essentia_compression.dart`.
